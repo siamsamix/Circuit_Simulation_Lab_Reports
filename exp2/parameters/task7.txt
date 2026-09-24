@@ -1,0 +1,3 @@
+R1 = 2.2k
+C1 = 1u
+V1 => Magnitude = 5V, Phase = 0

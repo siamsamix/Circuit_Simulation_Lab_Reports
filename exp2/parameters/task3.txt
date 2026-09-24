@@ -1,0 +1,4 @@
+R1 = 100
+C1 = 10u
+L1 = 6.8mH
+V1 => Magnitude = 5V, Phase = 0
