@@ -1,0 +1,1121 @@
+% circuit-sim-lab-report — report.tex
+% Course 0714-EEE-2102, Circuit Simulation Laboratory
+% Experiment 2 — frequency responses of passive LP/HP/BP/BS filters
+%
+% Compile (twice, from Lab_report_latex/):
+%   env pdflatex -interaction=nonstopmode report.tex
+
+\documentclass[12pt,a4paper]{article}
+
+% ----- Page geometry: A4, 1 inch margins all sides -----
+\usepackage[margin=1in]{geometry}
+
+% ----- Times New Roman (text + math) -----
+\usepackage{newtxtext,newtxmath}
+
+% ----- Spacing: 1.5 line spacing, 6 pt paragraph spacing -----
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip}          % paragraph gaps instead of indents
+\setlength{\parskip}{6pt plus 1pt}
+
+% ----- Math, SI units -----
+\usepackage{amsmath}
+\usepackage{siunitx}
+
+% ----- Graphics, tables, captions, floats -----
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\usepackage{multirow}
+\usepackage[table]{xcolor} % row shading for Word-style table headers
+\graphicspath{{../figures/circuit_diagrams/}{../figures/graphs_for_task5/}{../figures/PSpice_graphs/}}
+
+% ----- Lists: compact, guide-style itemization -----
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=2em, label=\textbullet}
+
+% ----- Front matter and PDF output -----
+\usepackage{pdfpages}
+\usepackage[hidelinks]{hyperref}
+
+% ----- Headings: bold, left-aligned, 14/15 pt -----
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection}{0.8em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection}{0.8em}{}
+\titlespacing*{\section}{0pt}{*3}{*2}
+\titlespacing*{\subsection}{0pt}{*2.5}{*1.5}
+
+% ----- Captions: centered, 11 pt, figures below / tables above -----
+\captionsetup{font=small, labelfont=bf, justification=centering}
+\captionsetup[table]{position=above, skip=4pt}
+\captionsetup[figure]{position=below, skip=4pt}
+
+% ----- Page number: bottom-center -----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% ----- Experiment number: sections then number 2.1-2.10 -----
+\newcommand{\expnumber}{2}
+\renewcommand{\thesection}{\expnumber.\arabic{section}}
+
+\begin{document}
+
+% =====================================================================
+% FRONT MATTER (pages 1-2): cover page and task sheet
+% =====================================================================
+\includepdf[pages={1}]{../Cover_page.pdf}
+\includepdf[pages={1}]{../2nd_page.pdf}
+
+% =====================================================================
+% HEADER BLOCK
+% =====================================================================
+\begin{center}
+  {\large\bfseries Experiment No. \expnumber}\\[4pt]
+  {\large\bfseries Name of the Experiment: Simulation, Analysis, and
+    Evaluation of Frequency Responses of Passive Low-Pass, High-Pass,
+    Band-Pass, and Band-Stop Filters Using PSpice}
+\end{center}
+\vspace{6pt}
+
+% =====================================================================
+\section{Objective}
+% =====================================================================
+\begin{enumerate}[label=\roman*.]
+  \item To design and simulate, in PSpice, passive low-pass, high-pass,
+        band-pass, and band-stop filters with cutoff frequencies
+        specified by the class-roll formula, using standard component
+        values.
+  \item To draw the gain-versus-frequency curves of the simulated
+        filters from the data points read off the PSpice traces and
+        determine their cutoff
+        frequencies, center frequencies, and bandwidths using the
+        70.7\% criterion.
+  \item To compare the simulated characteristic frequencies with the
+        theoretical values through percentage-error analysis.
+  \item To investigate the effect of changing the resistor and
+        capacitor values on the cutoff frequency and the frequency
+        response of a filter.
+\end{enumerate}
+
+% =====================================================================
+\section{Theory}
+% =====================================================================
+\subsection{Frequency response and the decibel scale}
+A filter is a circuit whose gain depends on the frequency of the
+sinusoidal input. Its \textit{frequency response} is the variation of
+the magnitude (and phase) of the output-to-input ratio with frequency.
+For the present experiments only the magnitude response is needed,
+plotted in decibels as
+\begin{equation}
+  A_{\mathrm{dB}} = 20\log_{10}\left|\frac{V_{\mathrm{out}}}{V_{\mathrm{in}}}\right|
+  = 20\log_{10}|H(\omega)|,
+  \label{eq:dB}
+\end{equation}
+where $H(\omega)=V_{\mathrm{out}}/V_{\mathrm{in}}$ is the sinusoidal
+transfer function of the circuit and $\omega=2\pi f$. A gain of $1/\sqrt{2}$
+corresponds to
+$20\log_{10}(1/\sqrt{2}) \approx -3.01\ \mathrm{dB}$, i.e.\ the output
+has fallen to 70.7\% of its passband value. The frequencies at which
+this happens are the \textit{cutoff frequencies} of the filter; they
+delimit the passband from the stopband.
+
+\subsection{First-order low-pass and high-pass RC filters}
+Both first-order filters analysed here are simple resistive dividers in
+which one arm is frequency-dependent. A series resistor $R$ followed by
+a shunt capacitor $C$ (output taken across $C$) gives
+\begin{equation}
+  H_{\mathrm{LP}}(\omega)
+    = \frac{1/(j\omega C)}{R + 1/(j\omega C)}
+    = \frac{1}{1 + j\omega RC},
+  \label{eq:lp-h}
+\end{equation}
+with magnitude
+\begin{equation}
+  |H_{\mathrm{LP}}(\omega)| = \frac{1}{\sqrt{1+(\omega RC)^2}}.
+  \label{eq:lp-mag}
+\end{equation}
+At low frequency the capacitor impedance $1/(\omega C)$ is very large,
+so almost the whole input appears at the output ($|H|\to 1$); at high
+frequency the capacitor shorts the output node to ground and the gain
+falls off as $1/\omega$, i.e.\ at $-20\ \mathrm{dB/decade}$. Setting
+$|H_{\mathrm{LP}}| = 1/\sqrt{2}$ in \eqref{eq:lp-mag} requires
+$\omega RC = 1$, so the cutoff frequency is
+\begin{equation}
+  f_{c} = \frac{1}{2\pi RC}.
+  \label{eq:lp-fc}
+\end{equation}
+
+Interchanging the two elements (series $C$, shunt $R$) gives the
+high-pass transfer function
+\begin{equation}
+  H_{\mathrm{HP}}(\omega) = \frac{R}{R + 1/(j\omega C)}
+    = \frac{j\omega RC}{1 + j\omega RC},
+  \qquad
+  |H_{\mathrm{HP}}(\omega)| = \frac{\omega RC}{\sqrt{1+(\omega RC)^2}},
+  \label{eq:hp}
+\end{equation}
+which again equals $1/\sqrt{2}$ at $\omega = 1/RC$; the high-pass filter
+therefore has the same cutoff frequency $f_c = 1/(2\pi RC)$, with the
+gain rising at $+20\ \mathrm{dB/decade}$ below $f_c$ and approaching
+unity above it.
+
+\subsection{Series RLC band-pass and band-stop filters}
+A series loop of $R$, $L$ and $C$ driven by a sinusoidal source has
+total impedance
+\begin{equation}
+  Z(\omega) = R + j\omega L + \frac{1}{j\omega C}
+            = R + j\underbrace{\left(\omega L - \frac{1}{\omega C}\right)}_{X(\omega)},
+  \label{eq:rlc-z}
+\end{equation}
+where $X(\omega)$ is the net reactance. The inductive and capacitive
+reactances cancel at the angular frequency $\omega_0$ for which
+$\omega_0 L = 1/(\omega_0 C)$, giving the \textit{resonant} or
+\textit{center} frequency
+\begin{equation}
+  f_{0} = \frac{1}{2\pi\sqrt{LC}}.
+  \label{eq:res}
+\end{equation}
+At $f_0$ the loop is purely resistive and the loop current is maximal.
+
+If the output is taken \textit{across the resistor}, the voltage divider
+yields
+\begin{equation}
+  H_{\mathrm{BP}}(\omega) = \frac{R}{R + jX(\omega)},
+  \qquad
+  |H_{\mathrm{BP}}(\omega)| = \frac{R}{\sqrt{R^{2}+X^{2}(\omega)}}.
+  \label{eq:bp}
+\end{equation}
+The gain is unity at resonance ($X=0$), falls at low frequency (the
+capacitor blocks the loop current) and at high frequency (the inductor
+blocks it): a band-pass response. If instead the output is taken
+\textit{across the series $LC$ pair},
+\begin{equation}
+  H_{\mathrm{BS}}(\omega) = \frac{jX(\omega)}{R + jX(\omega)},
+  \qquad
+  |H_{\mathrm{BS}}(\omega)| = \frac{|X(\omega)|}{\sqrt{R^{2}+X^{2}(\omega)}},
+  \label{eq:bs}
+\end{equation}
+which is the complement of \eqref{eq:bp}: unity far from resonance and
+a null ($|H_{\mathrm{BS}}| = 0$) at $f_0$ --- a band-stop response.
+
+Because \eqref{eq:bp} and \eqref{eq:bs} both depend on $R$ and $X$ in
+the same way, the cutoff condition $|H| = 1/\sqrt{2}$ for either filter
+reduces to
+\begin{equation}
+  |X(\omega)| = \left|\omega L - \frac{1}{\omega C}\right| = R,
+  \label{eq:cut-cond}
+\end{equation}
+i.e.\ the band edges occur where the net reactance equals the
+resistance. Writing $\omega L - 1/(\omega C) = \pm R$ and multiplying by
+$\omega/L$ gives the two quadratic equations
+$\omega^{2} \mp (R/L)\,\omega - 1/(LC) = 0$, whose positive roots are
+the upper and lower cutoff angular frequencies
+\begin{align}
+  \omega_{H} &= \frac{R}{2L} + \sqrt{\left(\frac{R}{2L}\right)^{2} + \frac{1}{LC}},
+  \label{eq:wH}\\
+  \omega_{L} &= -\frac{R}{2L} + \sqrt{\left(\frac{R}{2L}\right)^{2} + \frac{1}{LC}}.
+  \label{eq:wL}
+\end{align}
+Subtracting, the bandwidth in radians per second is
+$\omega_H-\omega_L = R/L$, so in hertz
+\begin{equation}
+  BW = f_{H} - f_{L} = \frac{R}{2\pi L}.
+  \label{eq:bw}
+\end{equation}
+The cutoff frequencies also satisfy $f_{0} = \sqrt{f_{L} f_{H}}$
+(geometric symmetry of the response about $f_0$ on a log axis), and the
+\textit{quality factor} --- the selectivity measure --- is
+\begin{equation}
+  Q = \frac{f_{0}}{BW} = \frac{\omega_{0} L}{R} = \frac{1}{R}\sqrt{\frac{L}{C}}.
+  \label{eq:q}
+\end{equation}
+A large $Q$ (small $R$) means a narrow, sharply peaked response; a
+small $Q$ means a wide band and a shallow skirt. The development of
+this section follows \cite{ref:sadiku} and \cite{ref:boylestad}.
+
+% =====================================================================
+\section{Design}
+% =====================================================================
+The class roll number is $n = 6$, so the specified (formula) cutoff
+frequencies are
+\begin{itemize}
+  \item Low-pass filter:
+        $f_{c,\mathrm{LP}} = 100 + 10(n-1) = 100 + 10\cdot 5
+        = \SI{150}{\hertz}$.
+  \item High-pass filter:
+        $f_{c,\mathrm{HP}} = 2000 + 100(n-1) = 2000 + 100\cdot 5
+        = \SI{2500}{\hertz}$.
+  \item Band-pass and band-stop filters:
+        $f_{L} = \SI{150}{\hertz}$, $f_{H} = \SI{2500}{\hertz}$, with
+        $f_{0} = \sqrt{f_{L}f_{H}} = \sqrt{150\cdot 2500}
+        = \SI{612.4}{\hertz}$ and
+        $BW = f_{H}-f_{L} = \SI{2350}{\hertz}$.
+\end{itemize}
+
+Component values were then selected from the standard E-series so that
+the formula frequencies are reproduced as closely as possible; the
+actual frequencies produced by the chosen standard values are the
+\textbf{theoretical values} against which the simulation is compared.
+
+\subsection{Low-pass filter (circuit 1)}
+Choosing the standard capacitor $C = \SI{100}{\nano\farad}$,
+\eqref{eq:lp-fc} requires
+\[
+  R = \frac{1}{2\pi f_{c} C}
+    = \frac{1}{2\pi \cdot 150 \cdot 100\times 10^{-9}}
+    = \SI{10.61}{\kilo\ohm},
+\]
+so the nearest standard value $R = \SI{10.7}{\kilo\ohm}$ was used.
+
+\subsection{High-pass filter (circuit 2)}
+Choosing the standard capacitor $C = \SI{10}{\nano\farad}$,
+\[
+  R = \frac{1}{2\pi f_{c} C}
+    = \frac{1}{2\pi \cdot 2500 \cdot 10\times 10^{-9}}
+    = \SI{6.37}{\kilo\ohm},
+\]
+and the nearest standard value $R = \SI{6.34}{\kilo\ohm}$ was used.
+
+\subsection{Band-pass and band-stop filters (circuits 3 and 4)}
+Both use the same series RLC loop with a standard
+$C = \SI{10}{\micro\farad}$. From \eqref{eq:res}, the inductor needed
+for $f_0 = \SI{612.4}{\hertz}$ is
+\[
+  L = \frac{1}{(2\pi f_{0})^{2} C}
+    = \frac{1}{(2\pi \cdot 612.4)^{2} \cdot 10\times 10^{-6}}
+    = \SI{6.75}{\milli\henry},
+\]
+rounded to the standard value $L = \SI{6.8}{\milli\henry}$. From
+\eqref{eq:bw}, the resistance setting $BW = \SI{2350}{\hertz}$ is
+\[
+  R = 2\pi L \cdot BW = 2\pi \cdot 6.8\times 10^{-3} \cdot 2350
+    = \SI{100.4}{\ohm},
+\]
+rounded to the standard value $R = \SI{100}{\ohm}$. The band-pass
+circuit takes the output across $R$; the band-stop circuit takes it
+across the series $LC$ pair.
+
+\subsection{Modified low-pass filter (task 7)}
+The resistor and capacitor of circuit 1 were changed to the standard
+values $R = \SI{2.2}{\kilo\ohm}$ and $C = \SI{1}{\micro\farad}$ to
+evaluate the effect of $R$ and $C$ on the response.
+
+% =====================================================================
+\section{List of Components}
+% =====================================================================
+\begin{table}[H]
+  \centering
+  \caption{Components, instruments, and software used}
+  \label{tab:components}
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{|c|l|l|S|}
+    \hline
+    \rowcolor{black!12}\textbf{Sl. No.} & \textbf{Component/Instrument} & \textbf{Specification/Value} & {\textbf{Quantity}} \\
+    \hline
+    1 & Resistor & \SI{10.7}{\kilo\ohm} (circuit 1) & 1 \\
+    \hline
+    2 & Resistor & \SI{6.34}{\kilo\ohm} (circuit 2) & 1 \\
+    \hline
+    3 & Resistor & \SI{100}{\ohm} (circuits 3--4)   & 2 \\
+    \hline
+    4 & Resistor & \SI{2.2}{\kilo\ohm} (circuit 1, modified) & 1 \\
+    \hline
+    5 & Capacitor & \SI{100}{\nano\farad} (circuit 1) & 1 \\
+    \hline
+    6 & Capacitor & \SI{10}{\nano\farad} (circuit 2)  & 1 \\
+    \hline
+    7 & Capacitor & \SI{10}{\micro\farad} (circuits 3--4) & 2 \\
+    \hline
+    8 & Capacitor & \SI{1}{\micro\farad} (circuit 1, modified) & 1 \\
+    \hline
+    9 & Inductor & \SI{6.8}{\milli\henry} (circuits 3--4) & 2 \\
+    \hline
+    10 & AC voltage source & VAC, magnitude \SI{5}{\volt}, phase \SI{0}{\degree} & 5 \\
+    \hline
+    11 & Simulation software & PSpice & 1 \\
+    \hline
+    12 & Plotting software & OriginPro & 1 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\section{PSpice Circuit Diagrams}
+% The actual PSpice schematic exports.
+% =====================================================================
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{circuit1.png}
+	\caption{PSpice schematic of circuit 1: passive low-pass RC filter
+		($R = \SI{10.7}{\kilo\ohm}$, $C = \SI{100}{\nano\farad}$),
+		output taken across the capacitor}
+	\label{fig:sch1}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{circuit2.png}
+	\caption{PSpice schematic of circuit 2: passive high-pass RC filter
+		($R = \SI{6.34}{\kilo\ohm}$, $C = \SI{10}{\nano\farad}$),
+		output taken across the resistor}
+	\label{fig:sch2}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{circuit3.png}
+	\caption{PSpice schematic of circuit 3: passive band-pass series RLC
+		filter ($R = \SI{100}{\ohm}$, $L = \SI{6.8}{\milli\henry}$,
+		$C = \SI{10}{\micro\farad}$), output taken across the
+		resistor}
+	\label{fig:sch3}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{circuit4.png}
+	\caption{PSpice schematic of circuit 4: passive band-stop series RLC
+		filter ($R = \SI{100}{\ohm}$, $L = \SI{6.8}{\milli\henry}$,
+		$C = \SI{10}{\micro\farad}$), output taken across the series
+		$LC$ pair}
+	\label{fig:sch4}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{circuit1_changed.png}
+	\caption{PSpice schematic of the modified low-pass filter of task 7
+		(circuit 1 with $R = \SI{2.2}{\kilo\ohm}$,
+		$C = \SI{1}{\micro\farad}$)}
+	\label{fig:sch1c}
+\end{figure}
+
+% =====================================================================
+
+% =====================================================================
+\section{Working Procedure}
+% =====================================================================
+\begin{enumerate}
+  \item Create a new analog (schematic) project in PSpice for each
+        filter circuit.
+  \item Place the components (R, C, L, and the VAC source) from the
+        PSpice source library and wire the circuit of the corresponding
+        type: series $R$/shunt $C$ low-pass (Fig.~\ref{fig:sch1}),
+        series $C$/shunt $R$ high-pass (Fig.~\ref{fig:sch2}), series RLC
+        with output across $R$ band-pass (Fig.~\ref{fig:sch3}), series
+        RLC with output across the $LC$ pair band-stop
+        (Fig.~\ref{fig:sch4}). Connect the negative terminal of the
+        source to ground.
+  \item Double-click each component and set its value as specified in
+        the design section; set the VAC source \texttt{ACMAG} to 5~V
+        with 0\textdegree{} phase (the sweep normalises the response,
+        so any magnitude gives the same gain curve).
+  \item In the simulation profile, select \textit{AC Sweep/Noise}
+        analysis with a logarithmic (decade) sweep of 20 points:
+        \SI{1}{\hertz} to \SI{100}{\kilo\hertz} for the low-pass
+        filters, \SI{1}{\hertz} to \SI{30}{\mega\hertz} for the
+        high-pass filter, and \SI{1}{\hertz} to \SI{1}{\mega\hertz} for
+        the band-pass and band-stop filters.
+  \item Run the simulation and probe the output voltage; plot the
+        voltage gain $V_{\mathrm{out}}/V_{\mathrm{in}}$ in decibels
+        against frequency.
+  \item Using PSpice's trace cursor, read the frequency, output
+        voltage magnitude, and gain at each of the 20 sweep points
+        directly off the trace, and tabulate the values.
+  \item Enter the tabulated points into OriginPro and plot
+        gain~(dB) versus frequency on a logarithmic frequency axis
+        (task 5). Draw a horizontal line at $-3.01\ \mathrm{dB}$
+        (the 70.7\% criterion) and read the intersection(s) with the
+        response curve: these are the simulated cutoff frequency
+        (low-/high-pass) or the lower and upper cutoff frequencies
+        (band-pass/band-stop). The center frequency is
+        $f_0=\sqrt{f_L f_H}$ and the bandwidth $BW=f_H-f_L$.
+  \item For task 7, replace $R$ and $C$ of the low-pass circuit with
+        \SI{2.2}{\kilo\ohm} and \SI{1}{\micro\farad} respectively
+        (Fig.~\ref{fig:sch1c}) and repeat steps 4--7.
+\end{enumerate}
+
+% =====================================================================
+\section{Calculation}
+% =====================================================================
+\subsection{Theoretical characteristic frequencies (standard values)}
+The standard component values do not reproduce the formula frequencies
+exactly; substituting them into the derived equations gives the
+theoretical values.
+
+\textbf{Low-pass filter:} from \eqref{eq:lp-fc}, with
+$R = \SI{10.7}{\kilo\ohm}$, $C = \SI{100}{\nano\farad}$:
+\begin{equation}
+  f_{c} = \frac{1}{2\pi RC}
+        = \frac{1}{2\pi \cdot 10.7\times 10^{3} \cdot 100\times 10^{-9}}
+        = \SI{148.7}{\hertz}.
+  \label{eq:calc-lp}
+\end{equation}
+
+\textbf{High-pass filter:} with $R = \SI{6.34}{\kilo\ohm}$,
+$C = \SI{10}{\nano\farad}$:
+\begin{equation}
+  f_{c} = \frac{1}{2\pi \cdot 6.34\times 10^{3} \cdot 10\times 10^{-9}}
+        = \SI{2510.3}{\hertz}.
+  \label{eq:calc-hp}
+\end{equation}
+
+\textbf{Band-pass and band-stop filters:} with $R = \SI{100}{\ohm}$,
+$L = \SI{6.8}{\milli\henry}$, $C = \SI{10}{\micro\farad}$.
+From \eqref{eq:res}:
+\begin{equation}
+  f_{0} = \frac{1}{2\pi\sqrt{6.8\times 10^{-3}\cdot 10\times 10^{-6}}}
+        = \frac{1}{2\pi\sqrt{6.8\times 10^{-8}}}
+        = \SI{610.3}{\hertz}.
+  \label{eq:calc-f0}
+\end{equation}
+From \eqref{eq:wH}--\eqref{eq:wL}, using
+$R/2L = 7352.9\ \mathrm{rad/s}$ and
+\[
+  \sqrt{(R/2L)^{2} + \frac{1}{LC}}
+    = \sqrt{7352.9^{2} + 1.4706\times 10^{7}}
+    = 8292.8\ \mathrm{rad/s}:
+\]
+\begin{align}
+  f_{H} &= \frac{7352.9 + 8292.8}{2\pi} = \SI{2490.1}{\hertz},
+  \label{eq:calc-fH}\\
+  f_{L} &= \frac{8292.8 - 7352.9}{2\pi} = \SI{149.6}{\hertz}.
+  \label{eq:calc-fL}
+\end{align}
+From \eqref{eq:bw} and \eqref{eq:q}:
+\begin{align}
+  BW &= \frac{R}{2\pi L}
+      = \frac{100}{2\pi \cdot 6.8\times 10^{-3}}
+      = \SI{2340.5}{\hertz},
+  \label{eq:calc-bw}\\
+  Q  &= \frac{1}{100}\sqrt{\frac{6.8\times 10^{-3}}{10\times 10^{-6}}}
+      = \frac{26.08}{100} = 0.261.
+  \label{eq:calc-q}
+\end{align}
+
+\textbf{Modified low-pass filter (task 7):} with
+$R = \SI{2.2}{\kilo\ohm}$, $C = \SI{1}{\micro\farad}$:
+\begin{equation}
+  f_{c} = \frac{1}{2\pi \cdot 2.2\times 10^{3} \cdot 1\times 10^{-6}}
+        = \SI{72.3}{\hertz}.
+  \label{eq:calc-lpc}
+\end{equation}
+
+\subsection{Extracting the simulated values from the data}
+The data points read off the PSpice traces (Tables
+\ref{tab:data1}--\ref{tab:datac} in Section 2.8) form a coarse
+logarithmic grid, so each 70.7\% crossing was located by linear
+interpolation of $\log|H|$ against $\log f$ between the two points
+that bracket the $-3.01\ \mathrm{dB}$ level. For circuit 1 the gain
+brackets the criterion between
+$f_1 = \SI{147.91}{\hertz}$ ($|H| = 0.70909$) and
+$f_2 = \SI{169.82}{\hertz}$ ($|H| = 0.65887$):
+\begin{align}
+  t &= \frac{\ln 0.70711 - \ln 0.70909}{\ln 0.65887 - \ln 0.70909}
+     = 0.0381, \nonumber\\
+  f_{c,\mathrm{sim}} &= f_1\left(\frac{f_2}{f_1}\right)^{t}
+     = 147.91 \times \left(\frac{169.82}{147.91}\right)^{0.0381}
+     = \SI{148.7}{\hertz}.
+  \label{eq:interp}
+\end{align}
+The same procedure was applied to every crossing of every filter; the
+simulated $f_0$, $BW$ and $Q$ were then computed from the interpolated
+$f_L$ and $f_H$ via $f_0=\sqrt{f_Lf_H}$, $BW=f_H-f_L$, $Q=f_0/BW$.
+
+% =====================================================================
+\section{Result Analysis}
+% =====================================================================
+\subsection{Simulated frequency responses}
+Figures~\ref{fig:psp1}--\ref{fig:pspc} show the gain curves obtained
+directly from the PSpice simulations; all five display the expected
+passband/stopband shapes derived in Section 2.2 (the passband gain is
+unity ($\approx 0\ \mathrm{dB}$) in every case, as predicted for ideal
+divider circuits).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pspice_graph_of_circuit1_gain_db.png}
+  \caption{PSpice frequency response of the low-pass filter (circuit 1)}
+  \label{fig:psp1}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pspice_graph_of_circuit2_gain_db.png}
+  \caption{PSpice frequency response of the high-pass filter (circuit 2)}
+  \label{fig:psp2}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pspice_graph_of_circuit3_gain_db.png}
+  \caption{PSpice frequency response of the band-pass filter (circuit 3)}
+  \label{fig:psp3}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pspice_graph_of_circuit4_gain_db.png}
+  \caption{PSpice frequency response of the band-stop filter (circuit 4)}
+  \label{fig:psp4}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pspice_graph_of_circuit1_changed_gain_db.png}
+  \caption{PSpice frequency response of the modified low-pass filter
+           (task 7)}
+  \label{fig:pspc}
+\end{figure}
+
+\subsection{Output-voltage magnitude versus frequency}
+Figures~\ref{fig:vm1}--\ref{fig:vmc} plot the same simulations in
+absolute output voltage against frequency. The source drives the input
+with a \SI{5}{\volt} magnitude at every frequency, so each curve's
+passband level is the gain of Section 2.8.1 scaled by 5~V: the
+low-pass output holds near \SI{5}{\volt} at low frequency and collapses
+toward zero in the stopband; the high-pass output is complementary; the
+band-pass peaks at \SI{5}{\volt} at resonance, and the band-stop
+notches to nearly zero there ($\approx \SI{0.027}{\volt}$, i.e.\ the
+$-45.5\ \mathrm{dB}$ minimum of the sampled sweep).
+
+Tables~\ref{tab:data1}--\ref{tab:datac} list the data points read from the
+traces, which were used for the plots and the 70.7\% crossings:
+
+\begin{table}[H]
+  \centering
+  \caption{Data points read off the PSpice trace of the low-pass filter (circuit 1)}
+  \label{tab:data1}
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \rowcolor{black!12}\textbf{Frequency (Hz)} & \textbf{Output voltage $|V_{\mathrm{out}}|$ (V)} & \textbf{Gain $A_v = |V_{\mathrm{out}}|/|V_{\mathrm{in}}|$} \\
+    \hline
+    \num{1.00} & \num{5.000} & \num{1.0000}\\
+    \hline
+    \num{14.79} & \num{4.975} & \num{0.9951}\\
+    \hline
+    \num{26.30} & \num{4.924} & \num{0.9847}\\
+    \hline
+    \num{40.74} & \num{4.822} & \num{0.9645}\\
+    \hline
+    \num{50.12} & \num{4.738} & \num{0.9477}\\
+    \hline
+    \num{60.26} & \num{4.634} & \num{0.9268}\\
+    \hline
+    \num{70.79} & \num{4.515} & \num{0.9029}\\
+    \hline
+    \num{83.18} & \num{4.364} & \num{0.8728}\\
+    \hline
+    \num{97.72} & \num{4.179} & \num{0.8358}\\
+    \hline
+    \num{112.20} & \num{3.992} & \num{0.7983}\\
+    \hline
+    \num{128.82} & \num{3.780} & \num{0.7559}\\
+    \hline
+    \num{147.91} & \num{3.545} & \num{0.7091}\\
+    \hline
+    \num{169.82} & \num{3.294} & \num{0.6589}\\
+    \hline
+    \num{199.53} & \num{2.988} & \num{0.5977}\\
+    \hline
+    \num{234.42} & \num{2.679} & \num{0.5358}\\
+    \hline
+    \num{275.42} & \num{2.376} & \num{0.4752}\\
+    \hline
+    \num{398.11} & \num{1.750} & \num{0.3500}\\
+    \hline
+    \num{630.96} & \num{1.147} & \num{0.2295}\\
+    \hline
+    \num{2041.7} & \num{0.363} & \num{0.0727}\\
+    \hline
+    \num{100000} & \num{0.007} & \num{0.0015} \\
+    \hline
+  \end{tabular}
+\end{table}
+\begin{table}[H]
+  \centering
+  \caption{Data points read off the PSpice trace of the high-pass filter (circuit 2)}
+  \label{tab:data2}
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \rowcolor{black!12}\textbf{Frequency (Hz)} & \textbf{Output voltage $|V_{\mathrm{out}}|$ (V)} & \textbf{Gain $A_v = |V_{\mathrm{out}}|/|V_{\mathrm{in}}|$} \\
+    \hline
+    \num{1.00} & \num{0.002} & \num{0.0004}\\
+    \hline
+    \num{151.36} & \num{0.301} & \num{0.0602}\\
+    \hline
+    \num{537.03} & \num{1.046} & \num{0.2092}\\
+    \hline
+    \num{870.96} & \num{1.639} & \num{0.3278}\\
+    \hline
+    \num{1288.2} & \num{2.283} & \num{0.4566}\\
+    \hline
+    \num{1548.8} & \num{2.625} & \num{0.5251}\\
+    \hline
+    \num{1819.7} & \num{2.935} & \num{0.5869}\\
+    \hline
+    \num{2138.0} & \num{3.242} & \num{0.6484}\\
+    \hline
+    \num{2511.9} & \num{3.537} & \num{0.7073}\\
+    \hline
+    \num{2951.2} & \num{3.809} & \num{0.7617}\\
+    \hline
+    \num{3467.4} & \num{4.050} & \num{0.8100}\\
+    \hline
+    \num{4168.7} & \num{4.283} & \num{0.8567}\\
+    \hline
+    \num{5011.9} & \num{4.471} & \num{0.8941}\\
+    \hline
+    \num{6165.9} & \num{4.631} & \num{0.9262}\\
+    \hline
+    \num{7585.8} & \num{4.747} & \num{0.9494}\\
+    \hline
+    \num{9772.4} & \num{4.843} & \num{0.9686}\\
+    \hline
+    \num{12882} & \num{4.908} & \num{0.9815}\\
+    \hline
+    \num{22387} & \num{4.969} & \num{0.9938}\\
+    \hline
+    \num{51286} & \num{4.994} & \num{0.9988}\\
+    \hline
+    \num{3.0e+07} & \num{5.000} & \num{1.0000} \\
+    \hline
+  \end{tabular}
+\end{table}
+\begin{table}[H]
+  \centering
+  \caption{Data points read off the PSpice trace of the band-pass filter (circuit 3)}
+  \label{tab:data3}
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \rowcolor{black!12}\textbf{Frequency (Hz)} & \textbf{Output voltage $|V_{\mathrm{out}}|$ (V)} & \textbf{Gain $A_v = |V_{\mathrm{out}}|/|V_{\mathrm{in}}|$} \\
+    \hline
+    \num{1.00} & \num{0.031} & \num{0.0063}\\
+    \hline
+    \num{15.49} & \num{0.485} & \num{0.0969}\\
+    \hline
+    \num{42.66} & \num{1.300} & \num{0.2601}\\
+    \hline
+    \num{87.10} & \num{2.438} & \num{0.4877}\\
+    \hline
+    \num{114.82} & \num{2.995} & \num{0.5989}\\
+    \hline
+    \num{151.36} & \num{3.559} & \num{0.7118}\\
+    \hline
+    \num{208.93} & \num{4.149} & \num{0.8298}\\
+    \hline
+    \num{288.40} & \num{4.596} & \num{0.9191}\\
+    \hline
+    \num{416.87} & \num{4.899} & \num{0.9799}\\
+    \hline
+    \num{616.60} & \num{5.000} & \num{1.0000}\\
+    \hline
+    \num{912.01} & \num{4.888} & \num{0.9776}\\
+    \hline
+    \num{1318.3} & \num{4.572} & \num{0.9145}\\
+    \hline
+    \num{1819.7} & \num{4.115} & \num{0.8231}\\
+    \hline
+    \num{2511.9} & \num{3.518} & \num{0.7036}\\
+    \hline
+    \num{3311.3} & \num{2.952} & \num{0.5905}\\
+    \hline
+    \num{4466.8} & \num{2.355} & \num{0.4710}\\
+    \hline
+    \num{6309.6} & \num{1.753} & \num{0.3507}\\
+    \hline
+    \num{9772.4} & \num{1.169} & \num{0.2338}\\
+    \hline
+    \num{30200} & \num{0.387} & \num{0.0773}\\
+    \hline
+    \num{1.0e+06} & \num{0.012} & \num{0.0023} \\
+    \hline
+  \end{tabular}
+\end{table}
+\begin{table}[H]
+  \centering
+  \caption{Data points read off the PSpice trace of the band-stop filter (circuit 4)}
+  \label{tab:data4}
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \rowcolor{black!12}\textbf{Frequency (Hz)} & \textbf{Output voltage $|V_{\mathrm{out}}|$ (V)} & \textbf{Gain $A_v = |V_{\mathrm{out}}|/|V_{\mathrm{in}}|$} \\
+    \hline
+    \num{1.00} & \num{5.000} & \num{1.0000}\\
+    \hline
+    \num{15.49} & \num{4.976} & \num{0.9953}\\
+    \hline
+    \num{42.66} & \num{4.828} & \num{0.9656}\\
+    \hline
+    \num{87.10} & \num{4.365} & \num{0.8730}\\
+    \hline
+    \num{147.91} & \num{3.558} & \num{0.7116}\\
+    \hline
+    \num{213.80} & \num{2.734} & \num{0.5468}\\
+    \hline
+    \num{295.12} & \num{1.909} & \num{0.3819}\\
+    \hline
+    \num{457.09} & \num{0.756} & \num{0.1511}\\
+    \hline
+    \num{562.34} & \num{0.214} & \num{0.0427}\\
+    \hline
+    \num{616.60} & \num{0.027} & \num{0.0053}\\
+    \hline
+    \num{660.69} & \num{0.207} & \num{0.0414}\\
+    \hline
+    \num{812.83} & \num{0.749} & \num{0.1498}\\
+    \hline
+    \num{977.24} & \num{1.234} & \num{0.2468}\\
+    \hline
+    \num{1258.9} & \num{1.903} & \num{0.3805}\\
+    \hline
+    \num{1737.8} & \num{2.728} & \num{0.5455}\\
+    \hline
+    \num{2511.9} & \num{3.553} & \num{0.7106}\\
+    \hline
+    \num{4466.8} & \num{4.411} & \num{0.8821}\\
+    \hline
+    \num{9549.9} & \num{4.855} & \num{0.9710}\\
+    \hline
+    \num{29512} & \num{4.984} & \num{0.9969}\\
+    \hline
+    \num{1.0e+06} & \num{5.000} & \num{1.0000} \\
+    \hline
+  \end{tabular}
+\end{table}
+\begin{table}[H]
+  \centering
+  \caption{Data points read off the PSpice trace of the modified low-pass filter (task 7)}
+  \label{tab:datac}
+  \small
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \rowcolor{black!12}\textbf{Frequency (Hz)} & \textbf{Output voltage $|V_{\mathrm{out}}|$ (V)} & \textbf{Gain $A_v = |V_{\mathrm{out}}|/|V_{\mathrm{in}}|$} \\
+    \hline
+    \num{1.00} & \num{5.000} & \num{0.9999}\\
+    \hline
+    \num{8.51} & \num{4.966} & \num{0.9931}\\
+    \hline
+    \num{14.45} & \num{4.903} & \num{0.9806}\\
+    \hline
+    \num{21.38} & \num{4.795} & \num{0.9590}\\
+    \hline
+    \num{25.70} & \num{4.711} & \num{0.9423}\\
+    \hline
+    \num{30.90} & \num{4.598} & \num{0.9196}\\
+    \hline
+    \num{36.31} & \num{4.469} & \num{0.8938}\\
+    \hline
+    \num{41.69} & \num{4.332} & \num{0.8664}\\
+    \hline
+    \num{47.86} & \num{4.170} & \num{0.8340}\\
+    \hline
+    \num{54.95} & \num{3.982} & \num{0.7963}\\
+    \hline
+    \num{63.10} & \num{3.768} & \num{0.7536}\\
+    \hline
+    \num{72.44} & \num{3.533} & \num{0.7066}\\
+    \hline
+    \num{85.11} & \num{3.238} & \num{0.6476}\\
+    \hline
+    \num{100.00} & \num{2.931} & \num{0.5861}\\
+    \hline
+    \num{117.49} & \num{2.622} & \num{0.5243}\\
+    \hline
+    \num{138.04} & \num{2.321} & \num{0.4642}\\
+    \hline
+    \num{204.17} & \num{1.670} & \num{0.3340}\\
+    \hline
+    \num{323.59} & \num{1.091} & \num{0.2182}\\
+    \hline
+    \num{1096.5} & \num{0.329} & \num{0.0658}\\
+    \hline
+    \num{100000} & \num{0.004} & \num{0.0007} \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pspice_graph_of_circuit1.png}
+  \caption{PSpice output-voltage magnitude versus frequency for the
+           low-pass filter (circuit 1)}
+  \label{fig:vm1}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pspice_graph_of_circuit2.png}
+  \caption{PSpice output-voltage magnitude versus frequency for the
+           high-pass filter (circuit 2)}
+  \label{fig:vm2}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pspice_graph_of_circuit3.png}
+  \caption{PSpice output-voltage magnitude versus frequency for the
+           band-pass filter (circuit 3)}
+  \label{fig:vm3}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pspice_graph_of_circuit4.png}
+  \caption{PSpice output-voltage magnitude versus frequency for the
+           band-stop filter (circuit 4)}
+  \label{fig:vm4}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{pspice_graph_of_circuit1_changed.png}
+  \caption{PSpice output-voltage magnitude versus frequency for the
+           modified low-pass filter (task 7)}
+  \label{fig:vmc}
+\end{figure}
+
+\subsection{Gain-versus-frequency curves from the read data points (task 5)}
+The data points of Tables
+\ref{tab:data1}--\ref{tab:datac} were plotted in OriginPro (Figures
+\ref{fig:og1}--\ref{fig:ogc}). The $-3.01\ \mathrm{dB}$ line
+(70.7\% criterion) intersects the circuit-1 curve at
+\SI{148.7}{\hertz}, the circuit-2 curve at \SI{2510.5}{\hertz}, the
+circuit-3 curve at \SI{149.8}{\hertz} and \SI{2486.5}{\hertz}, the
+circuit-4 curve at \SI{149.2}{\hertz} and \SI{2494.9}{\hertz}, and the
+modified circuit-1 curve at \SI{72.3}{\hertz}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{OriginPro_graph_of_circuit1_gain_db_vs_freq.png}
+  \caption{OriginPro gain-versus-frequency curve of the low-pass filter
+           (circuit 1)}
+  \label{fig:og1}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{OriginPro_graph_of_circuit2_gain_db_vs_freq.png}
+  \caption{OriginPro gain-versus-frequency curve of the high-pass
+           filter (circuit 2)}
+  \label{fig:og2}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{OriginPro_graph_of_circuit3_gain_db_vs_freq.png}
+  \caption{OriginPro gain-versus-frequency curve of the band-pass
+           filter (circuit 3)}
+  \label{fig:og3}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{OriginPro_graph_of_circuit4_gain_db_vs_freq.png}
+  \caption{OriginPro gain-versus-frequency curve of the band-stop
+           filter (circuit 4)}
+  \label{fig:og4}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{OriginPro_graph_of_circuit1_changed_gain_db_vs_freq.png}
+  \caption{OriginPro gain-versus-frequency curve of the modified
+           low-pass filter (task 7)}
+  \label{fig:ogc}
+\end{figure}
+
+\subsection{Comparison of formula, theoretical, and simulated frequencies (task 6)}
+Table~\ref{tab:compare} collects the class-roll formula targets, the
+theoretical values computed from the standard component values in
+Section 2.7, and the simulated values extracted from the data with the
+70.7\% criterion. Percentage error is defined as
+\[
+  \%\ \text{error} =
+  \frac{\text{Theoretical} - \text{Simulated}}{\text{Theoretical}} \times 100.
+\]
+
+\begin{table}[H]
+  \centering
+  \caption{Formula targets vs.\ theoretical vs.\ simulated characteristic
+           frequencies; percentage error is theory vs.\ simulation}
+  \label{tab:compare}
+  \small
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{|l|l|r|r|r|r|}
+    \hline
+    \rowcolor{black!12}\textbf{Circuit} & \textbf{Quantity} & \textbf{Formula (Hz)} & \textbf{Theoretical (Hz)} &
+    \textbf{Simulated (Hz)} & \textbf{\% Error} \\
+    \hline
+    1 (LP) & $f_c$ & 150.0 & 148.7 & 148.7 & $+0.04$ \\
+    \hline
+    2 (HP) & $f_c$ & 2500.0 & 2510.3 & 2510.5 & $-0.01$ \\
+    \hline
+    \multirow{5}{*}{3 (BP)}
+      & $f_L$ & 150.0 & 149.6 & 149.8 & $-0.12$ \\
+    \cline{2-6}
+      & $f_H$ & 2500.0 & 2490.1 & 2486.5 & $+0.14$ \\
+    \cline{2-6}
+      & $f_0$ & 612.4 & 610.3 & 610.3 & $+0.01$ \\
+    \cline{2-6}
+      & $BW$ & 2350.0 & 2340.5 & 2336.7 & $+0.16$ \\
+    \cline{2-6}
+      & $Q$ & 0.2606 & 0.2608 & 0.2612 & $-0.15$ \\
+    \hline
+    \multirow{5}{*}{4 (BS)}
+      & $f_L$ & 150.0 & 149.6 & 149.2 & $+0.25$ \\
+    \cline{2-6}
+      & $f_H$ & 2500.0 & 2490.1 & 2494.9 & $-0.19$ \\
+    \cline{2-6}
+      & $f_0$ & 612.4 & 610.3 & 610.2 & $+0.03$ \\
+    \cline{2-6}
+      & $BW$ & 2350.0 & 2340.5 & 2345.7 & $-0.22$ \\
+    \cline{2-6}
+      & $Q$ & 0.2606 & 0.2608 & 0.2601 & $+0.25$ \\
+    \hline
+    1 changed (LP) & $f_c$ & 150.0 & 72.3 & 72.3 & $+0.01$ \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Every simulated quantity agrees with its theoretical value to better
+than $0.3\%$. The deviation of the theoretical values from the
+formula targets (at most $0.84\%$, e.g.\ $148.7\ \mathrm{Hz}$ against
+$150\ \mathrm{Hz}$ for the low-pass filter) is not a simulation
+discrepancy: it is the deliberate consequence of rounding the designed
+component values to standard series values (Section 2.3).
+
+\subsection{Effect of changing R and C (task 7)}
+Table~\ref{tab:task7} compares the original and modified low-pass
+filters.
+
+\begin{table}[H]
+  \centering
+  \caption{Low-pass filter before and after changing R and C}
+  \label{tab:task7}
+  \renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{|l|c|c|}
+    \hline
+    \rowcolor{black!12}\textbf{Quantity} & \textbf{Original (circuit 1)} & \textbf{Modified (task 7)} \\
+    \hline
+    $R$ & \SI{10.7}{\kilo\ohm} & \SI{2.2}{\kilo\ohm} \\
+    \hline
+    $C$ & \SI{100}{\nano\farad} & \SI{1}{\micro\farad} \\
+    \hline
+    $RC$ & \SI{1.07}{\milli\second} & \SI{2.2}{\milli\second} \\
+    \hline
+    Theoretical $f_c$ & \SI{148.7}{\hertz} & \SI{72.3}{\hertz} \\
+    \hline
+    Simulated $f_c$ & \SI{148.7}{\hertz} & \SI{72.3}{\hertz} \\
+    \hline
+    \% Error & $+0.04$ & $+0.01$ \\
+    \hline
+    Stopband slope & $-20\ \mathrm{dB/dec}$ & $-20\ \mathrm{dB/dec}$ \\
+    \hline
+  \end{tabular}
+\end{table}
+
+Although the resistor was \emph{decreased} from
+\SI{10.7}{\kilo\ohm} to \SI{2.2}{\kilo\ohm}, the cutoff frequency also
+decreased by a factor of about 2.05, because the capacitor was
+increased tenfold while the resistor was only decreased by a factor of
+4.86; the product $RC$ (hence $1/2\pi RC$) governs. The overall shape
+of the response is unchanged: passband gain $\approx 0\ \mathrm{dB}$
+and a $-20\ \mathrm{dB/decade}$ roll-off beyond $f_c$, as Figs.
+\ref{fig:og1} and \ref{fig:ogc} confirm.
+
+% =====================================================================
+\section{Discussion}
+% =====================================================================
+All four filter types behaved exactly as the derived theory predicts.
+The low-pass response is flat near unity gain and falls at
+$-20\ \mathrm{dB/decade}$ beyond $f_c$; the high-pass response is its
+mirror image; the band-pass curve peaks at $f_0 = \SI{610}{\hertz}$
+with a gain of essentially 1, and the band-stop curve shows the
+complementary deep notch at the same frequency. Since both RLC filters
+share one loop and differ only in the output terminals, their cutoff
+frequencies come from the same condition $|X(\omega)| = R$ and agree
+with each other within the interpolation tolerance.
+
+The agreement between simulation and theory (percentage errors below
+$0.3\%$, Table \ref{tab:compare}) is far better than one would obtain
+with physical components. This is expected: the PSpice models are
+ideal lumped elements at the specified values, that is there are no
+tolerances, parasitics, or meter-loading effects; and the AC solver
+evaluates the same node equations derived in Section 2.2. The
+residual sub-percent discrepancies are therefore numerical rather
+than physical: the sweep contains only 20 logarithmically spaced
+points, so the true $-3\ \mathrm{dB}$ crossing usually falls between
+samples and the interpolated value inherits a small error from the
+curvature of the response on the log-log grid. A denser sweep would
+reduce the residuals further.
+
+The formula/theoretical/simulated distinction deserves emphasis. The
+class-roll formula specifies an ideal target (e.g.\ \SI{150}{\hertz}),
+but only standard E-series components are available; choosing, say,
+\SI{10.7}{\kilo\ohm} instead of the exactly required
+\SI{10.61}{\kilo\ohm} shifts the true cutoff to \SI{148.7}{\hertz}.
+Grading the simulation against the formula directly would wrongly
+attribute this intentional design rounding to simulation error, which
+is why the standard-value theory is the proper reference and
+against it the simulation is essentially exact.
+
+Changing $R$ and $C$ (task 7) illustrates the inverse-proportional
+dependence $f_c \propto 1/RC$. A first-order filter's cutoff is set by
+the single time constant $RC$; only the \emph{product} matters, which
+is why very different $R$/$C$ pairs yield the same response shape and
+the frequency simply scales with $1/RC$. The unchanged
+$-20\ \mathrm{dB/decade}$ slope confirms that the filter order is a
+property of the topology (one energy-storage element), not of the
+component values. For the RLC pair, by contrast, $f_0$ depends only on
+$L$ and $C$ while the bandwidth depends on $R/L$: increasing $R$ would
+widen the band and reduce $Q$ (already low here, $Q \approx 0.26$,
+which is why the passband is very wide with gentle skirts), whereas
+increasing $L$ or $C$ would pull $f_0$ down without changing $Q$'s
+dependence on $L/C$ alone ($Q \propto \sqrt{L/C}$).
+
+Two waveform details are worth noting. The circuit-4 notch bottoms out
+near $-45.5\ \mathrm{dB}$ in the read data, but the theoretical null is
+complete ($|H_{\mathrm{BS}}|\to 0$ at $f_0$ because the series $LC$
+branch becomes a short); the finite floor is again a sweep-sampling
+artefact, the nearest sample point does not fall exactly on $f_0$.
+Likewise, the high-pass gain at \SI{1}{\hertz} ($\approx -68\ \mathrm{dB}$)
+matches the predicted asymptote $20\log_{10}(f/f_c)$. Practically,
+the experiment shows that passive filters are simple, robust and
+require no power supply, but their selectivity is limited by the
+low $Q$ achievable with passive elements: for narrow bands one needs
+high-$Q$ coils or active topologies, since loading by the source and
+measuring instrument (idealised away here) further degrades real
+passive responses.
+
+% =====================================================================
+\section{Reference}
+% =====================================================================
+\renewcommand{\refname}{} % suppress duplicate heading; \section{Reference} above serves
+\begin{thebibliography}{9}
+  \bibitem{ref:sadiku} C. K. Alexander and M. N. O. Sadiku,
+    \textit{Fundamentals of Electric Circuits}, 5th ed. New York,
+    NY, USA: McGraw-Hill, 2010.
+  \bibitem{ref:boylestad} R. L. Boylestad, \textit{Introductory
+    Circuit Analysis}, 13th ed. Harlow, U.K.: Pearson Education, 2016.
+\end{thebibliography}
+
+\end{document}
