@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.6.25)  24 SEP 2026 20:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.6.25)  24 SEP 2026 21:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -811,12 +811,12 @@ Package hyperref Info: Link coloring OFF on input line 70.
 \@outlinefile=\write3
 \openout3 = `report.out'.
 
-<../Cover_page.pdf, id=100, 597.53236pt x 845.05714pt>
+<../Cover_page.pdf, id=96, 597.53236pt x 845.05714pt>
 File: ../Cover_page.pdf Graphic file (type pdf)
 <use ../Cover_page.pdf>
 Package pdftex.def Info: ../Cover_page.pdf  used on input line 75.
 (pdftex.def)             Requested size: 597.5309pt x 845.05507pt.
-<../Cover_page.pdf, id=102, page=1, 597.53236pt x 845.05714pt>
+<../Cover_page.pdf, id=98, page=1, 597.53236pt x 845.05714pt>
 File: ../Cover_page.pdf Graphic file (type pdf)
 <use ../Cover_page.pdf, page 1>
 Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 75.
@@ -841,12 +841,12 @@ Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 75.
 
 
  <../Cover_page.pdf>]
-<../2nd_page.pdf, id=124, 614.295pt x 1011.78pt>
+<../2nd_page.pdf, id=120, 614.295pt x 1011.78pt>
 File: ../2nd_page.pdf Graphic file (type pdf)
 <use ../2nd_page.pdf>
 Package pdftex.def Info: ../2nd_page.pdf  used on input line 76.
 (pdftex.def)             Requested size: 614.29349pt x 1011.77753pt.
-<../2nd_page.pdf, id=126, page=1, 614.295pt x 1011.78pt>
+<../2nd_page.pdf, id=122, page=1, 614.295pt x 1011.78pt>
 File: ../2nd_page.pdf Graphic file (type pdf)
 <use ../2nd_page.pdf, page 1>
 Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 76.
@@ -985,7 +985,7 @@ LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 338.
  [6{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-<../figures/circuit_diagrams/circuit1.png, id=241, 1039.63406pt x 624.08156pt>
+<../figures/circuit_diagrams/circuit1.png, id=237, 1039.63406pt x 624.08156pt>
 File: ../figures/circuit_diagrams/circuit1.png Graphic file (type png)
 <use ../figures/circuit_diagrams/circuit1.png>
 Package pdftex.def Info: ../figures/circuit_diagrams/circuit1.png  used on inpu
@@ -1040,13 +1040,13 @@ LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
 LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
 (Font)              scaled to size 6.1pt on input line 359.
  [7]
-<../figures/circuit_diagrams/circuit2.png, id=249, 1040.38687pt x 624.08156pt>
+<../figures/circuit_diagrams/circuit2.png, id=245, 1040.38687pt x 624.08156pt>
 File: ../figures/circuit_diagrams/circuit2.png Graphic file (type png)
 <use ../figures/circuit_diagrams/circuit2.png>
 Package pdftex.def Info: ../figures/circuit_diagrams/circuit2.png  used on inpu
 t line 365.
 (pdftex.def)             Requested size: 407.66833pt x 244.54308pt.
-<../figures/circuit_diagrams/circuit3.png, id=250, 1073.51062pt x 632.3625pt>
+<../figures/circuit_diagrams/circuit3.png, id=246, 1073.51062pt x 632.3625pt>
 File: ../figures/circuit_diagrams/circuit3.png Graphic file (type png)
 <use ../figures/circuit_diagrams/circuit3.png>
 Package pdftex.def Info: ../figures/circuit_diagrams/circuit3.png  used on inpu
@@ -1064,7 +1064,7 @@ LaTeX Info: Symbol \textmu not provided by
             Default family used instead on input line 378.
  [8 <../figures/circuit_diagrams/circuit1.png> <../figures/circuit_diagrams/cir
 cuit2.png>]
-<../figures/circuit_diagrams/circuit4.png, id=259, 1077.27469pt x 632.3625pt>
+<../figures/circuit_diagrams/circuit4.png, id=255, 1077.27469pt x 632.3625pt>
 File: ../figures/circuit_diagrams/circuit4.png Graphic file (type png)
 <use ../figures/circuit_diagrams/circuit4.png>
 Package pdftex.def Info: ../figures/circuit_diagrams/circuit4.png  used on inpu
@@ -1076,7 +1076,7 @@ LaTeX Info: Symbol \textmu not provided by
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 388.
-<../figures/circuit_diagrams/circuit1_changed.png, id=260, 1000.48781pt x 618.0
+<../figures/circuit_diagrams/circuit1_changed.png, id=256, 1000.48781pt x 618.0
 5907pt>
 File: ../figures/circuit_diagrams/circuit1_changed.png Graphic file (type png)
 <use ../figures/circuit_diagrams/circuit1_changed.png>
@@ -1110,166 +1110,165 @@ LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 505.
  [11]
-<../figures/PSpice_graphs/pspice_graph_of_circuit1_gain_db.png, id=312, 994.546
+<../figures/PSpice_graphs/pspice_graph_of_circuit1_gain_db.png, id=306, 994.546
 39pt x 424.44727pt>
 File: ../figures/PSpice_graphs/pspice_graph_of_circuit1_gain_db.png Graphic fil
 e (type png)
 <use ../figures/PSpice_graphs/pspice_graph_of_circuit1_gain_db.png>
 Package pdftex.def Info: ../figures/PSpice_graphs/pspice_graph_of_circuit1_gain
-_db.png  used on input line 545.
+_db.png  used on input line 524.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
-<../figures/PSpice_graphs/pspice_graph_of_circuit2_gain_db.png, id=313, 994.546
+<../figures/PSpice_graphs/pspice_graph_of_circuit2_gain_db.png, id=307, 994.546
 39pt x 424.44727pt>
 File: ../figures/PSpice_graphs/pspice_graph_of_circuit2_gain_db.png Graphic fil
 e (type png)
 <use ../figures/PSpice_graphs/pspice_graph_of_circuit2_gain_db.png>
 Package pdftex.def Info: ../figures/PSpice_graphs/pspice_graph_of_circuit2_gain
-_db.png  used on input line 552.
+_db.png  used on input line 531.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
- [12 <../figures/PSpice_graphs/pspice_graph_of_circuit1_gain_db.png>]
-<../figures/PSpice_graphs/pspice_graph_of_circuit3_gain_db.png, id=325, 994.546
+<../figures/PSpice_graphs/pspice_graph_of_circuit3_gain_db.png, id=308, 994.546
 39pt x 424.44727pt>
 File: ../figures/PSpice_graphs/pspice_graph_of_circuit3_gain_db.png Graphic fil
 e (type png)
 <use ../figures/PSpice_graphs/pspice_graph_of_circuit3_gain_db.png>
 Package pdftex.def Info: ../figures/PSpice_graphs/pspice_graph_of_circuit3_gain
-_db.png  used on input line 559.
+_db.png  used on input line 538.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
-<../figures/PSpice_graphs/pspice_graph_of_circuit4_gain_db.png, id=326, 994.546
+ [12 <../figures/PSpice_graphs/pspice_graph_of_circuit1_gain_db.png> <../figure
+s/PSpice_graphs/pspice_graph_of_circuit2_gain_db.png>]
+<../figures/PSpice_graphs/pspice_graph_of_circuit4_gain_db.png, id=319, 994.546
 39pt x 424.44727pt>
 File: ../figures/PSpice_graphs/pspice_graph_of_circuit4_gain_db.png Graphic fil
 e (type png)
 <use ../figures/PSpice_graphs/pspice_graph_of_circuit4_gain_db.png>
 Package pdftex.def Info: ../figures/PSpice_graphs/pspice_graph_of_circuit4_gain
-_db.png  used on input line 566.
+_db.png  used on input line 545.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
-<../figures/PSpice_graphs/pspice_graph_of_circuit1_changed_gain_db.png, id=327,
+<../figures/PSpice_graphs/pspice_graph_of_circuit1_changed_gain_db.png, id=320,
  994.54639pt x 424.44727pt>
 File: ../figures/PSpice_graphs/pspice_graph_of_circuit1_changed_gain_db.png Gra
 phic file (type png)
 <use ../figures/PSpice_graphs/pspice_graph_of_circuit1_changed_gain_db.png>
 Package pdftex.def Info: ../figures/PSpice_graphs/pspice_graph_of_circuit1_chan
-ged_gain_db.png  used on input line 573.
+ged_gain_db.png  used on input line 552.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
- [13 <../figures/PSpice_graphs/pspice_graph_of_circuit2_gain_db.png> <../figure
-s/PSpice_graphs/pspice_graph_of_circuit3_gain_db.png> <../figures/PSpice_graphs
-/pspice_graph_of_circuit4_gain_db.png>] [14 <../figures/PSpice_graphs/pspice_gr
-aph_of_circuit1_changed_gain_db.png>] [15] [16] [17]
-[18]
-<../figures/PSpice_graphs/pspice_graph_of_circuit1.png, id=370, 994.54639pt x 4
+ [13 <../figures/PSpice_graphs/pspice_graph_of_circuit3_gain_db.png> <../figure
+s/PSpice_graphs/pspice_graph_of_circuit4_gain_db.png> <../figures/PSpice_graphs
+/pspice_graph_of_circuit1_changed_gain_db.png>]
+<../figures/PSpice_graphs/pspice_graph_of_circuit1.png, id=333, 994.54639pt x 4
 24.44727pt>
 File: ../figures/PSpice_graphs/pspice_graph_of_circuit1.png Graphic file (type 
 png)
 <use ../figures/PSpice_graphs/pspice_graph_of_circuit1.png>
 Package pdftex.def Info: ../figures/PSpice_graphs/pspice_graph_of_circuit1.png 
- used on input line 858.
+ used on input line 574.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
-<../figures/PSpice_graphs/pspice_graph_of_circuit2.png, id=371, 994.54639pt x 4
+<../figures/PSpice_graphs/pspice_graph_of_circuit2.png, id=334, 994.54639pt x 4
 24.44727pt>
 File: ../figures/PSpice_graphs/pspice_graph_of_circuit2.png Graphic file (type 
 png)
 <use ../figures/PSpice_graphs/pspice_graph_of_circuit2.png>
 Package pdftex.def Info: ../figures/PSpice_graphs/pspice_graph_of_circuit2.png 
- used on input line 866.
+ used on input line 582.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
- [19 <../figures/PSpice_graphs/pspice_graph_of_circuit1.png>]
-<../figures/PSpice_graphs/pspice_graph_of_circuit3.png, id=378, 994.54639pt x 4
+<../figures/PSpice_graphs/pspice_graph_of_circuit3.png, id=335, 994.54639pt x 4
 24.44727pt>
 File: ../figures/PSpice_graphs/pspice_graph_of_circuit3.png Graphic file (type 
 png)
 <use ../figures/PSpice_graphs/pspice_graph_of_circuit3.png>
 Package pdftex.def Info: ../figures/PSpice_graphs/pspice_graph_of_circuit3.png 
- used on input line 874.
+ used on input line 590.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
-<../figures/PSpice_graphs/pspice_graph_of_circuit4.png, id=379, 994.54639pt x 4
+ [14 <../figures/PSpice_graphs/pspice_graph_of_circuit1.png> <../figures/PSpice
+_graphs/pspice_graph_of_circuit2.png>]
+<../figures/PSpice_graphs/pspice_graph_of_circuit4.png, id=345, 994.54639pt x 4
 24.44727pt>
 File: ../figures/PSpice_graphs/pspice_graph_of_circuit4.png Graphic file (type 
 png)
 <use ../figures/PSpice_graphs/pspice_graph_of_circuit4.png>
 Package pdftex.def Info: ../figures/PSpice_graphs/pspice_graph_of_circuit4.png 
- used on input line 882.
+ used on input line 598.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
-<../figures/PSpice_graphs/pspice_graph_of_circuit1_changed.png, id=380, 994.546
+<../figures/PSpice_graphs/pspice_graph_of_circuit1_changed.png, id=346, 994.546
 39pt x 424.44727pt>
 File: ../figures/PSpice_graphs/pspice_graph_of_circuit1_changed.png Graphic fil
 e (type png)
 <use ../figures/PSpice_graphs/pspice_graph_of_circuit1_changed.png>
 Package pdftex.def Info: ../figures/PSpice_graphs/pspice_graph_of_circuit1_chan
-ged.png  used on input line 890.
+ged.png  used on input line 606.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
- [20 <../figures/PSpice_graphs/pspice_graph_of_circuit2.png> <../figures/PSpice
-_graphs/pspice_graph_of_circuit3.png> <../figures/PSpice_graphs/pspice_graph_of
-_circuit4.png>]
+ [15 <../figures/PSpice_graphs/pspice_graph_of_circuit3.png> <../figures/PSpice
+_graphs/pspice_graph_of_circuit4.png> <../figures/PSpice_graphs/pspice_graph_of
+_circuit1_changed.png>] [16] [17] [18] [19]
 <../figures/graphs_for_task5/OriginPro_graph_of_circuit1_gain_db_vs_freq.png, i
-d=395, 578.16pt x 361.35pt>
+d=387, 578.16pt x 361.35pt>
 File: ../figures/graphs_for_task5/OriginPro_graph_of_circuit1_gain_db_vs_freq.p
 ng Graphic file (type png)
 <use ../figures/graphs_for_task5/OriginPro_graph_of_circuit1_gain_db_vs_freq.pn
 g>
 Package pdftex.def Info: ../figures/graphs_for_task5/OriginPro_graph_of_circuit
-1_gain_db_vs_freq.png  used on input line 908.
+1_gain_db_vs_freq.png  used on input line 891.
 (pdftex.def)             Requested size: 385.02547pt x 240.63658pt.
+ [20]
 <../figures/graphs_for_task5/OriginPro_graph_of_circuit2_gain_db_vs_freq.png, i
-d=396, 578.16pt x 361.35pt>
+d=394, 578.16pt x 361.35pt>
 File: ../figures/graphs_for_task5/OriginPro_graph_of_circuit2_gain_db_vs_freq.p
 ng Graphic file (type png)
 <use ../figures/graphs_for_task5/OriginPro_graph_of_circuit2_gain_db_vs_freq.pn
 g>
 Package pdftex.def Info: ../figures/graphs_for_task5/OriginPro_graph_of_circuit
-2_gain_db_vs_freq.png  used on input line 916.
+2_gain_db_vs_freq.png  used on input line 899.
 (pdftex.def)             Requested size: 385.02547pt x 240.63658pt.
- [21 <../figures/PSpice_graphs/pspice_graph_of_circuit1_changed.png> <../figure
-s/graphs_for_task5/OriginPro_graph_of_circuit1_gain_db_vs_freq.png>]
 <../figures/graphs_for_task5/OriginPro_graph_of_circuit3_gain_db_vs_freq.png, i
-d=405, 578.16pt x 361.35pt>
+d=395, 578.16pt x 361.35pt>
 File: ../figures/graphs_for_task5/OriginPro_graph_of_circuit3_gain_db_vs_freq.p
 ng Graphic file (type png)
 <use ../figures/graphs_for_task5/OriginPro_graph_of_circuit3_gain_db_vs_freq.pn
 g>
 Package pdftex.def Info: ../figures/graphs_for_task5/OriginPro_graph_of_circuit
-3_gain_db_vs_freq.png  used on input line 924.
+3_gain_db_vs_freq.png  used on input line 907.
 (pdftex.def)             Requested size: 385.02547pt x 240.63658pt.
+ [21 <../figures/graphs_for_task5/OriginPro_graph_of_circuit1_gain_db_vs_freq.p
+ng> <../figures/graphs_for_task5/OriginPro_graph_of_circuit2_gain_db_vs_freq.pn
+g>]
 <../figures/graphs_for_task5/OriginPro_graph_of_circuit4_gain_db_vs_freq.png, i
-d=406, 578.16pt x 361.35pt>
+d=403, 578.16pt x 361.35pt>
 File: ../figures/graphs_for_task5/OriginPro_graph_of_circuit4_gain_db_vs_freq.p
 ng Graphic file (type png)
 <use ../figures/graphs_for_task5/OriginPro_graph_of_circuit4_gain_db_vs_freq.pn
 g>
 Package pdftex.def Info: ../figures/graphs_for_task5/OriginPro_graph_of_circuit
-4_gain_db_vs_freq.png  used on input line 932.
+4_gain_db_vs_freq.png  used on input line 915.
 (pdftex.def)             Requested size: 385.02547pt x 240.63658pt.
- [22 <../figures/graphs_for_task5/OriginPro_graph_of_circuit2_gain_db_vs_freq.p
-ng> <../figures/graphs_for_task5/OriginPro_graph_of_circuit3_gain_db_vs_freq.pn
-g>]
 <../figures/graphs_for_task5/OriginPro_graph_of_circuit1_changed_gain_db_vs_fre
-q.png, id=415, 578.16pt x 361.35pt>
+q.png, id=404, 578.16pt x 361.35pt>
 File: ../figures/graphs_for_task5/OriginPro_graph_of_circuit1_changed_gain_db_v
 s_freq.png Graphic file (type png)
 <use ../figures/graphs_for_task5/OriginPro_graph_of_circuit1_changed_gain_db_vs
 _freq.png>
 Package pdftex.def Info: ../figures/graphs_for_task5/OriginPro_graph_of_circuit
-1_changed_gain_db_vs_freq.png  used on input line 940.
+1_changed_gain_db_vs_freq.png  used on input line 923.
 (pdftex.def)             Requested size: 385.02547pt x 240.63658pt.
-
-[23 <../figures/graphs_for_task5/OriginPro_graph_of_circuit4_gain_db_vs_freq.pn
-g> <../figures/graphs_for_task5/OriginPro_graph_of_circuit1_changed_gain_db_vs_
-freq.png>]
+ [22 <../figures/graphs_for_task5/OriginPro_graph_of_circuit3_gain_db_vs_freq.p
+ng> <../figures/graphs_for_task5/OriginPro_graph_of_circuit4_gain_db_vs_freq.pn
+g>] [23 <../figures/graphs_for_task5/OriginPro_graph_of_circuit1_changed_gain_d
+b_vs_freq.png>]
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 1021.
+            Default family used instead on input line 1004.
  [24] [25] [26] (./report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2020/03/25>
  ***********
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: C58214DB5939BBF8756D0F3D9016F01D;5160.
+(rerunfilecheck)             Checksum: B5E3A46619374C79E74796D70B296B8A;4859.
  ) 
 Here is how much of TeX's memory you used:
- 21797 strings out of 469515
- 402286 string characters out of 5470807
- 788079 words of memory out of 5000000
- 50013 multiletter control sequences out of 15000+600000
+ 21793 strings out of 469515
+ 402234 string characters out of 5470807
+ 788007 words of memory out of 5000000
+ 50011 multiletter control sequences out of 15000+600000
  676286 words of font info for 143 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  74i,17n,117p,1195b,1256s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1283,10 +1282,10 @@ x/txmiaX.pfb></usr/share/texmf-dist/fonts/type1/public/newtx/txsys.pfb></usr/sh
 are/texmf-dist/fonts/type1/public/txfonts/txtt.pfb></usr/share/texmf-dist/fonts
 /type1/public/newtx/ztmb.pfb></usr/share/texmf-dist/fonts/type1/public/newtx/zt
 mr.pfb></usr/share/texmf-dist/fonts/type1/public/newtx/ztmri.pfb>
-Output written on report.pdf (26 pages, 3002910 bytes).
+Output written on report.pdf (26 pages, 3001226 bytes).
 PDF statistics:
- 530 PDF objects out of 1000 (max. 8388607)
- 408 compressed objects within 5 object streams
- 116 named destinations out of 1000 (max. 500000)
- 323 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 524 PDF objects out of 1000 (max. 8388607)
+ 402 compressed objects within 5 object streams
+ 114 named destinations out of 1000 (max. 500000)
+ 315 words of extra memory for PDF output out of 10000 (max. 10000000)
 
