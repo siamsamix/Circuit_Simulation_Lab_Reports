@@ -6,3 +6,4 @@ This is a repo for a lab report with a very weird teacher.
 4) For task 7, the paramaters of task 1 has been changed. It is referred to as "circuit1_changed"
 5) Every used formulae must first be derived properly in the theory section.
 6) The theory section must be copied from the reference books.
+7) The lab report must be written in latex
