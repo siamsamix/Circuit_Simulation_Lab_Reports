@@ -1,0 +1,15 @@
+- Ignore files that are named "IGNORE_THIS".
+- All latex related files must stored inside "Lab_report_latex" folder.
+- Must write the lab report in latex.
+- The first page should be Cover_page.pdf
+- The second page must be 2nd_page.pdf
+- DON'T look at the graphs nor their python scripts now. Use placeholders instead in the report.
+- You can read the data points from the "Data_points" folder.
+- In the report, use the circuit schematics diagrams from the "schematics" folder. No need to read them using OCR, instead read the netlist files from the "netlists" folder to learn about the circuit configurations.
+- Read the 2nd_page.pdf file for more details into what to include in the lab report.
+- Must include all the derivations of used formulas and equations.
+- The theory sections must be paraphrased from the books inside "Theory_Resources" folder.
+- Use appropriate skills (python-math) to make mathematical calculations.
+- The mathematical calculation part must show whether the data from the simulation (Amplitude, phase) match theoretical values or not.
+- The experiments were supposed to be done in PSpice, but I instead used LTspice. Assume LTspice everywhere. I will later manually modify the latex file to replace "LTspice" with "PSpice".
+- Use placeholders whenever there's a lack of diagrams or graphs.

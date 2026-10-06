@@ -1,0 +1,12 @@
+* Full-Wave Bridge Rectifier without Filter Capacitor
+V1 1 0 SIN(0 100 50)
+D1 1 2 D1N914
+D2 0 2 D1N914
+D3 3 1 D1N914
+D4 3 0 D1N914
+R1 2 3 100K
+.MODEL D1N914 D(Is=168.1E-21 N=1 Rs=.1 Ikf=0 Xti=3 Eg=1.11 Cjo=4p
++ M=.3333 Vj=.75 Fc=.5 Isr=100p Nr=2 Bv=100 Ibv=100u Tt=11.54n)
+.TRAN 10US 100MS
+.PROBE
+.END

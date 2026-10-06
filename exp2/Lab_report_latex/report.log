@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.6.25)  25 SEP 2026 12:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.6.25)  26 SEP 2026 21:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1371,8 +1371,6 @@ ist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 412.
-LaTeX Font Info:    Font shape `OT1/ntxtlf/b/n' will be
-(Font)              scaled to size 10.95pt on input line 420.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 439.
@@ -1541,8 +1539,11 @@ ged.png  used on input line 741.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
  [19 <../figures/PSpice_graphs/pspice_graph_of_circuit2.png> <../figures/PSpice
 _graphs/pspice_graph_of_circuit3.png> <../figures/PSpice_graphs/pspice_graph_of
-_circuit4.png>] [20 <../figures/PSpice_graphs/pspice_graph_of_circuit1_changed.
-png>] [21] [22] [23] [24]
+_circuit4.png>]
+LaTeX Font Info:    Font shape `OT1/ntxtlf/b/n' will be
+(Font)              scaled to size 10.95pt on input line 760.
+ [20 <../figures/PSpice_graphs/pspice_graph_of_circuit1_changed.png>] [21] [22]
+ [23] [24]
 <../figures/graphs_for_task5/OriginPro_graph_of_circuit1_gain_db_vs_freq.png, i
 d=457, 578.16pt x 361.35pt>
 File: ../figures/graphs_for_task5/OriginPro_graph_of_circuit1_gain_db_vs_freq.p
@@ -1560,7 +1561,7 @@ ng Graphic file (type png)
 <use ../figures/graphs_for_task5/OriginPro_graph_of_circuit2_gain_db_vs_freq.pn
 g>
 Package pdftex.def Info: ../figures/graphs_for_task5/OriginPro_graph_of_circuit
-2_gain_db_vs_freq.png  used on input line 1034.
+2_gain_db_vs_freq.png  used on input line 1033.
 (pdftex.def)             Requested size: 385.02547pt x 240.63658pt.
 <../figures/graphs_for_task5/OriginPro_graph_of_circuit3_gain_db_vs_freq.png, i
 d=466, 578.16pt x 361.35pt>
@@ -1569,7 +1570,7 @@ ng Graphic file (type png)
 <use ../figures/graphs_for_task5/OriginPro_graph_of_circuit3_gain_db_vs_freq.pn
 g>
 Package pdftex.def Info: ../figures/graphs_for_task5/OriginPro_graph_of_circuit
-3_gain_db_vs_freq.png  used on input line 1042.
+3_gain_db_vs_freq.png  used on input line 1041.
 (pdftex.def)             Requested size: 385.02547pt x 240.63658pt.
 
 [26 <../figures/graphs_for_task5/OriginPro_graph_of_circuit1_gain_db_vs_freq.pn
@@ -1582,7 +1583,7 @@ ng Graphic file (type png)
 <use ../figures/graphs_for_task5/OriginPro_graph_of_circuit4_gain_db_vs_freq.pn
 g>
 Package pdftex.def Info: ../figures/graphs_for_task5/OriginPro_graph_of_circuit
-4_gain_db_vs_freq.png  used on input line 1050.
+4_gain_db_vs_freq.png  used on input line 1049.
 (pdftex.def)             Requested size: 385.02547pt x 240.63658pt.
 <../figures/graphs_for_task5/OriginPro_graph_of_circuit1_changed_gain_db_vs_fre
 q.png, id=475, 578.16pt x 361.35pt>
@@ -1591,7 +1592,7 @@ s_freq.png Graphic file (type png)
 <use ../figures/graphs_for_task5/OriginPro_graph_of_circuit1_changed_gain_db_vs
 _freq.png>
 Package pdftex.def Info: ../figures/graphs_for_task5/OriginPro_graph_of_circuit
-1_changed_gain_db_vs_freq.png  used on input line 1058.
+1_changed_gain_db_vs_freq.png  used on input line 1057.
 (pdftex.def)             Requested size: 385.02547pt x 240.63658pt.
  [27 <../figures/graphs_for_task5/OriginPro_graph_of_circuit3_gain_db_vs_freq.p
 ng> <../figures/graphs_for_task5/OriginPro_graph_of_circuit4_gain_db_vs_freq.pn
@@ -1599,9 +1600,9 @@ g>] [28 <../figures/graphs_for_task5/OriginPro_graph_of_circuit1_changed_gain_d
 b_vs_freq.png>]
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 1138.
+            Default family used instead on input line 1137.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/it' will be
-(Font)              scaled to size 12.0pt on input line 1153.
+(Font)              scaled to size 12.0pt on input line 1150.
  [29] [30] [31] (./report.aux)
  ***********
 LaTeX2e <2025-11-01>
@@ -1613,7 +1614,7 @@ Package rerunfilecheck Info: File `report.out' has not changed.
 Here is how much of TeX's memory you used:
  51437 strings out of 469515
  1211298 string characters out of 5470807
- 1809626 words of memory out of 5000000
+ 1808552 words of memory out of 5000000
  79355 multiletter control sequences out of 15000+600000
  676656 words of font info for 144 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
@@ -1628,10 +1629,10 @@ x/txsys.pfb></usr/share/texmf-dist/fonts/type1/public/txfonts/txtt.pfb></usr/sh
 are/texmf-dist/fonts/type1/public/newtx/ztmb.pfb></usr/share/texmf-dist/fonts/t
 ype1/public/newtx/ztmr.pfb></usr/share/texmf-dist/fonts/type1/public/newtx/ztmr
 i.pfb>
-Output written on report.pdf (31 pages, 3031171 bytes).
+Output written on report.pdf (31 pages, 3148081 bytes).
 PDF statistics:
- 598 PDF objects out of 1000 (max. 8388607)
- 469 compressed objects within 5 object streams
+ 596 PDF objects out of 1000 (max. 8388607)
+ 467 compressed objects within 5 object streams
  143 named destinations out of 1000 (max. 500000)
  337 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -1,0 +1,1256 @@
+% circuit-sim-lab-report — report.tex
+% Course 0714-EEE-2102, Circuit Simulation Laboratory
+% Experiment 1 — transient and steady-state responses of RC circuits
+%
+% Compile (twice, from the project directory):
+%   env pdflatex -interaction=nonstopmode report.tex
+
+\documentclass[12pt,a4paper]{article}
+
+% ----- Page geometry: A4, 1 inch margins all sides -----
+\usepackage[margin=1in]{geometry}
+
+% ----- Times New Roman (text + math) -----
+\usepackage{newtxtext,newtxmath}
+
+% ----- Spacing: 1.5 line spacing, 6 pt paragraph spacing -----
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip}          % paragraph gaps instead of indents
+\setlength{\parskip}{6pt plus 1pt}
+
+% ----- Math, SI units -----
+\usepackage{amsmath}
+\usepackage{siunitx}
+
+% ----- Graphics, tables, captions, floats -----
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\graphicspath{{figures/}}
+
+% ----- Lists: compact, guide-style itemization -----
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=2em, label=\textbullet}
+
+% ----- Front matter and PDF output -----
+\usepackage{pdfpages}
+\usepackage[hidelinks]{hyperref}
+
+% ----- Ragged-right paragraph columns (Task 6 parameter table) -----
+\usepackage{array}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% ----- URL line breaking (reference [3]) -----
+\usepackage{xurl}
+
+% ----- Headings: bold, left-aligned, 14/15 pt -----
+\usepackage{titlesec}
+\titleformat{\section}
+{\normalfont\Large\bfseries}{\thesection}{0.8em}{}
+\titleformat{\subsection}
+{\normalfont\large\bfseries}{\thesubsection}{0.8em}{}
+\titlespacing*{\section}{0pt}{*3}{*2}
+\titlespacing*{\subsection}{0pt}{*2.5}{*1.5}
+
+% ----- Captions: centered, 11 pt, figures below / tables above -----
+\captionsetup{font=small, labelfont=bf, justification=centering}
+\captionsetup[table]{position=above, skip=4pt}
+\captionsetup[figure]{position=below, skip=4pt}
+
+% ----- Page number: bottom-center -----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% ----- Experiment number: sections then number N.1–N.10 -----
+\newcommand{\expnumber}{1}
+\renewcommand{\thesection}{\expnumber.\arabic{section}}
+
+\begin{document}
+	
+	% =====================================================================
+	% FRONT MATTER (pages 1–2), per the instructor's instructions:
+	%   page 1: Cover_Page.pdf    page 2: 2nd_page.pdf
+	% =====================================================================
+	\includepdf[pages={1}]{Cover_Page.pdf}
+	\includepdf[pages={1}]{2nd_page.pdf}
+	\setcounter{page}{1}
+	
+	% =====================================================================
+	% HEADER BLOCK
+	% =====================================================================
+	\begin{center}
+		{\large\bfseries Experiment No. \expnumber}\\[4pt]
+		{\large\bfseries Name of the Experiment: Simulation, Analysis, and
+			Evaluation of Transient and Steady-State Responses of RC Circuits
+			with Switching, Pulse, and Sinusoidal Inputs Using PSpice}
+	\end{center}
+	\vspace{6pt}
+	
+	% =====================================================================
+	\section{Objective}
+	% =====================================================================
+	\begin{enumerate}[label=\roman*., leftmargin=2.5em]
+		\item To design and simulate RC circuits driven by switched DC,
+		pulse, and sinusoidal sources using PSpice.
+		\item To analyze the transient charging and discharging responses and
+		to determine the simulated time constants, comparing them with
+		the theoretical values through percentage-error analysis.
+		\item To determine the initial capacitor charge required to
+		eliminate the transient component of the sinusoidal response,
+		and to verify the resulting steady-state response by
+		simulation.
+		\item To investigate the effects of varying the input waveform and
+		the circuit parameters ($R$, $C$, and frequency) on the
+		transient and steady-state responses of the RC circuit.
+	\end{enumerate}
+	
+	% =====================================================================
+	\section{Theory}
+	% =====================================================================
+	An RC circuit contains a resistor $R$ in series with a capacitor $C$
+	and is the simplest circuit that exhibits a \emph{transient response}:
+	whenever a source is suddenly connected, disconnected, or changed, the
+	capacitor voltage cannot jump instantaneously because the charge on
+	its plates---and hence the energy $\tfrac{1}{2}Cv_C^2$ stored in its
+	electric field---can only change through a finite current.  The
+	capacitor voltage therefore relaxes continuously from its initial
+	value toward the new steady value demanded by the source, over a time
+	set by the circuit itself.  This behavior is governed by a first-order
+	differential equation, so every response in this experiment is a
+	decaying exponential (or an exponential plus a sinusoid) whose
+	characteristic time is the \emph{time constant} $\tau = RC$
+	\cite{sadiku}, \cite{boylestad}.
+	
+	\paragraph{Natural (source-free) response.}
+	When a charged capacitor is left to discharge through a resistor,
+	Kirchhoff's current law at the top node gives $i_C + i_R = 0$ with
+	$i_C = C\,dv_C/dt$ and $i_R = v_C/R$, hence
+	\begin{equation}
+		RC\,\frac{dv_C}{dt} + v_C = 0 .
+		\label{eq:natural-ode}
+	\end{equation}
+	Separating variables, $\dfrac{dv_C}{v_C} = -\dfrac{dt}{RC}$, and
+	integrating both sides yields
+	$\ln v_C = -t/RC + \ln A$, so that
+	\begin{equation}
+		v_C(t) = V_0\, e^{-t/\tau}, \qquad \tau \equiv RC,
+		\label{eq:natural}
+	\end{equation}
+	where the constant $A$ has been fixed by the initial condition
+	$v_C(0) = V_0$, itself set by the initial charge $Q_0 = C V_0$.  The
+	response is entirely due to the energy initially stored, so it is
+	called the \emph{natural response} of the circuit \cite{sadiku}.
+	Because the discharge current $i = v_C/R$ shrinks as $v_C$ falls, the
+	decay is fast at first and progressively slower: the voltage retains
+	its polarity while the current direction reverses relative to the
+	charging phase \cite{boylestad}.
+	
+	\paragraph{Time constant.}
+	From Eq.~\eqref{eq:natural}, at $t = \tau$ the capacitor voltage has
+	fallen to $V_0/e \approx 0.368\,V_0$ (36.8\,\% of its initial value);
+	during charging it reaches $1 - 1/e \approx 0.632$ (63.2\,\%) of its
+	final value.  This gives the practical measurement rule used
+	throughout this experiment: the time constant is the interval from the
+	switching instant to the 36.8\,\% (discharging) or 63.2\,\%
+	(charging) point of the waveform \cite{boylestad}.  After $5\tau$ the
+	exponential factor is $e^{-5} \approx 0.0067$, i.e.\ the response is
+	within 0.7\,\% of its final value, which is conventionally regarded
+	as complete settling \cite{sadiku}.  A small $\tau$ (small $R$, small
+	$C$) means quick energy exchange and a fast response; a large $\tau$
+	means slow relaxation.
+	
+	\paragraph{Step response (charging).}
+	When a DC source $V_s$ is suddenly applied to a series RC circuit
+	with an arbitrary initial voltage $V_0$, Kirchhoff's voltage law gives
+	\begin{equation}
+		RC\,\frac{dv_C}{dt} + v_C = V_s .
+		\label{eq:step-ode}
+	\end{equation}
+	Separating variables and integrating exactly as for
+	Eq.~\eqref{eq:natural-ode},
+	$\ln\!\left[\dfrac{v_C - V_s}{V_0 - V_s}\right] = -t/\tau$, gives the
+	\emph{complete response}
+	\begin{equation}
+		v_C(t) = V_s + (V_0 - V_s)\, e^{-t/\tau}.
+		\label{eq:step}
+	\end{equation}
+	Equation~\eqref{eq:step} is the sum of a \emph{forced}
+	(steady-state) part $V_s$ and a \emph{natural} (transient) part
+	$(V_0 - V_s)e^{-t/\tau}$; the transient exists only because the
+	initial condition differs from the forced value \cite{sadiku}.  For an
+	initially uncharged capacitor ($V_0 = 0$),
+	\begin{equation}
+		v_C(t) = V_s\left(1 - e^{-t/\tau}\right),
+		\label{eq:charging}
+	\end{equation}
+	the familiar rising exponential: charge is deposited very rapidly at
+	first (the full source voltage appears across $R$) and ever more
+	slowly as $v_C$ approaches $V_s$ and the driving difference
+	$v_s - v_C$ collapses \cite{boylestad}.  If the circuit contains
+	several resistors, $\tau$ is computed with the Th\'evenin resistance
+	seen at the capacitor terminals \cite{sadiku}.
+	
+	\paragraph{Pulse input.}
+	A rectangular pulse of amplitude $V_m$, width $T_{on}$, and period $T$
+	alternately connects the capacitor to $V_m$ and to zero.  Each
+	interval is a step response described by Eq.~\eqref{eq:step}:
+	\begin{equation}
+		v_C(t) =
+		\begin{cases}
+			V_m\left(1 - e^{-t/\tau}\right), & 0 \le t \le T_{on}, \\[4pt]
+			V_m\left(1 - e^{-T_{on}/\tau}\right) e^{-(t - T_{on})/\tau},
+			& T_{on} < t \le T,
+		\end{cases}
+		\label{eq:pulse}
+	\end{equation}
+	and later cycles repeat from whatever voltage the capacitor has
+	reached, using Eq.~\eqref{eq:step} with that value as $V_0$.  If
+	$T_{on} \gg \tau$ (in practice $\ge 5\tau$) the capacitor fully
+	charges and discharges within every cycle; if $T_{on} \lesssim \tau$
+	it never reaches the pulse amplitude.
+	
+	\paragraph{Sinusoidal input and phasor steady state.}
+	For the sinusoid $v_s(t) = V_m \sin(\omega t + \phi)$, the steady
+	state can be found with phasors.  The capacitor voltage--current
+	relation $i = C\,dv/dt$ transforms to the phasor relation
+	$I = j\omega C V$, i.e.\ the capacitor presents the impedance
+	\begin{equation}
+		Z_C = \frac{V}{I} = \frac{1}{j\omega C},
+		\label{eq:zc}
+	\end{equation}
+	so its voltage lags its current by $90^\circ$ \cite{sadiku}.  By
+	phasor voltage division in the series RC circuit,
+	\begin{equation}
+		\mathbf{V}_C = \frac{Z_C}{R + Z_C}\,\mathbf{V}_s
+		= \frac{1}{1 + j\omega\tau}\,\mathbf{V}_s,
+		\qquad \tau = RC .
+		\label{eq:h}
+	\end{equation}
+	The transfer function $H(j\omega)$ of
+	Eq.~\eqref{eq:h} has magnitude $1/\sqrt{1 + (\omega\tau)^2}$ and
+	angle $-\tan^{-1}(\omega\tau)$, so the steady-state capacitor
+	voltage is
+	again sinusoidal, at the same frequency, with amplitude attenuated
+	and phase lagging the source by
+	\begin{equation}
+		A = \frac{V_m}{\sqrt{1 + (\omega\tau)^2}}, \qquad
+		\theta = \tan^{-1}(\omega\tau),
+		\label{eq:amp-lag}
+	\end{equation}
+	that is,
+	\begin{equation}
+		v_{C,\mathrm{SS}}(t) = A \sin(\omega t + \phi - \theta).
+		\label{eq:ss}
+	\end{equation}
+	Equation~\eqref{eq:h} is the low-pass character of the RC circuit:
+	well below the cutoff frequency $f_c = 1/(2\pi\tau)$
+	($\omega\tau \ll 1$) the capacitor follows the source almost
+	undistorted, whereas well above it ($\omega\tau \gg 1$) the output is
+	strongly attenuated and lags by nearly $90^\circ$ \cite{sadiku}.
+	
+	\paragraph{Transient elimination by initial charge.}
+	With the source applied at $t = 0$ and an initial capacitor voltage
+	$V_0$, the complete response is the steady state plus a natural term:
+	\begin{equation}
+		v_C(t) = v_{C,\mathrm{SS}}(t)
+		+ \left[V_0 - v_{C,\mathrm{SS}}(0)\right] e^{-t/\tau}.
+		\label{eq:complete-sine}
+	\end{equation}
+	The transient component vanishes if and only if the capacitor is
+	pre-charged to exactly the steady-state value at the switching
+	instant,
+	\begin{equation}
+		V_0 = v_{C,\mathrm{SS}}(0) = A \sin(\phi - \theta),
+		\label{eq:ic-cond}
+	\end{equation}
+	corresponding to an initial charge
+	\begin{equation}
+		Q_0 = C\,V_0 = C\,A\sin(\phi - \theta).
+		\label{eq:q0}
+	\end{equation}
+	This is the condition tested in Tasks 5 and 6d.  In the steady state
+	the capacitor absorbs no net energy: with
+	$v_{C,\mathrm{SS}} = A\sin(\omega t + \psi)$, its instantaneous power
+	\begin{equation}
+		p_C = v_C\,C\frac{dv_C}{dt}
+		= \tfrac{1}{2}\omega C A^{2}\sin\!\bigl(2(\omega t + \psi)\bigr)
+		\label{eq:pcap}
+	\end{equation}
+	oscillates symmetrically about zero with a cycle mean of zero and a
+	peak value of $\tfrac{1}{2}\omega C A^{2}$, as energy is alternately
+	stored in the electric field and returned to the source.
+	
+	\paragraph{Assumptions.}
+	The analysis assumes ideal lumped components (no capacitor leakage or
+	equivalent series resistance), a source resistance of zero, and
+	switches that change state instantaneously.  In the simulations the
+	switches are voltage-controlled elements with a small on-resistance
+	($R_{on} = \SI{1}{\milli\ohm}$) and a large but finite
+	off-resistance ($R_{off} = \SI{1}{\mega\ohm}$), and the initial
+	capacitor voltage is set explicitly; the consequences of these
+	non-idealities are examined in the Result Analysis and Discussion.
+	
+	% =====================================================================
+	\section{List of Components}
+	% =====================================================================
+	\begin{table}[H]
+		\centering
+		\caption{List of components, instruments, and software (quantities
+			count the distinct task schematics in which each value appears;
+			Tasks 5 and 6d rerun the Task 4 and 6c schematics with an added
+			initial condition)}
+		\label{tab:components}
+		\begin{tabular}{cP{4.2cm}P{5.2cm}c}
+			\toprule
+			Sl. No. & Component/Instrument & Specification/Value & Quantity \\
+			\midrule
+			1 & Resistor & \SI{100}{\ohm}          & 2 \\
+			2 & Resistor & \SI{500}{\ohm}          & 1 \\
+			3 & Resistor & \SI{1}{\kilo\ohm}        & 3 \\
+			4 & Resistor & \SI{1.8}{\kilo\ohm}      & 1 \\
+			5 & Resistor & \SI{2}{\kilo\ohm}        & 1 \\
+			6 & Resistor & \SI{3}{\kilo\ohm}        & 1 \\
+			7 & Capacitor & \SI{1}{\micro\farad}   & 3 \\
+			8 & Capacitor & \SI{5}{\micro\farad}   & 1 \\
+			9 & Capacitor & \SI{50}{\micro\farad}  & 2 \\
+			10 & DC voltage source & \SI{10}{\volt}; \SI{20}{\volt} & 2 \\
+			11 & Pulse voltage source & $0$--\SI{5}{\volt}
+			(Task 3: $5$/$\SI{10}{\milli\second}$;\;
+			Task 6b: $25$/$\SI{50}{\milli\second}$) & 2 \\
+			12 & Sinusoidal voltage source & \SI{10}{\volt},
+			\SI{100}{\hertz}, $-70^\circ$;\; \SI{50}{\volt},
+			\SI{200}{\hertz}, $-50^\circ$ & 2 \\
+			13 & Simulation software & PSpice & 1 \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	% =====================================================================
+	\section{Working Procedure}
+	% =====================================================================
+	The circuits were investigated using transient analysis in PSpice.
+	The procedure below describes circuit construction, simulation setup,
+	and waveform analysis for each task.
+	
+	\begin{enumerate}[label=\arabic*., leftmargin=2.5em, itemsep=6pt]
+		\item \textbf{Prepare the schematic.}
+		Open PSpice and create a new schematic.  Select
+		\texttt{Draw} $\rightarrow$ \texttt{Get New Part...} to place
+		components, and use \texttt{Draw} $\rightarrow$ \texttt{Wire}
+		to connect them.  Rotate components using \texttt{Ctrl+R},
+		double-click them to edit their properties, and connect the
+		circuit reference node to \texttt{GND\_EARTH}.
+		
+		\item \textbf{Construct the switching circuit (Tasks 1 and 2).}
+		Place a \texttt{VDC} source, \texttt{Sw\_tOpen} and
+		\texttt{Sw\_tClose} switches, two resistors, and a capacitor.
+		Connect them as shown in Figure~\ref{fig:schematic-switching}.
+		Set the source to \SI{10}{\volt}, R1 to \SI{1}{\kilo\ohm},
+		R2 to \SI{1.8}{\kilo\ohm}, and C1 to
+		\SI{1}{\micro\farad}.  Set U1 to open at
+		\SI{6}{\milli\second} and U2 to close at
+		\SI{7}{\milli\second}.
+		
+		\item \textbf{Simulate the switching response.}
+		Use \texttt{Markers} $\rightarrow$ \texttt{Mark Voltage/Level}
+		to measure the capacitor voltage.  Add a differential voltage
+		marker using \texttt{Mark Voltage Differential}, with the
+		terminal locations and polarity shown in
+		Figure~\ref{fig:schematic-switching}.  Under
+		\texttt{Analysis} $\rightarrow$ \texttt{Setup}, enable
+		\texttt{Transient...} and open its settings.  Set both
+		\texttt{Print Step} and \texttt{Step Ceiling} to
+		\SI{1}{\micro\second}, and set \texttt{Final Time} to
+		\SI{50}{\milli\second}.  Select
+		\texttt{Skip initial transient solution}.  Save the schematic
+		using \texttt{File} $\rightarrow$ \texttt{Save}, then run
+		\texttt{Analysis} $\rightarrow$ \texttt{Simulate}.
+		Observe the charging, holding, and discharging intervals.
+		
+		\item \textbf{Construct the pulse-driven circuit (Task 3).}
+		Connect a \texttt{VPULSE} source, a \SI{1}{\kilo\ohm}
+		resistor, and a \SI{1}{\micro\farad} capacitor as shown in
+		Figure~\ref{fig:schematic-pulse}.  Set the source properties to
+		\texttt{V1=0}, \texttt{V2=5}, \texttt{TR=1n},
+		\texttt{TF=1n}, \texttt{PW=5ms}, and \texttt{PER=10ms}.
+		
+		\item \textbf{Simulate the pulse response.}
+		Place voltage-level markers at the source and capacitor
+		terminals, and a differential marker across R1 with the
+		polarity shown in Figure~\ref{fig:schematic-pulse}.
+		Set the transient \texttt{Final Time} to
+		\SI{30}{\milli\second}, retain the \SI{1}{\micro\second}
+		print step and step ceiling, and select
+		\texttt{Skip initial transient solution}.  Save and simulate
+		the circuit.  Observe the capacitor charging during each
+		high-level interval and discharging during each low-level
+		interval.
+		
+		\item \textbf{Construct the sinusoidally driven circuit (Task 4).}
+		Connect a \texttt{VSIN} source, the two resistors, and C1 as
+		shown in Figure~\ref{fig:schematic-sine}.  Set the shunt
+		resistor to \SI{500}{\ohm}, the series resistor to
+		\SI{1}{\kilo\ohm}, and C1 to \SI{1}{\micro\farad}.
+		Configure the source with \texttt{VOFF=0},
+		\texttt{VAMPL=10}, \texttt{FREQ=100}, and
+		\texttt{PHASE=-70}.
+		
+		\item \textbf{Simulate the sinusoidal response.}
+		Place source-voltage, capacitor-voltage, and differential
+		voltage markers as shown in Figure~\ref{fig:schematic-sine}.
+		Set \texttt{Final Time} to \SI{50}{\milli\second}, retain
+		the \SI{1}{\micro\second} print step and step ceiling, and
+		select \texttt{Skip initial transient solution}.
+		Save and simulate the circuit.  Observe the initial transient
+		and the subsequent steady-state waveform.  Plot the capacitor
+		power using the product of its voltage and current, with the
+		current reference directed into the positive-voltage terminal.
+		
+		\item \textbf{Apply the initial capacitor voltage (Task 5).}
+		Retain the Task 4 circuit and simulation settings.
+		Double-click C1 and set its initial-voltage property to
+		\texttt{IC=-8.278}.  This value is the calculated
+		steady-state capacitor voltage at the switching instant,
+		rounded to three decimal places.  Save and repeat the
+		simulation, then compare the waveform with Task 4 to verify
+		that the transient component is suppressed.
+		
+		\item \textbf{Investigate parameter variations (Tasks 6a--6c).}
+		Repeat the corresponding switching, pulse, and sinusoidal
+		simulations using
+		Figures~\ref{fig:schematic-task6a}--\ref{fig:schematic-task6cd}
+		and Table~\ref{tab:task6params}.  For Task 6a, use a
+		\SI{20}{\volt} source, R1 = \SI{3}{\kilo\ohm},
+		R2 = \SI{2}{\kilo\ohm}, and C1 = \SI{5}{\micro\farad};
+		set the opening and closing times to \SI{75}{\milli\second}
+		and \SI{76}{\milli\second}, respectively.
+		For Task 6b, use R1 = \SI{100}{\ohm} and
+		C1 = \SI{50}{\micro\farad}, with a pulse width of
+		\SI{25}{\milli\second} and a period of
+		\SI{50}{\milli\second}.  For Task 6c, use a
+		\SI{50}{\volt}, \SI{200}{\hertz} sinusoidal source with
+		phase $-50^\circ$, a \SI{100}{\ohm} series resistor,
+		a \SI{1}{\kilo\ohm} shunt resistor, and a
+		\SI{50}{\micro\farad} capacitor.  Use zero initial
+		capacitor voltage for these runs and extend the simulation
+		duration as needed to observe the slower responses.
+		
+		\item \textbf{Suppress the transient at the modified operating
+			point (Task 6d).}
+		Retain the Task 6c circuit and set the initial-voltage property
+		of C1 to \texttt{IC=-5.935}.  Repeat the simulation and
+		compare the capacitor voltage with Task 6c.  Also plot the
+		capacitor power to observe the alternating storage and return
+		of energy during steady-state operation.
+		
+		\item \textbf{Export waveforms and measure time constants.}
+		Save the voltage and power plots and export the waveform data
+		for analysis.  Record the capacitor voltages at the switching
+		instants and pulse boundaries.  Use interpolation between
+		adjacent samples to locate the 63.2\,\% charging and
+		36.8\,\% discharging points, measured relative to the total
+		voltage change.  Measure each time constant from the start of
+		the corresponding charging or discharging interval.
+		
+		\item \textbf{Fit the transient and steady-state responses.}
+		Fit the charging and discharging data to exponential functions,
+		allowing a nonzero final voltage when necessary.  Fit the
+		steady-state sinusoidal data to determine amplitude and phase.
+		Subtract the steady-state response from the complete waveform
+		to isolate the transient component and assess its decay.
+		
+		\item \textbf{Compare simulation and calculation.}
+		Compare the measured time constants, waveform amplitudes,
+		phase shifts, and initial capacitor charges with the values
+		calculated in Section~\ref{sec:calc}.  Evaluate percentage
+		errors using Eq.~\eqref{eq:perr}, and report absolute
+		deviations when the theoretical value is zero.  Summarize the
+		results in tables and discuss the effects of changing the
+		source, component values, and initial capacitor voltage.
+	\end{enumerate}
+	
+	% =====================================================================
+	\section{Working Diagram}
+	% =====================================================================
+	The three circuit topologies used in the experiment are shown below as
+	exported from the simulation schematics.  The Task 6 simulations reuse
+	the same three topologies with the modified component and source
+	values listed in Table~\ref{tab:task6params}; their updated schematics
+	are also included below.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.85\textwidth]{circuit_task1,2.png}
+		\caption{PSpice schematic of the switching RC circuit (Tasks 1 and 2): \SI{10}{\volt} DC source V1, \SI{1}{\kilo\ohm} charging
+			resistor, \SI{1.8}{\kilo\ohm} discharge resistor, C1 =
+			\SI{1}{\micro\farad}; U1 opens at $t_{open} =
+			\SI{6}{\milli\second}$ and U2 closes at $t_{close} =
+			\SI{7}{\milli\second}$}
+		\label{fig:schematic-switching}
+	\end{figure}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{circuit_task3.png}
+		\caption{PSpice schematic of the pulse-driven RC circuit (Task 3):
+			pulse source V1 (0--\SI{5}{\volt}, width \SI{5}{\milli\second},
+			period \SI{10}{\milli\second}) in series with R1 =
+			\SI{1}{\kilo\ohm} and C1 = \SI{1}{\micro\farad}}
+		\label{fig:schematic-pulse}
+	\end{figure}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.85\textwidth]{circuit_task4,5.png}
+		\caption{PSpice schematic of the sinusoidally driven RC circuit
+			(Tasks 4 and 5): V1 = $10\sin(2\pi\cdot100 t -
+			70^{\circ})$~V, \SI{500}{\ohm} shunt resistor across the source,
+			\SI{1}{\kilo\ohm} series resistor, and C1 =
+			\SI{1}{\micro\farad}; Task 5 adds the initial condition
+			\texttt{IC = -8.2748}}
+		\label{fig:schematic-sine}
+	\end{figure}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.85\textwidth]{circuit_task6a.png}
+		\caption{PSpice schematic for Task 6a: \SI{20}{\volt} source,
+			\SI{3}{\kilo\ohm} charging resistor, \SI{2}{\kilo\ohm}
+			discharge resistor, and \SI{5}{\micro\farad} capacitor;
+			U1 opens at \SI{75}{\milli\second} and U2 closes at
+			\SI{76}{\milli\second}}
+		\label{fig:schematic-task6a}
+	\end{figure}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\textwidth]{circuit_task6b.png}
+		\caption{PSpice schematic for Task 6b: pulse-driven RC circuit
+			with R1 = \SI{100}{\ohm} and C1 = \SI{50}{\micro\farad}}
+		\label{fig:schematic-task6b}
+	\end{figure}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.85\textwidth]{circuit_task6c,d.png}
+		\caption{PSpice schematic for Tasks 6c and 6d: sinusoidal source
+			with a \SI{1}{\kilo\ohm} shunt resistor, \SI{100}{\ohm}
+			series resistor, and \SI{50}{\micro\farad} capacitor;
+			Task 6d applies the initial capacitor voltage
+			\SI{-5.935}{\volt}}
+		\label{fig:schematic-task6cd}
+	\end{figure}
+	
+	% =====================================================================
+	\section{Calculation}
+	\label{sec:calc}
+	% =====================================================================
+	\paragraph{Tasks 1 --- switching circuit.}
+	$R_{1} = \SI{1}{\kilo\ohm}$ denotes the charging resistor and
+	$R_2 = \SI{1.8}{\kilo\ohm}$ the discharge resistor.  During charging
+	($0 \le t \le \SI{6}{\milli\second}$) the source drives the capacitor
+	through $R_1$ alone, so $\tau = R_{1}C$; after U2 closes the
+	capacitor discharges through $R_{1}$ and $R_2$ in series.  With
+	$C = \SI{1}{\micro\farad}$,
+	\begin{align}
+		\tau_{charge} &= R_{1} C
+		= \left(1\times10^{3}\,\si{\ohm}\right)
+		\left(1\times10^{-6}\,\si{\farad}\right)
+		= \SI{1}{\milli\second}, \\
+		\tau_{discharge} &= (R_{1} + R_2)\,C
+		= \left(2.8\times10^{3}\,\si{\ohm}\right)
+		\left(1\times10^{-6}\,\si{\farad}\right)
+		= \SI{2.8}{\milli\second}.
+	\end{align}
+	The capacitor voltage when the source is disconnected at
+	$t = \SI{6}{\milli\second}$ follows from Eq.~\eqref{eq:charging}:
+	\begin{equation}
+		v_C(\SI{6}{\milli\second}) = 10\left(1 - e^{-6}\right)
+		= 10 \times 0.997521 = \SI{9.9752}{\volt}.
+	\end{equation}
+	
+	\paragraph{Task 3 --- pulse input.}
+	Here $\tau = R_1 C = \SI{1}{\milli\second}$, and the pulse width
+	($\SI{5}{\milli\second} = 5\tau$) allows essentially full charge and
+	discharge every cycle.  From Eq.~\eqref{eq:pulse}, for example at
+	$t = \SI{1}{\milli\second}$ (charging) and $t = \SI{6}{\milli\second}$
+	(one $\tau$ into the discharge),
+	\begin{align}
+		v_C(\SI{1}{\milli\second}) &= 5\left(1 - e^{-1}\right)
+		= 5 \times 0.632121 = \SI{3.1606}{\volt}, \\
+		v_C(\SI{6}{\milli\second}) &= 5\left(1 - e^{-5}\right)e^{-1}
+		= 4.9663 \times 0.367879 = \SI{1.8270}{\volt},
+	\end{align}
+	and the remaining instants of Table~\ref{tab:task3} follow the same
+	way.
+	
+	\paragraph{Task 4 --- sinusoidal input.}
+	The \SI{500}{\ohm} shunt resistor does not enter the calculation,
+	because an ideal voltage source maintains its terminal voltage
+	regardless of loading; the resistance seen by the capacitor is the
+	series \SI{1}{\kilo\ohm} alone.  With $\omega = 2\pi f = 2\pi \times
+	100 = \SI{628.32}{\radian\per\second}$ and
+	$\tau = \SI{1}{\milli\second}$,
+	\begin{equation}
+		\omega\tau = 628.32 \times 10^{-3} = 0.6283,
+	\end{equation}
+	so Eq.~\eqref{eq:amp-lag} gives the steady-state amplitude and lag
+	\begin{align}
+		A &= \frac{10}{\sqrt{1 + 0.6283^2}}
+		= \frac{10}{1.1810} = \SI{8.4673}{\volt},\\
+		\theta &= \tan^{-1}(0.6283) = 32.14^{\circ}.
+	\end{align}
+	The capacitor-voltage phase is $\phi - \theta = -70^\circ - 32.14^\circ
+	= -102.14^\circ$, and the required initial voltage
+	(Eq.~\eqref{eq:ic-cond}) is
+	\begin{equation}
+		V_0 = 8.4673\sin(-102.14^{\circ})
+		= 8.4673 \times (-0.9776) = \SI{-8.278}{\volt},
+	\end{equation}
+	corresponding to an initial charge
+	$Q_0 = C V_0 = (1\times10^{-6})(-8.278) =
+	\SI{-8.278}{\micro\coulomb}$.  The circuit cutoff frequency is
+	$f_c = 1/(2\pi\tau) = \SI{159.2}{\hertz}$, so the
+	\SI{100}{\hertz} excitation lies below cutoff
+	($f/f_c = 0.63$).  In the steady state the capacitor power
+	oscillates with peak value (Eq.~\eqref{eq:pcap})
+	\begin{equation}
+		p_{C,\mathrm{peak}} = \tfrac{1}{2}\omega C A^{2}
+		= \tfrac{1}{2}(628.32)\left(1\times10^{-6}\right)(8.4673)^2
+		= \SI{22.5}{\milli\watt}
+	\end{equation}
+	and a cycle mean of zero.
+	
+	\paragraph{Task 5 --- transient elimination.}
+	The applied initial condition is
+	$V_{IC} = \SI{-8.2748}{\volt}$ (the value of $V_0$ above rounded to
+	four decimal places).  The residual transient amplitude predicted by
+	Eq.~\eqref{eq:complete-sine} is therefore
+	\begin{equation}
+		\left|V_{IC} - V_0\right| = \left|-8.2748 + 8.2779\right|
+		= \SI{3.1}{\milli\volt},
+	\end{equation}
+	decaying with the same $\tau = \SI{1}{\milli\second}$; apart from
+	this, the waveform should coincide with the theoretical steady state
+	of Eq.~\eqref{eq:ss} from $t = 0$ onward.
+	
+	\paragraph{Task 6a --- switching parameters changed.}
+	With the charging resistor raised to \SI{3}{\kilo\ohm}, the
+	discharge resistor to \SI{2}{\kilo\ohm}, and
+	$C = \SI{5}{\micro\farad}$,
+	\begin{align}
+		\tau_{charge} &= \left(3\times 10^{3}\right)\left(5\times 10^{-6}\right)
+		= \SI{15}{\milli\second}, \\
+		\tau_{discharge} &= \left(5\times 10^{3}\right)\left(5\times 10^{-6}\right)
+		= \SI{25}{\milli\second},
+	\end{align}
+	and S1 opens at exactly $5\tau_{charge} =
+	\SI{75}{\milli\second}$, at which point
+	\begin{equation}
+		v_C(\SI{75}{\milli\second}) = 20\left(1 - e^{-5}\right)
+		= \SI{19.8652}{\volt}.
+	\end{equation}
+	
+	\paragraph{Task 6b --- pulse parameters changed.}
+	$\tau = R_1 C = (100)\left(50\times 10^{-6}\right) =
+	\SI{5}{\milli\second}$, and both the \SI{25}{\milli\second} on and
+	off intervals equal $5\tau$, so the capacitor nearly fully charges
+	and discharges every cycle:
+	\begin{align}
+		v_C(\SI{25}{\milli\second}) &= 5\left(1 - e^{-5}\right)
+		= \SI{4.9663}{\volt},\\
+		v_C(\SI{50}{\milli\second}) &= 4.9663\, e^{-5} = \SI{0.0335}{\volt},
+	\end{align}
+	and the second cycle starts from \SI{0.0335}{\volt}:
+	$v_C(\SI{75}{\milli\second}) = 5 - (5 - 0.0335)e^{-5} =
+	\SI{4.9665}{\volt}$, $v_C(\SI{100}{\milli\second}) = \SI{0.0335}{\volt}$.
+	
+	\paragraph{Task 6c/d --- sinusoid parameters changed.}
+	With $f = \SI{200}{\hertz}$, series $R = \SI{100}{\ohm}$,
+	$C = \SI{50}{\micro\farad}$ (the \SI{1}{\kilo\ohm} shunt does not
+	enter, as in Task 4):
+	\begin{equation}
+		\omega\tau = 2\pi \times 200 \times (100)\left(50\times 10^{-6}\right)
+		= 6.2832 \quad \left(= 2\pi\ \text{exactly}\right),
+	\end{equation}
+	\begin{align}
+		A &= \frac{50}{\sqrt{1 + 6.2832^2}}
+		= \frac{50}{6.3623} = \SI{7.8588}{\volt},\\
+		\theta &= \tan^{-1}(6.2832) = 80.96^{\circ}.
+	\end{align}
+	The capacitor-voltage phase is $-50^\circ - 80.96^\circ =
+	-130.96^\circ$, and
+	\begin{equation}
+		V_0 = 7.8588 \sin(-130.96^{\circ})
+		= 7.8588 \times (-0.7552) = \SI{-5.935}{\volt},
+	\end{equation}
+	\begin{equation}
+		Q_0 = C V_0 = \left(50\times 10^{-6}\right)(-5.935)
+		= \SI{-296.75}{\micro\coulomb}.
+	\end{equation}
+	The cutoff is now $f_c = 1/(2\pi\tau) = \SI{31.8}{\hertz}$, so the
+	\SI{200}{\hertz} excitation is far above cutoff.
+	
+	% =====================================================================
+	\section{Result Analysis}
+	\label{sec:results}
+	% =====================================================================
+	All simulated quantities below were extracted from the exported
+	waveform data by the interpolation and least-squares fitting
+	procedure described in the Working Procedure (steps 11--13), and the
+	percentage error is evaluated as
+	\begin{equation}
+		\% \text{ Error} =
+		\frac{\text{Theoretical} - \text{Simulated}}{\text{Theoretical}}
+		\times 100 .
+		\label{eq:perr}
+	\end{equation}
+	The waveform figures below show the exported simulation graphs.
+	
+	\subsection{Switch input (Task 1)}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graph_task1,2.png}
+		\caption{Simulated transient response of the switching RC circuit
+			(Task 1): capacitor voltage charging during
+			$0$--\SI{6}{\milli\second}, holding between
+			\SI{6}{\milli\second} and \SI{7}{\milli\second}, and
+			discharging after \SI{7}{\milli\second}}
+		\label{fig:task12}
+	\end{figure}
+	
+	From Figure~\ref{fig:task12}, the capacitor charges to
+	\SI{9.9752}{\volt} in \SI{6}{\milli\second} ($6\tau_{charge}$), holds
+	its voltage during the \SI{1}{\milli\second} interval in which both
+	switches are open, and then decays through the
+	\SI{2.8}{\kilo\ohm} path.  Table~\ref{tab:task12} compares the
+	measured time constants and voltages with theory.
+	
+	\begin{table}[H]
+		\centering
+		\caption{Task 1: simulated vs.\ theoretical time constants
+			and capacitor voltages}
+		\label{tab:task12}
+		\begin{tabular}{lcccr}
+			\toprule
+			Quantity & Theoretical & Simulated & Unit & \% Error \\
+			\midrule
+			$\tau_{charge}$ (63.2\,\% crossing) & 1.0000 & 0.99999 & ms
+			& $+0.001$ \\
+			$\tau_{discharge}$ (36.8\,\% crossing) & 2.8000 & 2.8055 & ms
+			& $-0.195$ \\
+			$\tau_{discharge}$ (exponential fit, free final value)
+			& 2.8000 & 2.7968 & ms & $+0.114$ \\
+			$v_C$ at $t = \SI{6}{\milli\second}$ & 9.9752 & 9.9752 & V
+			& $0.000$ \\
+			$v_C$ at $t = \SI{7}{\milli\second}$ (hold) & 9.9752 & 9.9653 & V
+			& $+0.099$ \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	The charging time constant matches theory essentially exactly.  The
+	36.8\,\% crossing overestimates $\tau_{discharge}$ by
+	$0.195\,\%$ because the discharge does not settle exactly to zero:
+	the open switch S1 still feeds the discharge loop through its
+	\SI{1}{\mega\ohm} off-resistance, leaving a final value equal to the
+	resistive-divider pedestal $V_s R_d/(R_{off}+R_d) = 10 \times
+	1.8/(1000 + 1.8) = \SI{17.97}{\milli\volt}$.  A three-parameter
+	exponential fit $v_C = V_f + A e^{-t/\tau}$ that accounts for this
+	pedestal returns $\tau = \SI{2.7968}{\milli\second}$
+	($0.114\,\%$ error) with $V_f = \SI{17.97}{\milli\volt}$,
+	confirming that the time constant itself is accurate and only the
+	final value is shifted.  The \SI{9.9}{\milli\volt} droop during the
+	hold interval arises from the same off-resistance
+	(Section~\ref{sec:discussion}).
+	
+	\subsection{Pulse input (Task 3)}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graph_task3.png}
+		\caption{Simulated response of the RC circuit to the
+			0--\SI{5}{\volt} pulse train (Task 3): the capacitor charges
+			during each \SI{5}{\milli\second} on-interval and discharges
+			during each \SI{5}{\milli\second} off-interval}
+		\label{fig:task3}
+	\end{figure}
+	
+	Figure~\ref{fig:task3} shows the exponential charge/discharge cycles
+	predicted by Eq.~\eqref{eq:pulse}.  The simulated time constant, read
+	at the 63.2\,\% crossing, is $\tau = \SI{1.0000}{\milli\second}$
+	($+0.003\,\%$ error).  The capacitor voltage was read at every
+	integer millisecond from $t = \SI{1}{\milli\second}$ to
+	$t = \SI{10}{\milli\second}$, i.e.\ at every multiple of $\tau$
+	across one complete pulse period (\SI{5}{\milli\second} on $+$
+	\SI{5}{\milli\second} off); Table~\ref{tab:task3} lists the values.
+	
+	\begin{table}[H]
+		\centering
+		\caption{Task 3: capacitor voltage at specified times
+			($\tau = \SI{1}{\milli\second}$, pulse $0$--\SI{5}{\volt},
+			width \SI{5}{\milli\second}, period \SI{10}{\milli\second})}
+		\label{tab:task3}
+		\begin{tabular}{cccc}
+			\toprule
+			Time (ms) & Theoretical $v_C$ (V) & Simulated $v_C$ (V) &
+			\% Error \\
+			\midrule
+			1 & 3.1606 & 3.1607 & $-0.002$ \\
+			2 & 4.3233 & 4.3233 & $-0.001$ \\
+			3 & 4.7511 & 4.7511 & $-0.000$ \\
+			4 & 4.9084 & 4.9084 & $-0.000$ \\
+			5 & 4.9663 & 4.9663 & $-0.000$ \\
+			6 & 1.8270 & 1.8270 & $-0.002$ \\
+			7 & 0.6721 & 0.6721 & $+0.002$ \\
+			8 & 0.2473 & 0.2472 & $+0.008$ \\
+			9 & 0.0910 & 0.0910 & $+0.010$ \\
+			10 & 0.0335 & 0.0335 & $+0.016$ \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	Every sampled voltage agrees with Eq.~\eqref{eq:pulse} to better
+	than $0.02\,\%$: after the \SI{5}{\milli\second} ($5\tau$) on-interval
+	the capacitor holds $99.3\,\%$ of \SI{5}{\volt}, and after the
+	$5\tau$ off-interval only $0.7\,\%$ remains, exactly as the $5\tau$
+	rule predicts.
+	
+	\subsection{Sinusoidal input, transient present (Task 4)}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graph_task4.png}
+		\caption{Simulated response of the RC circuit to
+			$10\sin(2\pi\cdot100 t - 70^{\circ})$~V (Task 4): the capacitor
+			voltage starts from zero and converges to the attenuated,
+			phase-lagged steady-state sinusoid within about
+			$5\tau = \SI{5}{\milli\second}$}
+		\label{fig:task4}
+	\end{figure}
+	
+	The least-squares fit of the steady portion of the waveform in
+	Figure~\ref{fig:task4} gives the amplitude and phase of the
+	capacitor voltage, and subtracting the theoretical steady state from
+	the full waveform isolates the transient term; both are compared
+	with the predictions of Section~\ref{sec:calc}
+	(Table~\ref{tab:task4}).
+	
+	\begin{table}[H]
+		\centering
+		\caption{Task 4: sinusoidal steady-state and transient quantities}
+		\label{tab:task4}
+		\begin{tabular}{lcccr}
+			\toprule
+			Quantity & Theoretical & Simulated & Unit & \% Error \\
+			\midrule
+			Steady-state amplitude $A$ & 8.4673 & 8.4672 & V & $+0.001$ \\
+			Phase of $v_{C}$ & $-102.142$ & $-102.142$ & deg & $-0.000$ \\
+			Phase lag $\theta$ & 32.142 & 32.142 & deg & $-0.001$ \\
+			Transient amplitude & 8.278 & 8.280 & V & $-0.022$ \\
+			Transient time constant & 1.0000 & 0.9998 & ms & $+0.019$ \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	The simulated amplitude and phase match the theoretical values of
+	Eq.~\eqref{eq:amp-lag} to within $0.001\,\%$ and
+	$0.001^{\circ}$: the output sinusoid is attenuated to $84.7\,\%$ of
+	the source amplitude and lags it by $32.14^\circ$, exactly the
+	low-pass behavior expected at $f/f_c = 0.63$.  The transient term
+	extracted from the data is $8.28\,e^{-t/\tau}$~V with
+	$\tau = \SI{0.9998}{\milli\second}$, in agreement with
+	Eq.~\eqref{eq:complete-sine} for $V_0 = 0$.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graph_task4_power.png}
+		\caption{Instantaneous power of the capacitor for the Task 4 run:
+			after the transient dies out the power oscillates symmetrically
+			about zero with a peak of \SI{22.5}{\milli\watt}, indicating no
+			net energy absorption in the steady state}
+		\label{fig:task4power}
+	\end{figure}
+	
+	Figure~\ref{fig:task4power} shows the corresponding capacitor power:
+	once the transient has decayed, $p_C(t)$ oscillates symmetrically
+	about zero (measured peak $\pm\SI{22.52}{\milli\watt}$, cycle mean
+	$\approx 0$), so the capacitor returns to the source exactly as much
+	energy as it draws---the defining property of a reactive element in
+	the steady state, and a direct check of Eq.~\eqref{eq:pcap}.
+	
+	\subsection{Transient elimination by initial charge (Task 5)}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graph_task5.png}
+		\caption{Task 5: with the initial condition
+			\texttt{.ic V(N002) = -8.2748}, the capacitor voltage is a pure
+			steady-state sinusoid from $t = 0$; no transient component is
+			visible}
+		\label{fig:task5}
+	\end{figure}
+	
+	With the capacitor pre-charged, the waveform of
+	Figure~\ref{fig:task5} is sinusoidal from the first instant: the
+	natural term of Eq.~\eqref{eq:complete-sine} is absent.
+	Table~\ref{tab:task5} compares the applied initial charge with the
+	requirement of Eq.~\eqref{eq:ic-cond}.
+	
+	\begin{table}[H]
+		\centering
+		\caption{Task 5: initial capacitor charge required to eliminate the
+			transient ($C = \SI{1}{\micro\farad}$)}
+		\label{tab:task5}
+		\begin{tabular}{lcccr}
+			\toprule
+			Quantity & Theoretical & Simulated & Unit & \% Error \\
+			\midrule
+			Required initial voltage $V_0$ & $-8.2779$ & $-8.2748$ & V
+			& $+0.038$ \\
+			Initial charge $Q_0 = C V_0$ & $-8.2779$ & $-8.2748$ &
+			\si{\micro\coulomb} & $+0.038$ \\
+			Residual transient amplitude & $3.1$ & $3.1$ & mV & --- \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	The simulated waveform coincides with the theoretical steady state
+	of Eq.~\eqref{eq:ss}, with $A = \SI{8.4673}{\volt}$ and phase
+	$-102.14^{\circ}$, to within \SI{3.1}{\milli\volt} at $t = 0^{+}$,
+	the deviation decaying with $\tau = \SI{1}{\milli\second}$: the
+	entire visible deviation is the consequence of entering the
+	theoretical $V_0$ rounded to four
+	decimals, exactly as Eq.~\eqref{eq:complete-sine} predicts.
+	
+	\subsection{Variation of input and circuit parameters (Task 6)}
+	
+	Table~\ref{tab:task6params} summarizes the parameter changes of the
+	four Task 6 runs, using the updated schematics in
+	Figures~\ref{fig:schematic-task6a}--\ref{fig:schematic-task6cd}.
+	
+	\begin{table}[H]
+		\centering
+		\caption{Task 6: parameter variations and their predicted effect}
+		\label{tab:task6params}
+		\begin{tabular}{cP{1.6cm}P{4.6cm}P{4.9cm}}
+			\toprule
+			Run & Based on & Changed parameters & Predicted effect \\
+			\midrule
+			6a & Task 1/2 &
+			$V_s$: $10 \to \SI{20}{\volt}$; charging $R$: $\SI{1}{} \to
+			\SI{3}{\kilo\ohm}$; discharge $R$: $\SI{1.8}{} \to
+			\SI{2}{\kilo\ohm}$; $C$: $\SI{1}{} \to
+			\SI{5}{\micro\farad}$; switches $6/7 \to 75/76$~ms &
+			$\tau_{charge}$: $1 \to \SI{15}{\milli\second}$;
+			$\tau_{discharge}$: $2.8 \to \SI{25}{\milli\second}$; opening
+			at $5\tau_{charge}$ \\
+			6b & Task 3 &
+			$R$: $\SI{1}{} \to \SI{0.1}{\kilo\ohm}$; $C$: $\SI{1}{} \to
+			\SI{50}{\micro\farad}$; width $5 \to \SI{25}{\milli\second}$;
+			period $10 \to \SI{50}{\milli\second}$ &
+			$\tau$: $1 \to \SI{5}{\milli\second}$; on/off still $5\tau$
+			each \\
+			6c & Task 4 &
+			$V_m$: $10 \to \SI{50}{\volt}$; $f$: $100 \to
+			\SI{200}{\hertz}$; series $R$: $\SI{1}{} \to
+			\SI{0.1}{\kilo\ohm}$; $C$: $\SI{1}{} \to
+			\SI{50}{\micro\farad}$ &
+			$\omega\tau$: $0.63 \to 6.28$; $A$: $8.47 \to
+			\SI{7.86}{\volt}$; $\theta$: $32.1^\circ \to 81.0^\circ$ \\
+			6d & Task 6c &
+			add \texttt{.ic V(N002) = -5.935} &
+			transient eliminated; pure steady state from $t = 0$ \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\paragraph{6a --- switching circuit with larger $\tau$.}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graph_task6a.png}
+		\caption{Task 6a: response of the switching RC circuit with
+			\SI{3}{\kilo\ohm} charging resistor, \SI{5}{\kilo\ohm} discharge
+			path, $C = \SI{5}{\micro\farad}$, and \SI{20}{\volt} source:
+			charging for \SI{75}{\milli\second} ($5\tau_{charge}$), hold for
+			\SI{1}{\milli\second}, discharging with
+			$\tau_{discharge} = \SI{25}{\milli\second}$}
+		\label{fig:task6a}
+	\end{figure}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Task 6a: simulated vs.\ theoretical time constants and
+			voltages}
+		\label{tab:task6a}
+		\begin{tabular}{lcccr}
+			\toprule
+			Quantity & Theoretical & Simulated & Unit & \% Error \\
+			\midrule
+			$\tau_{charge}$ (63.2\,\% crossing) & 15.0000 & 14.9994 & ms
+			& $+0.004$ \\
+			$\tau_{discharge}$ (36.8\,\% crossing) & 25.0000 & 25.0669 & ms
+			& $-0.268$ \\
+			$\tau_{discharge}$ (exponential fit, free final value) & 25.0000
+			& 24.9795 & ms & $+0.082$ \\
+			$v_C$ at $t = \SI{75}{\milli\second}$ & 19.8652 & 19.8653 & V
+			& $-0.000$ \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	The waveform of Figure~\ref{fig:task6a} is a time-stretched version
+	of the Task 1/2 response, with the same switch off-resistance
+	pedestal (here $20 \times 2/(1000+2) = \SI{39.92}{\milli\volt}$)
+	biasing the discharge crossing reading (Table~\ref{tab:task6a}); the
+	corrected fit again recovers $\tau_{discharge}$ to better than
+	$0.1\,\%$.  The source disconnects at exactly $5\tau_{charge}$, and
+	the capacitor holds $99.32\,\%$ of \SI{20}{\volt} at that instant,
+	in agreement with the $5\tau$ rule.
+	
+	\paragraph{6b --- pulse circuit with larger $\tau$.}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graph_task6b.png}
+		\caption{Task 6b: response to the 0--\SI{5}{\volt} pulse train with
+			$\tau = \SI{5}{\milli\second}$; each \SI{25}{\milli\second}
+			half-cycle lasts $5\tau$, so the capacitor reaches
+			$99.3\,\%$ of the pulse amplitude every cycle}
+		\label{fig:task6b}
+	\end{figure}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Task 6b: time constant and capacitor voltage at the
+			cycle boundaries}
+		\label{tab:task6b}
+		\begin{tabular}{lcccr}
+			\toprule
+			Quantity & Theoretical & Simulated & Unit & \% Error \\
+			\midrule
+			$\tau$ (63.2\,\% crossing) & 5.0000 & 5.0001 & ms & $-0.002$ \\
+			$v_C$ at $t = \SI{25}{\milli\second}$ & 4.9663 & 4.9663 & V
+			& $-0.000$ \\
+			$v_C$ at $t = \SI{50}{\milli\second}$ & 0.0335 & 0.0335 & V
+			& $+0.016$ \\
+			$v_C$ at $t = \SI{75}{\milli\second}$ & 4.9665 & 4.9665 & V
+			& $-0.000$ \\
+			$v_C$ at $t = \SI{100}{\milli\second}$ & 0.0335 & 0.0335 & V
+			& $+0.016$ \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	Despite the $25\times$ slower circuit ($\tau =
+	\SI{5}{\milli\second}$ vs.\ \SI{1}{\milli\second}), the pulse width
+	was enlarged by the same factor, so the waveform of
+	Figure~\ref{fig:task6b} retains the full-swing charge/discharge
+	character of Task 3 (Table~\ref{tab:task6b}); only the small
+	($0.7\,\%$) residue at each half-cycle boundary differs slightly
+	between the first and second cycles, because the second discharge
+	starts from the first cycle's residue.
+	
+	\paragraph{6c --- sinusoid with increased frequency and
+		attenuation.}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graph_task6c.png}
+		\caption{Task 6c: response to
+			$50\sin(2\pi\cdot200 t - 50^{\circ})$~V with $\tau =
+			\SI{5}{\milli\second}$ ($\omega\tau = 2\pi$): the steady-state
+			capacitor voltage is attenuated to \SI{7.86}{\volt} and lags the
+			source by $81^\circ$; the \SI{5.935}{\volt} transient decays
+			with $\tau = \SI{5}{\milli\second}$ and is still about
+			\SI{0.1}{\volt} at $t = \SI{20}{\milli\second}$}
+		\label{fig:task6c}
+	\end{figure}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Task 6c: sinusoidal steady-state and transient quantities}
+		\label{tab:task6c}
+		\begin{tabular}{lcccr}
+			\toprule
+			Quantity & Theoretical & Simulated & Unit & \% Error \\
+			\midrule
+			Steady-state amplitude $A$ & 7.8588 & 7.8585 & V & $+0.005$ \\
+			Phase of $v_{C}$ & $-130.957$ & $-130.957$ & deg & $-0.000$ \\
+			Phase lag $\theta$ & 80.957 & 80.957 & deg & $-0.001$ \\
+			Transient amplitude & 5.935 & 5.935 & V & $-0.002$ \\
+			Transient time constant & 5.0000 & 4.9997 & ms & $+0.007$ \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	Compared with Task 4, the excitation now lies far above cutoff
+	($f/f_c = 6.28$), so the same transfer function of
+	Eq.~\eqref{eq:h} predicts---and the fit of Figure~\ref{fig:task6c}
+	confirms---strong attenuation (to $15.7\,\%$ of the
+	\SI{50}{\volt} amplitude) and a lag approaching $90^\circ$
+	(Table~\ref{tab:task6c}).  The extracted transient
+	$5.935\,e^{-t/\tau}$~V matches the theoretical
+	$-v_{C,\mathrm{SS}}(0)$ from Eq.~\eqref{eq:complete-sine}.
+	
+	\paragraph{6d --- transient elimination at the new operating point.}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graph_task6d.png}
+		\caption{Task 6d: with \texttt{.ic V(N002) = -5.935} the capacitor
+			voltage is the pure steady-state sinusoid from $t = 0$; the
+			transient of Figure~\ref{fig:task6c} is absent}
+		\label{fig:task6d}
+	\end{figure}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Task 6d: initial charge required to eliminate the
+			transient ($C = \SI{50}{\micro\farad}$)}
+		\label{tab:task6d}
+		\begin{tabular}{lcccr}
+			\toprule
+			Quantity & Theoretical & Simulated & Unit & \% Error \\
+			\midrule
+			Required initial voltage $V_0$ & $-5.9350$ & $-5.9350$ & V
+			& $+0.000$ \\
+			Initial charge $Q_0 = C V_0$ & $-296.75$ & $-296.75$ &
+			\si{\micro\coulomb} & $+0.000$ \\
+			Max deviation from theoretical SS & $0$ & $<0.6$ & mV & --- \\
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	The pre-charge condition of Eq.~\eqref{eq:ic-cond} holds again at
+	the new operating point: the simulated waveform of
+	Figure~\ref{fig:task6d} follows
+	$v_{C,\mathrm{SS}}(t) = 7.8588\sin(1256.6 t - 130.96^{\circ})$~V to
+	within \SI{0.6}{\milli\volt} (less than $0.01\,\%$ of the amplitude)
+	for all $t > 0$ (Table~\ref{tab:task6d}).
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{graph_task6d_power.png}
+		\caption{Instantaneous capacitor power for Task 6d with the
+			transient eliminated: the power alternates between positive
+			and negative values as the capacitor stores and returns energy}
+		\label{fig:task6dpower}
+	\end{figure}
+	
+	Figure~\ref{fig:task6dpower} shows the capacitor power at the
+	transient-free Task 6d operating point, complementing the voltage
+	waveforms in Figure~\ref{fig:task6d}.
+	
+	% =====================================================================
+	\section{Discussion}
+	\label{sec:discussion}
+	% =====================================================================
+	Across all seven simulated circuits the first-order theory held to
+	better than $0.3\,\%$: every charging and discharging curve, every
+	pulse-cycle voltage, and both sinusoidal operating points reproduced
+	the exponential/sinusoidal forms of
+	Eqs.~\eqref{eq:natural}--\eqref{eq:complete-sine}.  This level of
+	agreement is expected because the simulator integrates exactly the
+	same differential equations from which the theoretical formulas are
+	derived; the experiment therefore verifies the analysis method and
+	the measurement procedure rather than the physics.
+	
+	The characteristic waveform shapes follow directly from the
+	energy-storage argument of Section~1.2.  During charging, the full
+	source voltage initially appears across the resistor, driving a
+	large deposition of charge; as $v_C$ rises, the difference
+	$v_s - v_C$---and with it the current---collapses, giving the
+	asymptotic approach of Eq.~\eqref{eq:charging}.  During discharge
+	the capacitor acts as a decaying source: $v_C$ keeps its polarity
+	while the current flows in the opposite direction through the
+	resistor.  In the sinusoidal steady state the capacitor never
+	absorbs net energy: the power trace of Figure~\ref{fig:task4power}
+	oscillates about zero, and the same holds for the strongly
+	attenuated Task 6c operating point.
+	
+	The residual discrepancies, though tiny, are all traceable to the
+	non-ideal switch model rather than to analysis error.  First, the
+	apparent discharge time constant read from a 36.8\,\% crossing came
+	out $0.20\,\%$ (Tasks 1/2) and $0.27\,\%$ (Task 6a) too large: the
+	open S1 keeps feeding the discharge loop through its
+	\SI{1}{\mega\ohm} off-resistance, so $v_C$ settles not to zero but
+	to the divider pedestal $V_s R_d/(R_{off}+R_d)$---\SI{17.97}{mV} in
+	Tasks 1/2 and \SI{39.92}{mV} in Task 6a, exactly the final values
+	returned by the free-final-value exponential fits.  Once the
+	pedestal is accounted for, $\tau_{discharge}$ agrees with theory to
+	better than $0.15\,\%$.  Second, the \SI{9.9}{\milli\volt}
+	(Tasks 1/2) and \SI{3.9}{\milli\volt} (Task 6a) droops during the
+	hold interval are the same leakage: with both switches open the
+	capacitor discharges toward the Th\'evenin voltage
+	$V_s(R_d + R_{off})/(2R_{off} + R_d)$ through
+	$R_{ch} + R_{off} \parallel (R_d + R_{off})$, i.e.\ with
+	$\tau_{hold} \approx \SI{0.50}{\second}$ and
+	$\SI{2.52}{\second}$ respectively---so slow that only a few
+	millivolts are lost in the \SI{1}{\milli\second} hold, an initial
+	leakage current of about \SI{10}{\micro\ampere} and
+	\SI{20}{\micro\ampere}.  Third, the Task 5 deviation from a pure
+	steady state (\SI{3.1}{\milli\volt} at $t = 0^{+}$) is precisely the
+	rounding residue of the entered initial condition ($-8.2748$ vs.\
+	the exact $-8.2779$~V) and decays with $\tau =
+	\SI{1}{\milli\second}$ exactly as Eq.~\eqref{eq:complete-sine}
+	predicts---confirmed by the difference between the Task 4 and Task 5
+	waveforms, which follows $8.275\,e^{-t/\tau}$~V within the solver's
+	numerical tolerance; the sub-millivolt Task 6d deviation
+	(\SI{0.57}{\milli\volt}) is likewise dominated by the $-5.935$~V
+	rounding (exact $-5.9350$~V) together with the integration tolerance
+	of the solver.  A real bench experiment would additionally show
+	capacitor leakage, equivalent series resistance, and switch
+	bounce/contact resistance, none of which the ideal simulation
+	contains; conversely, the shunt resistor placed across each
+	sinusoidal source has no effect on $v_C$ because an ideal source
+	holds its voltage regardless of loading.
+	
+	The Task 6 variations confirm the design intuition that the time
+	constant---not the absolute component values---controls the
+	response.  Task 6a stretched the charging time constant by
+	$15\times$ and the discharge time constant by about $9\times$, and
+	the whole waveform stretched accordingly while keeping the $5\tau$
+	timing rule exactly.  Task 6b kept the ratio $T_{on}/\tau = 5$ while
+	stretching both by $25\times$, so the pulse response kept its
+	full-swing shape.  The frequency variation is best read through the
+	dimensionless product $\omega\tau$: Task 4 operated below cutoff
+	($\omega\tau = 0.63$), where the RC pair passes $85\,\%$ of the
+	amplitude with a $32^\circ$ lag, while Task 6c operated far above
+	cutoff ($\omega\tau = 2\pi$), where only $16\,\%$ passes and the lag
+	approaches the capacitive limit of $90^\circ$---the RC circuit
+	acting as a low-pass filter in both regimes, with the corner set by
+	$RC$ alone.  The initial charge needed for transient-free operation
+	scales with the operating point through
+	$Q_0 = C\,A\sin(\phi - \theta)$ (Eq.~\eqref{eq:q0}): the condition
+	that required only $-8.28$~\si{\micro\coulomb} in Task 5 required
+	$-296.75$~\si{\micro\coulomb} in Task 6d, about $36$ times more
+	because $C$ is $50$ times larger while the amplitude-and-phase
+	factor is slightly smaller.
+	
+	Practically, these results show how a time constant is measured
+	from a waveform (63.2\,\%/36.8\,\% crossings, verified here against
+	exponential fits), why RC networks serve as timers, integrators,
+	and filters whose corner is set by $RC$ alone, and how an
+	undesirable switching transient can be removed entirely by
+	pre-charging the capacitor to the steady-state value at the
+	switching instant---a technique directly usable to eliminate
+	power-on transients in filter and coupling networks.
+	
+	% =====================================================================
+	\section{Reference}
+	% =====================================================================
+	\begin{thebibliography}{9}
+		\itemsep4pt
+		
+		\bibitem{sadiku}
+		C. K. Alexander and M. N. O. Sadiku, \textit{Fundamentals of
+			Electric Circuits}, 5th ed. New York, NY, USA: McGraw-Hill, 2013.
+		
+		\bibitem{boylestad}
+		R. L. Boylestad, \textit{Introductory Circuit Analysis}, 11th ed.
+		Upper Saddle River, NJ, USA: Pearson Prentice Hall, 2007.
+		
+		
+	\end{thebibliography}
+	
+\end{document}

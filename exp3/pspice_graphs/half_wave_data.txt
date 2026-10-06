@@ -1,0 +1,15 @@
+Rectifier performance metrics — output V(2), load current I(RL), source V(1); 3 complete cycles (0–59.9819 ms), T = 20 ms
+  Peak output voltage         V_m = 9.31343 V
+  Peak output current         I_m = 9.31343mA
+  Average output voltage     V_DC = 2.86413 V
+  Average output current     I_DC = 2.86413mA
+  RMS output voltage        V_RMS = 4.57717 V
+  RMS output current        I_RMS = 4.57717mA
+  DC load power              P_DC = 8.20324mW
+  AC load power              P_AC = 20.9505mW
+  Rectification efficiency      η = 39.1554 %
+  Ripple factor                 r = 1.24657
+  Form factor                  FF = 1.5981
+  Peak inverse voltage        PIV = 9.99998 V
+  Peak factor                  PF = 2.03476
+  Output frequency            f_o = 50 Hz

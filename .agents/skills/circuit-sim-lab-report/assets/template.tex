@@ -1,0 +1,236 @@
+% circuit-sim-lab-report — report.tex template
+% Course 0714-EEE-2102, Circuit Simulation Laboratory
+% Copy to <expN>/Lab_report_latex/report.tex, set the experiment number
+% below, fill the header block, and adapt the sections.
+%
+% Compile (twice, from Lab_report_latex/):
+%   env pdflatex -interaction=nonstopmode report.tex
+
+\documentclass[12pt,a4paper]{article}
+
+% ----- Page geometry: A4, 1 inch margins all sides -----
+\usepackage[margin=1in]{geometry}
+
+% ----- Times New Roman (text + math) -----
+\usepackage{newtxtext,newtxmath}
+
+% ----- Spacing: 1.5 line spacing, 6 pt paragraph spacing -----
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip}          % paragraph gaps instead of indents
+\setlength{\parskip}{6pt plus 1pt}
+
+% ----- Math, SI units -----
+\usepackage{amsmath}
+\usepackage{siunitx}
+
+% ----- Graphics, tables, captions, floats -----
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+% Figures live in <expN>/Graphs/; add ./figures/ for report-local images
+% (e.g. schematic exports).
+\graphicspath{{../Graphs/}{./figures/}}
+
+% ----- Lists: compact, guide-style itemization -----
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=2em, label=\textbullet}
+
+% ----- Front matter and PDF output -----
+\usepackage{pdfpages}
+\usepackage[hidelinks]{hyperref}
+
+% ----- Headings: bold, left-aligned, 14/15 pt -----
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\Large\bfseries}{\thesection}{0.8em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}{\thesubsection}{0.8em}{}
+% \Large = 14.4 pt, \large = 14.4→~14 pt at 12pt base; matches 14–16 pt rule
+\titlespacing*{\section}{0pt}{*3}{*2}
+\titlespacing*{\subsection}{0pt}{*2.5}{*1.5}
+
+% ----- Captions: centered, 11 pt, figures below / tables above -----
+\captionsetup{font=small, labelfont=bf, justification=centering}
+\captionsetup[table]{position=above, skip=4pt}
+\captionsetup[figure]{position=below, skip=4pt}
+
+% ----- Page number: bottom-center -----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% ----- Experiment number: sections then number N.1–N.10 -----
+% Guideline numbering: "1.1 Objective" ... "1.10 Reference" where the
+% prefix is the experiment number. Figures, tables, and equations keep
+% plain consecutive numbers (Figure 1, Table 1, (1)) per the guideline.
+\newcommand{\expnumber}{1}   % <-- CHANGE to the assigned experiment number
+\renewcommand{\thesection}{\expnumber.\arabic{section}}
+
+\begin{document}
+
+% =====================================================================
+% FRONT MATTER (pages 1–2), per the instructor's Intructions.txt:
+%   page 1: Cover_Page.pdf    page 2: 2nd_page.pdf
+% \includepdf adds a separate page and resets the page counter by
+% default; keep the body starting at page 1 of its own numbering.
+% =====================================================================
+\includepdf[pages={1}]{../Cover_Page.pdf}
+\includepdf[pages={1}]{../2nd_page.pdf}
+
+% =====================================================================
+% HEADER BLOCK
+% =====================================================================
+\begin{center}
+  {\large\bfseries Experiment No. \expnumber}\\[4pt]
+  {\large\bfseries Name of the Experiment: Simulation, Analysis, and
+    Evaluation of Transient and Steady-State Responses of RC Circuits
+    with Switching, Pulse, and Sinusoidal Inputs Using PSpice}
+\end{center}
+\vspace{6pt}
+
+% =====================================================================
+\section{Objective}
+% 2–4 items, action verbs (design/simulate/analyze/verify/investigate),
+% name the circuit/software concepts. No theory here.
+% =====================================================================
+\begin{enumerate}[label=\roman*.]
+  \item To design and simulate RC circuits with switching, pulse, and
+        sinusoidal inputs using PSpice.
+  \item To analyze the transient and steady-state responses of the
+        simulated circuits.
+  \item To compare simulated and theoretical time constants through
+        percentage-error analysis.
+\end{enumerate}
+
+% =====================================================================
+\section{Theory}
+% Principle of operation, governing equations (numbered), parameter
+% definitions, expected waveform behavior, assumptions. Explain why
+% the circuit behaves as observed — not a textbook dump.
+% =====================================================================
+An RC circuit consists of a resistor $R$ in series with a capacitor
+$C$... [principle of operation]
+
+The charging of the capacitor through $R$ is governed by
+\begin{equation}
+  v_C(t) = V_s \left(1 - e^{-t/\tau}\right), \qquad \tau = RC
+  \label{eq:charging}
+\end{equation}
+where $V_s$ is the source voltage and $\tau$ the time constant...
+
+% =====================================================================
+\section{Design}
+% Include ONLY if the experiment requires component/parameter design
+% or selection. Otherwise delete this section entirely.
+% =====================================================================
+... [circuit specifications, design equations, component-value
+calculations, selected values, constraints]
+
+% =====================================================================
+\section{List of Components}
+% Table of all components, instruments, and software used.
+% =====================================================================
+\begin{table}[H]
+  \centering
+  \caption{List of components, instruments, and software}
+  \label{tab:components}
+  \begin{tabular}{clcc}
+    \toprule
+    Sl. No. & Component/Instrument & Specification/Value & Quantity \\
+    \midrule
+    1 & Resistor           & \SI{1}{\kilo\ohm}     & 1 \\
+    2 & Capacitor          & \SI{100}{\micro\farad} & 1 \\
+    3 & Voltage Source     & DC, \SI{10}{\volt}    & 1 \\
+    4 & Switch             & Voltage-controlled    & 1 \\
+    5 & Simulation Software & PSpice              & 1 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Working Procedure}
+% Numbered steps, reproducible by another student.
+% NO results, NO conclusions here.
+% =====================================================================
+\begin{enumerate}
+  \item ...
+\end{enumerate}
+
+% =====================================================================
+\section{Working Diagram}
+% The ACTUAL simulation schematic export/screenshot — not a redrawn
+% drawing. Save it under Graphs/ or ./figures/ and reference by bare
+% filename (graphicspath covers both).
+% =====================================================================
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{schematic.png}
+  \caption{PSpice schematic of the RC circuit under simulation}
+  \label{fig:schematic}
+\end{figure}
+
+% =====================================================================
+\section{Calculation}
+% Given values → equations → substitution → intermediate steps →
+% final value with units. Show the steps, not just the answer.
+% =====================================================================
+Theoretical time constant with $R = \SI{1}{\kilo\ohm}$ and
+$C = \SI{100}{\micro\farad}$:
+\begin{equation}
+  \tau = RC
+       = \left(\SI{1}{\kilo\ohm}\right)\left(\SI{100}{\micro\farad}\right)
+       = \SI{0.1}{\second}
+  \label{eq:tau-calc}
+\end{equation}
+
+% =====================================================================
+\section{Result Analysis}
+% Waveforms, simulated vs. theoretical comparison tables, % error,
+% parameter-variation results. Every figure/table numbered, captioned,
+% and referred to in the prose.
+% =====================================================================
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{exp1_1.png}
+  \caption{Transient charging response of the RC circuit}
+  \label{fig:charging}
+\end{figure}
+
+From Figure~\ref{fig:charging}, the simulated time constant is ...
+
+\begin{table}[H]
+  \centering
+  \caption{Simulated vs. theoretical time constants}
+  \label{tab:tau-compare}
+  \begin{tabular}{lccc}
+    \toprule
+    Quantity & Theoretical & Simulated & \% Error \\
+    \midrule
+    $\tau$ (charging) & \SI{0.1}{\second} & \SI{0.098}{\second} & 2.0 \\
+    $\tau$ (discharging) & \SI{0.1}{\second} & \SI{0.101}{\second} & 1.0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Discussion}
+% Analysis, NOT a repeat of Result Analysis: why waveforms have this
+% shape, why simulated differs from theoretical, parameter effects,
+% model limitations, practical significance.
+% =====================================================================
+...
+
+% =====================================================================
+\section{Reference}
+% IEEE style, numbered in order of first citation in the text.
+% =====================================================================
+\begin{enumerate}[label={[\arabic*]}, leftmargin=2.5em]
+  \item W. H. Hayt, J. E. Kemmerly, and S. M. Durbin, \textit{Engineering
+        Circuit Analysis}, 8th ed. New York, NY, USA: McGraw-Hill, 2012.
+\end{enumerate}
+
+\end{document}

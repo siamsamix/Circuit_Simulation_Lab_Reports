@@ -54,7 +54,7 @@
 
 % ----- Captions: centered, 11 pt, figures below / tables above -----
 \captionsetup{font=small, labelfont=bf, justification=centering}
-\captionsetup[table]{position=above, skip=4pt}
+\captionsetup[table]{position=above, skip=4pt, labelfont=normalfont}
 \captionsetup[figure]{position=below, skip=4pt, labelfont=normalfont}
 
 % ----- Page number: bottom-center -----
@@ -504,84 +504,84 @@
 	% =====================================================================
 	
 	% =====================================================================
-\section{Simulation/Working Procedure}
-
-PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep simulations. OriginPro 2018 was used to tabulate the simulated data, plot the final gain-versus-frequency curves, determine the characteristic frequencies, and calculate percentage errors. The procedure was divided into the following two parts.
-
-\subsection*{Part 1: Simulation in PSpice 9.1 Schematics}
-
-\begin{enumerate}[leftmargin=0.8cm,label=\textbf{Step \arabic*:},itemsep=0.55em]
-	\item \textbf{Draw the schematics.}
-	Open PSpice 9.1 Schematics. Select \texttt{Draw $\rightarrow$ Get New Part} or press \texttt{Ctrl+G}. Place the required resistors, capacitors, inductors, AC voltage source (VAC), and analog ground (AGND/EGND) on the workspace. Construct the low-pass, high-pass, series RLC band-pass, and series RLC band-stop circuits according to Figs.~\ref{fig:sch1}--\ref{fig:sch1c}.
+	\section{Simulation/Working Procedure}
 	
-	Double-click each component and assign the values calculated in Section 1.3. For example, use $R=10.7\,\mathrm{k}\Omega$ and $C=100\,\mathrm{n}\mathrm{F}$ for the low-pass filter. Set the AC magnitude of the VAC source to $5\,\mathrm{V}$. Use \texttt{Draw $\rightarrow$ Wire}, or press \texttt{Ctrl+W}, to connect the circuit. Label the source and output nodes as \texttt{Vin} and \texttt{Vout}, respectively, and verify that each circuit has one analog-ground reference.
+	PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep simulations. OriginPro 2018 was used to tabulate the simulated data, plot the final gain-versus-frequency curves, determine the characteristic frequencies, and calculate percentage errors. The procedure was divided into the following two parts.
 	
-	\item \textbf{Set up the AC sweep.}
-	Select \texttt{Analysis $\rightarrow$ Setup}, enable \texttt{AC Sweep}, and open its settings. Select a decade sweep and enter the following parameters:
-	\begin{center}
-		\begin{tabular}{@{}ll@{}}
-			Points per decade: & 100 \\
-			Start frequency: & $1\,\mathrm{Hz}$ \\
-			End frequency: & $100\,\mathrm{kHz}$
-		\end{tabular}
-	\end{center}
-	Click \texttt{OK}, close the setup window, and save the schematic with an identifiable name, such as \texttt{LowPassFilter.sch}.
+	\subsection*{Part 1: Simulation in PSpice 9.1 Schematics}
 	
-	\item \textbf{Run the simulation and display the gain.}
-	Select \texttt{Analysis $\rightarrow$ Simulate}, or press \texttt{F11}. When the Probe window opens, select \texttt{Trace $\rightarrow$ Add Trace}. Enter
-	\begin{equation}
-		\texttt{DB(V(Vout)/V(Vin))}
-		\label{eq:pspice-db-trace}
-	\end{equation}
-	in the trace-expression box to display the voltage gain in decibels. Confirm that the plotted response has the expected low-pass, high-pass, band-pass, or band-stop shape.
+	\begin{enumerate}[leftmargin=0.8cm,label=\textbf{Step \arabic*:},itemsep=0.55em]
+		\item \textbf{Draw the schematics.}
+		Open PSpice 9.1 Schematics. Select \texttt{Draw $\rightarrow$ Get New Part} or press \texttt{Ctrl+G}. Place the required resistors, capacitors, inductors, AC voltage source (VAC), and analog ground (AGND/EGND) on the workspace. Construct the low-pass, high-pass, series RLC band-pass, and series RLC band-stop circuits according to Figs.~\ref{fig:sch1}--\ref{fig:sch1c}.
+		
+		Double-click each component and assign the values calculated in Section 1.3. For example, use $R=10.7\,\mathrm{k}\Omega$ and $C=100\,\mathrm{n}\mathrm{F}$ for the low-pass filter. Set the AC magnitude of the VAC source to $5\,\mathrm{V}$. Use \texttt{Draw $\rightarrow$ Wire}, or press \texttt{Ctrl+W}, to connect the circuit. Label the source and output nodes as \texttt{Vin} and \texttt{Vout}, respectively, and verify that each circuit has one analog-ground reference.
+		
+		\item \textbf{Set up the AC sweep.}
+		Select \texttt{Analysis $\rightarrow$ Setup}, enable \texttt{AC Sweep}, and open its settings. Select a decade sweep and enter the following parameters:
+		\begin{center}
+			\begin{tabular}{@{}ll@{}}
+				Points per decade: & 100 \\
+				Start frequency: & $1\,\mathrm{Hz}$ \\
+				End frequency: & $100\,\mathrm{kHz}$
+			\end{tabular}
+		\end{center}
+		Click \texttt{OK}, close the setup window, and save the schematic with an identifiable name, such as \texttt{LowPassFilter.sch}.
+		
+		\item \textbf{Run the simulation and display the gain.}
+		Select \texttt{Analysis $\rightarrow$ Simulate}, or press \texttt{F11}. When the Probe window opens, select \texttt{Trace $\rightarrow$ Add Trace}. Enter
+		\begin{equation}
+			\texttt{DB(V(Vout)/V(Vin))}
+			\label{eq:pspice-db-trace}
+		\end{equation}
+		in the trace-expression box to display the voltage gain in decibels. Confirm that the plotted response has the expected low-pass, high-pass, band-pass, or band-stop shape.
+		
+		\item \textbf{Measure and record the output voltage.}
+		Delete the decibel trace and add \texttt{V(Vout)} to display the output-voltage amplitude. Enable the cursor from \texttt{Trace $\rightarrow$ Cursor $\rightarrow$ Display}. Move the cursor along the frequency axis and record $V_{\mathrm{out}}$ at each frequency specified in the experimental data tables. Record enough points near each cutoff frequency and, for the RLC filters, near the resonant frequency to define the curve accurately.
+		
+		\item \textbf{Repeat for all filters.}
+		Repeat Steps 1--4 for the high-pass, band-pass, and band-stop filters. For the band-pass filter, measure the output across $R$. For the band-stop filter, measure the output across the series $LC$ combination. Export or manually tabulate the frequency and output-voltage data for processing in OriginPro.
+	\end{enumerate}
 	
-	\item \textbf{Measure and record the output voltage.}
-	Delete the decibel trace and add \texttt{V(Vout)} to display the output-voltage amplitude. Enable the cursor from \texttt{Trace $\rightarrow$ Cursor $\rightarrow$ Display}. Move the cursor along the frequency axis and record $V_{\mathrm{out}}$ at each frequency specified in the experimental data tables. Record enough points near each cutoff frequency and, for the RLC filters, near the resonant frequency to define the curve accurately.
+	\subsection*{Part 2: Plotting and Analysis in OriginPro 2018}
 	
-	\item \textbf{Repeat for all filters.}
-	Repeat Steps 1--4 for the high-pass, band-pass, and band-stop filters. For the band-pass filter, measure the output across $R$. For the band-stop filter, measure the output across the series $LC$ combination. Export or manually tabulate the frequency and output-voltage data for processing in OriginPro.
-\end{enumerate}
-
-\subsection*{Part 2: Plotting and Analysis in OriginPro 2018}
-
-\begin{enumerate}[leftmargin=0.8cm,label=\textbf{Step \arabic*:},itemsep=0.55em]
-	\item \textbf{Enter the simulation data.}
-	Launch OriginPro 2018 and prepare a separate worksheet for each filter. Assign the worksheet columns as follows:
-	\begin{center}
-		\begin{tabular}{@{}ll@{}}
-			Column A (X): & Input frequency, $f$ ($\mathrm{Hz}$) \\
-			Column B (Y): & Simulated output voltage, $V_{\mathrm{out}}$ ($\mathrm{V}$) \\
-			Column C (Y): & Voltage gain, $A_v=V_{\mathrm{out}}/V_{\mathrm{in}}$
-		\end{tabular}
-	\end{center}
-	If a decibel plot is required, calculate the gain using Eq.~\eqref{eq:gain-db}. Enter the recorded PSpice data in the corresponding rows.
+	\begin{enumerate}[leftmargin=0.8cm,label=\textbf{Step \arabic*:},itemsep=0.55em]
+		\item \textbf{Enter the simulation data.}
+		Launch OriginPro 2018 and prepare a separate worksheet for each filter. Assign the worksheet columns as follows:
+		\begin{center}
+			\begin{tabular}{@{}ll@{}}
+				Column A (X): & Input frequency, $f$ ($\mathrm{Hz}$) \\
+				Column B (Y): & Simulated output voltage, $V_{\mathrm{out}}$ ($\mathrm{V}$) \\
+				Column C (Y): & Voltage gain, $A_v=V_{\mathrm{out}}/V_{\mathrm{in}}$
+			\end{tabular}
+		\end{center}
+		If a decibel plot is required, calculate the gain using Eq.~\eqref{eq:gain-db}. Enter the recorded PSpice data in the corresponding rows.
+		
+		\item \textbf{Plot the frequency response.}
+		Highlight the frequency column and the gain or output-voltage column. Select \texttt{Plot $\rightarrow$ Line + Symbol} or \texttt{Scatter} to create the discrete-point graph. Connect the points with a smooth curve without altering the recorded data. Double-click the horizontal axis, open the \texttt{Scale} tab, and select \texttt{Logarithmic (Log10)} so that the complete frequency range is displayed clearly.
+		
+		\item \textbf{Determine the cutoff frequencies by the 70.7\% criterion.}
+		Determine the appropriate passband or peak output voltage $V_{\max}$ from the plotted curve. The cutoff-reference voltage is
+		\begin{equation}
+			V_{\mathrm{cutoff}}=0.707V_{\max}.
+			\label{eq:cutoff-reference-voltage}
+		\end{equation}
+		Use the \texttt{Screen Reader} or \texttt{Data Reader} tool to locate the intersection of the response curve with $V_{\mathrm{cutoff}}$. The corresponding frequency is the simulated cutoff frequency. For both band-pass and band-stop filters, locate the lower and upper intersections, $f_L$ and $f_H$, and calculate
+		\begin{equation}
+			BW_{\mathrm{sim}}=f_{H,\mathrm{sim}}-f_{L,\mathrm{sim}}
+			\label{eq:simulated-bandwidth}
+		\end{equation}
+		and
+		\begin{equation}
+			f_{0,\mathrm{sim}}=\sqrt{f_{L,\mathrm{sim}}f_{H,\mathrm{sim}}}.
+			\label{eq:simulated-center-frequency}
+		\end{equation}
+		Use interpolation between adjacent data points when an exact 70.7\% crossing is not directly available.
+		
+		\item \textbf{Calculate percentage errors.}
+		Compare each simulated cutoff frequency, center frequency, and bandwidth with its corresponding theoretical value. Use Eq.~\eqref{eq:percentage-error} through an Origin column formula or by direct calculation. Record the theoretical value, simulated value, absolute difference, and percentage error in the result tables.
+	\end{enumerate}
 	
-	\item \textbf{Plot the frequency response.}
-	Highlight the frequency column and the gain or output-voltage column. Select \texttt{Plot $\rightarrow$ Line + Symbol} or \texttt{Scatter} to create the discrete-point graph. Connect the points with a smooth curve without altering the recorded data. Double-click the horizontal axis, open the \texttt{Scale} tab, and select \texttt{Logarithmic (Log10)} so that the complete frequency range is displayed clearly.
-	
-	\item \textbf{Determine the cutoff frequencies by the 70.7\% criterion.}
-	Determine the appropriate passband or peak output voltage $V_{\max}$ from the plotted curve. The cutoff-reference voltage is
-	\begin{equation}
-		V_{\mathrm{cutoff}}=0.707V_{\max}.
-		\label{eq:cutoff-reference-voltage}
-	\end{equation}
-	Use the \texttt{Screen Reader} or \texttt{Data Reader} tool to locate the intersection of the response curve with $V_{\mathrm{cutoff}}$. The corresponding frequency is the simulated cutoff frequency. For both band-pass and band-stop filters, locate the lower and upper intersections, $f_L$ and $f_H$, and calculate
-	\begin{equation}
-		BW_{\mathrm{sim}}=f_{H,\mathrm{sim}}-f_{L,\mathrm{sim}}
-		\label{eq:simulated-bandwidth}
-	\end{equation}
-	and
-	\begin{equation}
-		f_{0,\mathrm{sim}}=\sqrt{f_{L,\mathrm{sim}}f_{H,\mathrm{sim}}}.
-		\label{eq:simulated-center-frequency}
-	\end{equation}
-	Use interpolation between adjacent data points when an exact 70.7\% crossing is not directly available.
-	
-	\item \textbf{Calculate percentage errors.}
-	Compare each simulated cutoff frequency, center frequency, and bandwidth with its corresponding theoretical value. Use Eq.~\eqref{eq:percentage-error} through an Origin column formula or by direct calculation. Record the theoretical value, simulated value, absolute difference, and percentage error in the result tables.
-\end{enumerate}
-
-\section{Result Analysis}
+	\section{Result Analysis}
 	% =====================================================================
 	\subsection{Theoretical characteristic frequencies (standard values)}
 	The standard component values do not reproduce the formula frequencies
@@ -751,7 +751,7 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 	
 	\begin{table}[H]
 		\centering
-		\caption{Data points read off the PSpice trace of the low-pass filter (circuit 1)}
+		\caption{Data points read off the PSpice trace of the low-pass filter}
 		\label{tab:data1}
 		\small
 		\renewcommand{\arraystretch}{1.2}
@@ -803,7 +803,7 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 	\end{table}
 	\begin{table}[H]
 		\centering
-		\caption{Data points read off the PSpice trace of the high-pass filter (circuit 2)}
+		\caption{Data points read off the PSpice trace of the high-pass filter}
 		\label{tab:data2}
 		\small
 		\renewcommand{\arraystretch}{1.2}
@@ -855,7 +855,7 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 	\end{table}
 	\begin{table}[H]
 		\centering
-		\caption{Data points read off the PSpice trace of the band-pass filter (circuit 3)}
+		\caption{Data points read off the PSpice trace of the band-pass filter}
 		\label{tab:data3}
 		\small
 		\renewcommand{\arraystretch}{1.2}
@@ -907,7 +907,7 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 	\end{table}
 	\begin{table}[H]
 		\centering
-		\caption{Data points read off the PSpice trace of the band-stop filter (circuit 4)}
+		\caption{Data points read off the PSpice trace of the band-stop filter}
 		\label{tab:data4}
 		\small
 		\renewcommand{\arraystretch}{1.2}
@@ -1024,8 +1024,7 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.85\textwidth]{OriginPro_graph_of_circuit1_gain_db_vs_freq.png}
-		\caption{OriginPro gain-versus-frequency curve of the low-pass filter
-			(circuit 1)}
+		\caption{OriginPro gain-versus-frequency curve of the low-pass filter}
 		\label{fig:og1}
 	\end{figure}
 	
@@ -1033,7 +1032,7 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 		\centering
 		\includegraphics[width=0.85\textwidth]{OriginPro_graph_of_circuit2_gain_db_vs_freq.png}
 		\caption{OriginPro gain-versus-frequency curve of the high-pass
-			filter (circuit 2)}
+			filter}
 		\label{fig:og2}
 	\end{figure}
 	
@@ -1041,7 +1040,7 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 		\centering
 		\includegraphics[width=0.85\textwidth]{OriginPro_graph_of_circuit3_gain_db_vs_freq.png}
 		\caption{OriginPro gain-versus-frequency curve of the band-pass
-			filter (circuit 3)}
+			filter}
 		\label{fig:og3}
 	\end{figure}
 	
@@ -1049,7 +1048,7 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 		\centering
 		\includegraphics[width=0.85\textwidth]{OriginPro_graph_of_circuit4_gain_db_vs_freq.png}
 		\caption{OriginPro gain-versus-frequency curve of the band-stop
-			filter (circuit 4)}
+			filter}
 		\label{fig:og4}
 	\end{figure}
 	
@@ -1080,36 +1079,36 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 		\renewcommand{\arraystretch}{1.25}
 		\begin{tabular}{|l|l|r|r|r|r|}
 			\hline
-			\rowcolor{black!12}\textbf{Circuit} & \textbf{Quantity} & \textbf{Formula (Hz)} & \textbf{Theoretical (Hz)} &
-			\textbf{Simulated (Hz)} & \textbf{\% Error} \\
+			\rowcolor{black!12}\textbf{Circuit} & \textbf{Quantity} & \textbf{Formula} & \textbf{Theoretical} &
+			\textbf{Simulated} & \textbf{\% Error} \\
 			\hline
-			1 (LP) & $f_c$ & 150.0 & 148.7 & 148.74 & $0.03$ \\
+			1 (LP) & $f_c$ & 150.0 Hz & 148.7 Hz & 148.74 Hz & $0.03$ \\
 			\hline
-			2 (HP) & $f_c$ & 2500.0 & 2510.3 & 2510.35 & $0.00$ \\
+			2 (HP) & $f_c$ & 2500.0 Hz & 2510.3 Hz & 2510.35 Hz & $0.00$ \\
 			\hline
 			\multirow{5}{*}{3 (BP)}
-			& $f_L$ & 150.0 & 149.6 & 149.59 & $0.01$ \\
+			& $f_L$ & 150.0 Hz & 149.6 Hz & 149.59 Hz & $0.01$ \\
 			\cline{2-6}
-			& $f_H$ & 2500.0 & 2490.1 & 2490.05 & $0.00$ \\
+			& $f_H$ & 2500.0 Hz & 2490.1 Hz & 2490.05 Hz & $0.00$ \\
 			\cline{2-6}
-			& $f_0$ & 612.4 & 610.3 & 610.33 & $0.00$ \\
+			& $f_0$ & 612.4 Hz & 610.3 Hz & 610.33 Hz & $0.00$ \\
 			\cline{2-6}
-			& $BW$ & 2350.0 & 2340.5 & 2340.5 & $0.00$ \\
+			& $BW$ & 2350.0 Hz & 2340.5 Hz & 2340.5 Hz & $0.00$ \\
 			\cline{2-6}
 			& $Q$ & 0.2606 & 0.2608 & 0.2608 & $0.00$ \\
 			\hline
 			\multirow{5}{*}{4 (BS)}
-			& $f_L$ & 150.0 & 149.6 & 149.58 & $0.01$ \\
+			& $f_L$ & 150.0 Hz & 149.6 Hz & 149.58 Hz & $0.01$ \\
 			\cline{2-6}
-			& $f_H$ & 2500.0 & 2490.1 & 2490.3 & $0.01$ \\
+			& $f_H$ & 2500.0 Hz & 2490.1 Hz & 2490.3 Hz & $0.01$ \\
 			\cline{2-6}
-			& $f_0$ & 612.4 & 610.3 & 611.8 & $0.25$ \\
+			& $f_0$ & 612.4 Hz & 610.3 Hz & 611.8 Hz & $0.25$ \\
 			\cline{2-6}
-			& $BW$ & 2350.0 & 2340.5 & 2340.7 & $0.01$ \\
+			& $BW$ & 2350.0 Hz & 2340.5 Hz & 2340.7 Hz & $0.01$ \\
 			\cline{2-6}
 			& $Q$ & 0.2606 & 0.2608 & 0.2614 & $0.23$ \\
 			\hline
-			1 changed (LP) & $f_c$ & 150.0 & 72.3 & 72.36 & $0.08$ \\
+			1 changed (LP) & $f_c$ & 150.0 Hz & 72.3 Hz & 72.36 Hz & $0.08$ \\
 			\hline
 		\end{tabular}
 	\end{table}
@@ -1141,11 +1140,9 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 			\hline
 			Theoretical $f_c$ & \SI{148.7}{\hertz} & \SI{72.3}{\hertz} \\
 			\hline
-			Simulated $f_c$ & \SI{148.7}{\hertz} & \SI{72.3}{\hertz} \\
+			Simulated $f_c$ & \SI{148.74}{\hertz} & \SI{72.36}{\hertz} \\
 			\hline
-			\% Error & $0.00$ & $0.00$ \\
-			\hline
-			Stopband slope & $-20\ \mathrm{dB/dec}$ & $-20\ \mathrm{dB/dec}$ \\
+			\% Error & $0.03$ & $0.08$ \\
 			\hline
 		\end{tabular}
 	\end{table}
@@ -1155,9 +1152,7 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 	decreased by a factor of about 2.05, because the capacitor was
 	increased tenfold while the resistor was only decreased by a factor of
 	4.86; the product $RC$ (hence $1/2\pi RC$) governs. The overall shape
-	of the response is unchanged: passband gain $\approx 0\ \mathrm{dB}$
-	and a $-20\ \mathrm{dB/decade}$ roll-off beyond $f_c$, as Figs.
-	\ref{fig:og1} and \ref{fig:ogc} confirm.
+	of the response is unchanged.
 	
 	% =====================================================================
 	\section{Discussion}
@@ -1230,9 +1225,11 @@ PSpice 9.1 Schematics was used to construct the circuits and perform AC-sweep si
 	\begin{thebibliography}{9}
 		\bibitem{ref:sadiku} C. K. Alexander and M. N. O. Sadiku,
 		\textit{Fundamentals of Electric Circuits}, 5th ed. New York,
-		NY, USA: McGraw-Hill, 2010.
+		NY, USA: McGraw-Hill, 2013, ch.~14, sec.~14.3--14.7,
+		pp.~617--641.
 		\bibitem{ref:boylestad} R. L. Boylestad, \textit{Introductory
-			Circuit Analysis}, 13th ed. Harlow, U.K.: Pearson Education, 2016.
+			Circuit Analysis}, 13th ed. Harlow, U.K.: Pearson Education,
+		2016, chs.~21 and 22, pp.~921--1046.
 	\end{thebibliography}
 	
 \end{document}
