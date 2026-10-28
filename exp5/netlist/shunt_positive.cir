@@ -1,0 +1,8 @@
+* Shunt Positive Clipper
+V1 1 0 SIN(0 50 50)
+R1 1 2 1k
+D1 2 0 D1N4002
+.model D1N4002 D(Is=14.11n Rs=33.89m N=1.984 Ikf=94.81 Xti=3 Eg=1.11 Cjo=51.17p M=.2762 Vj=.3905 Fc=.5 Isr=100.0p Nr=2 Bv=100.1 Ibv=10 Tt=4.761u)
+.tran 10u 80m
+.print tran v(1) v(2)
+.end

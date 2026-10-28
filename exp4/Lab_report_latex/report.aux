@@ -4,69 +4,77 @@
 \providecommand\HyField@AuxAddToCoFields[2]{}
 \citation{ref:theraja}
 \citation{ref:theraja}
-\@writefile{toc}{\contentsline {section}{\numberline {4.1}Objective}{5}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.2}Theory}{5}{section.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Full-wave bridge rectifier without filter capacitor. The four diodes conduct in pairs.}}{5}{figure.caption.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}Objective}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Theory}{1}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.1}Without filter capacitor}{1}{subsection.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Full-wave bridge rectifier without filter capacitor. The four diodes conduct in pairs.}}{2}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:bridge-theory}{{1}{5}{Full-wave bridge rectifier without filter capacitor. The four diodes conduct in pairs}{figure.caption.1}{}}
+\newlabel{fig:bridge-theory}{{1}{2}{Full-wave bridge rectifier without filter capacitor. The four diodes conduct in pairs}{figure.caption.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Input and output of the full-wave bridge rectifier without a filter: (a) without considering $V_D$ and (b) considering the diode drops. Each half-cycle is carried by one diode pair; with drops, a pair conducts only while $|v_i| > 2V_D$ and $v_o = |v_i| - 2V_D$. The drop $2V_D$ is exaggerated for clarity.}}{2}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:rect-waves}{{2}{2}{Input and output of the full-wave bridge rectifier without a filter: (a) without considering $V_D$ and (b) considering the diode drops. Each half-cycle is carried by one diode pair; with drops, a pair conducts only while $|v_i| > 2V_D$ and $v_o = |v_i| - 2V_D$. The drop $2V_D$ is exaggerated for clarity}{figure.caption.2}{}}
 \citation{ref:theraja}
+\newlabel{eq:vp-out}{{1}{3}{Without filter capacitor}{equation.1}{}}
+\newlabel{eq:vdc}{{2}{3}{Without filter capacitor}{equation.2}{}}
+\newlabel{eq:vrms}{{3}{3}{Without filter capacitor}{equation.3}{}}
+\newlabel{eq:powers}{{4}{3}{Without filter capacitor}{equation.4}{}}
+\newlabel{eq:eta-ff-r}{{5}{3}{Without filter capacitor}{equation.5}{}}
+\newlabel{eq:eta-deriv}{{6}{3}{Without filter capacitor}{equation.6}{}}
+\newlabel{eq:ff-deriv}{{7}{3}{Without filter capacitor}{equation.7}{}}
 \citation{ref:theraja-filter}
-\newlabel{eq:vp-out}{{1}{6}{Theory}{equation.1}{}}
-\newlabel{eq:vdc}{{2}{6}{Theory}{equation.2}{}}
-\newlabel{eq:vrms}{{3}{6}{Theory}{equation.3}{}}
-\newlabel{eq:powers}{{4}{6}{Theory}{equation.4}{}}
-\newlabel{eq:eta-ff-r}{{5}{6}{Theory}{equation.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Full-wave bridge rectifier with shunt capacitor filter ($C_1$ connected in parallel with the load $R_1$).}}{6}{figure.caption.2}\protected@file@percent }
-\newlabel{fig:bridge-filter}{{2}{6}{Full-wave bridge rectifier with shunt capacitor filter ($C_1$ connected in parallel with the load $R_1$)}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2.2}With filter capacitor}{4}{subsection.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Full-wave bridge rectifier with shunt capacitor filter ($C_1$ in parallel with $R_1$).}}{4}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:bridge-filter}{{3}{4}{Full-wave bridge rectifier with shunt capacitor filter ($C_1$ in parallel with $R_1$)}{figure.caption.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Theoretical input and load-voltage waveforms of the bridge rectifier with a shunt capacitor filter. The dotted curve is the unfiltered output $|v_i|-2V_D$. A diode pair conducts only during the short charging intervals near each crest; between them $C_1$ discharges through $R_1$, which produces the ripple $V_{r(pp)}$. The values of $R_1C_1$ and $2V_D$ are exaggerated for clarity.}}{4}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:theoretical-waveforms}{{4}{4}{Theoretical input and load-voltage waveforms of the bridge rectifier with a shunt capacitor filter. The dotted curve is the unfiltered output $|v_i|-2V_D$. A diode pair conducts only during the short charging intervals near each crest; between them $C_1$ discharges through $R_1$, which produces the ripple $V_{r(pp)}$. The values of $R_1C_1$ and $2V_D$ are exaggerated for clarity}{figure.caption.4}{}}
 \citation{ref:theraja-filter}
-\newlabel{eq:discharge}{{6}{7}{Theory}{equation.6}{}}
-\newlabel{eq:ripple-estimates}{{7}{7}{Theory}{equation.7}{}}
-\newlabel{eq:r-filtered}{{8}{7}{Theory}{equation.8}{}}
-\newlabel{eq:percentage-error}{{9}{7}{Theory}{equation.9}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.3}List of Components}{7}{section.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Components, instruments, and software used}}{7}{table.caption.3}\protected@file@percent }
-\newlabel{tab:components}{{1}{7}{Components, instruments, and software used}{table.caption.3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.4}PSpice Circuit Diagrams}{8}{section.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces PSpice schematic of the full-wave bridge rectifier without filter capacitor ($R_1 = \SI {100}{\kilo \ohm }$, $V_{\mathrm  {in}} = \SI {100}{\volt }$ amplitude at \SI {50}{\hertz })}}{8}{figure.caption.4}\protected@file@percent }
-\newlabel{fig:sch1}{{3}{8}{PSpice schematic of the full-wave bridge rectifier without filter capacitor ($R_1 = \SI {100}{\kilo \ohm }$, $V_{\mathrm {in}} = \SI {100}{\volt }$ amplitude at \SI {50}{\hertz })}{figure.caption.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces PSpice schematic of the full-wave bridge rectifier with filter capacitor ($C_1 = \SI {100}{\micro \farad }$ in parallel with $R_1 = \SI {100}{\kilo \ohm }$)}}{9}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:sch2}{{4}{9}{PSpice schematic of the full-wave bridge rectifier with filter capacitor ($C_1 = \SI {100}{\micro \farad }$ in parallel with $R_1 = \SI {100}{\kilo \ohm }$)}{figure.caption.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces PSpice schematic of the modified bridge rectifier (task 4, filter capacitor changed to $C_1 = \SI {10}{\micro \farad }$)}}{9}{figure.caption.6}\protected@file@percent }
-\newlabel{fig:sch3}{{5}{9}{PSpice schematic of the modified bridge rectifier (task 4, filter capacitor changed to $C_1 = \SI {10}{\micro \farad }$)}{figure.caption.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.1}PSpice netlist code}{9}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.5}Simulation/Working Procedure}{10}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.6}Calculation}{12}{section.6}\protected@file@percent }
-\newlabel{eq:calc-vp}{{10}{12}{Calculation}{equation.10}{}}
-\newlabel{eq:calc-ipk}{{11}{12}{Calculation}{equation.11}{}}
-\newlabel{eq:calc-vdc}{{12}{12}{Calculation}{equation.12}{}}
-\newlabel{eq:calc-vrms}{{13}{12}{Calculation}{equation.13}{}}
-\newlabel{eq:calc-powers}{{14}{12}{Calculation}{equation.14}{}}
-\newlabel{eq:calc-eta}{{15}{12}{Calculation}{equation.15}{}}
-\newlabel{eq:self-consistent}{{16}{12}{Calculation}{equation.16}{}}
-\newlabel{eq:calc-vdc-100u}{{17}{12}{Calculation}{equation.17}{}}
-\newlabel{eq:calc-r-100u}{{18}{13}{Calculation}{equation.18}{}}
-\newlabel{eq:calc-vdc-10u}{{19}{13}{Calculation}{equation.19}{}}
-\newlabel{eq:calc-r-10u}{{20}{13}{Calculation}{equation.20}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4.7}Result Analysis}{13}{section.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.1}Simulated waveforms}{13}{subsection.7.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces PSpice output: input and load-voltage waveforms of the bridge rectifier without filter capacitor}}{13}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:wave1}{{6}{13}{PSpice output: input and load-voltage waveforms of the bridge rectifier without filter capacitor}{figure.caption.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces PSpice output: input and load-voltage waveforms of the bridge rectifier with $C_1 = \SI {100}{\micro \farad }$}}{14}{figure.caption.8}\protected@file@percent }
-\newlabel{fig:wave2}{{7}{14}{PSpice output: input and load-voltage waveforms of the bridge rectifier with $C_1 = \SI {100}{\micro \farad }$}{figure.caption.8}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces PSpice output: input and load-voltage waveforms of the bridge rectifier with the modified $C_1 = \SI {10}{\micro \farad }$ (task 4)}}{14}{figure.caption.9}\protected@file@percent }
-\newlabel{fig:wave3}{{8}{14}{PSpice output: input and load-voltage waveforms of the bridge rectifier with the modified $C_1 = \SI {10}{\micro \farad }$ (task 4)}{figure.caption.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.2}Simulated parameters read from the waveforms}{14}{subsection.7.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Theoretical versus simulated parameters of the bridge rectifier without filter capacitor}}{15}{table.caption.10}\protected@file@percent }
-\newlabel{tab:compare-1}{{2}{15}{Theoretical versus simulated parameters of the bridge rectifier without filter capacitor}{table.caption.10}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Theoretical versus simulated parameters of the bridge rectifier with $C_1 = \SI {100}{\micro \farad }$}}{15}{table.caption.11}\protected@file@percent }
-\newlabel{tab:compare-2}{{3}{15}{Theoretical versus simulated parameters of the bridge rectifier with $C_1 = \SI {100}{\micro \farad }$}{table.caption.11}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Theoretical versus simulated parameters of the bridge rectifier with the modified $C_1 = \SI {10}{\micro \farad }$ (task 4)}}{16}{table.caption.12}\protected@file@percent }
-\newlabel{tab:compare-3}{{4}{16}{Theoretical versus simulated parameters of the bridge rectifier with the modified $C_1 = \SI {10}{\micro \farad }$ (task 4)}{table.caption.12}{}}
+\newlabel{eq:discharge}{{8}{5}{With filter capacitor}{equation.8}{}}
+\newlabel{eq:ripple-pp}{{9}{5}{With filter capacitor}{equation.9}{}}
+\newlabel{eq:vdc-filter}{{10}{5}{With filter capacitor}{equation.10}{}}
+\newlabel{eq:vrms-r}{{11}{5}{With filter capacitor}{equation.11}{}}
+\newlabel{eq:r-filtered}{{12}{5}{With filter capacitor}{equation.12}{}}
+\newlabel{eq:percentage-error}{{13}{5}{With filter capacitor}{equation.13}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}List of Components}{6}{section.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Components, instruments, and software used}}{6}{table.caption.5}\protected@file@percent }
+\newlabel{tab:components}{{1}{6}{Components, instruments, and software used}{table.caption.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}PSpice Circuit Diagrams}{6}{section.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces PSpice schematic of the full-wave bridge rectifier without filter capacitor ($R_1 = \SI {10}{\kilo \ohm }$, $V_{\mathrm  {in}} = \SI {100}{\volt }$ amplitude at \SI {50}{\hertz })}}{6}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:sch1}{{5}{6}{PSpice schematic of the full-wave bridge rectifier without filter capacitor ($R_1 = \SI {10}{\kilo \ohm }$, $V_{\mathrm {in}} = \SI {100}{\volt }$ amplitude at \SI {50}{\hertz })}{figure.caption.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces PSpice schematic of the full-wave bridge rectifier with filter capacitor ($C_1 = \SI {100}{\micro \farad }$ in parallel with $R_1 = \SI {10}{\kilo \ohm }$)}}{7}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:sch2}{{6}{7}{PSpice schematic of the full-wave bridge rectifier with filter capacitor ($C_1 = \SI {100}{\micro \farad }$ in parallel with $R_1 = \SI {10}{\kilo \ohm }$)}{figure.caption.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces PSpice schematic of the modified bridge rectifier (task 4, filter capacitor changed to $C_1 = \SI {50}{\micro \farad }$)}}{7}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:sch3}{{7}{7}{PSpice schematic of the modified bridge rectifier (task 4, filter capacitor changed to $C_1 = \SI {50}{\micro \farad }$)}{figure.caption.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4.1}PSpice netlist code}{7}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.5}Simulation/Working Procedure}{9}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.6}Calculation}{10}{section.6}\protected@file@percent }
+\newlabel{eq:calc-vp}{{14}{10}{Calculation}{equation.14}{}}
+\newlabel{eq:calc-ipk}{{15}{10}{Calculation}{equation.15}{}}
+\newlabel{eq:calc-vdc}{{16}{10}{Calculation}{equation.16}{}}
+\newlabel{eq:calc-vrms}{{17}{10}{Calculation}{equation.17}{}}
+\newlabel{eq:calc-powers}{{18}{10}{Calculation}{equation.18}{}}
+\newlabel{eq:calc-eta}{{19}{10}{Calculation}{equation.19}{}}
+\newlabel{eq:calc-vdc-100u}{{20}{11}{Calculation}{equation.20}{}}
+\newlabel{eq:calc-r-100u}{{21}{11}{Calculation}{equation.21}{}}
+\newlabel{eq:calc-vdc-50u}{{22}{11}{Calculation}{equation.22}{}}
+\newlabel{eq:calc-r-50u}{{23}{11}{Calculation}{equation.23}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.7}Result Analysis}{11}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.1}Simulated waveforms}{11}{subsection.7.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces PSpice output: input and load-voltage waveforms of the bridge rectifier without filter capacitor}}{12}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:wave1}{{8}{12}{PSpice output: input and load-voltage waveforms of the bridge rectifier without filter capacitor}{figure.caption.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces PSpice output: input and load-voltage waveforms of the bridge rectifier with $C_1 = \SI {100}{\micro \farad }$}}{12}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:wave2}{{9}{12}{PSpice output: input and load-voltage waveforms of the bridge rectifier with $C_1 = \SI {100}{\micro \farad }$}{figure.caption.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces PSpice output: input and load-voltage waveforms of the bridge rectifier with the modified $C_1 = \SI {50}{\micro \farad }$ (task 4)}}{12}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:wave3}{{10}{12}{PSpice output: input and load-voltage waveforms of the bridge rectifier with the modified $C_1 = \SI {50}{\micro \farad }$ (task 4)}{figure.caption.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7.2}Simulated parameters read from the waveforms}{13}{subsection.7.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Theoretical versus simulated parameters of the bridge rectifier without filter capacitor}}{14}{table.caption.12}\protected@file@percent }
+\newlabel{tab:compare-1}{{2}{14}{Theoretical versus simulated parameters of the bridge rectifier without filter capacitor}{table.caption.12}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Theoretical versus simulated parameters of the bridge rectifier with $C_1 = \SI {100}{\micro \farad }$}}{15}{table.caption.13}\protected@file@percent }
+\newlabel{tab:compare-2}{{3}{15}{Theoretical versus simulated parameters of the bridge rectifier with $C_1 = \SI {100}{\micro \farad }$}{table.caption.13}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.7.3}Effect of changing the filter capacitance (task 4)}{16}{subsection.7.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Simulated output of the filtered rectifier before and after changing the filter capacitance}}{16}{table.caption.13}\protected@file@percent }
-\newlabel{tab:task4}{{5}{16}{Simulated output of the filtered rectifier before and after changing the filter capacitance}{table.caption.13}{}}
+\newlabel{sec:task4}{{4.7.3}{16}{Effect of changing the filter capacitance (task 4)}{subsection.7.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Theoretical and simulated output of the filtered rectifier before and after changing the filter capacitance}}{16}{table.caption.14}\protected@file@percent }
+\newlabel{tab:task4}{{4}{16}{Theoretical and simulated output of the filtered rectifier before and after changing the filter capacitance}{table.caption.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.8}Discussion}{16}{section.8}\protected@file@percent }
 \bibcite{ref:theraja}{1}
 \bibcite{ref:theraja-filter}{2}
-\@writefile{toc}{\contentsline {section}{\numberline {4.8}Discussion}{17}{section.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.9}Reference}{17}{section.9}\protected@file@percent }
-\gdef \@abspage@last{17}
+\@writefile{toc}{\contentsline {section}{\numberline {4.9}References}{17}{section.9}\protected@file@percent }
+\gdef \@abspage@last{21}

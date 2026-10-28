@@ -1,0 +1,64 @@
+ngspice at /usr/bin/ngspice; Vm = 100 V, f = 50 Hz, RL = 10000 ohm, diode = D1N4002 (2VK = 1.4 V)
+(voltages in V, currents in mA, powers in mW, frequencies in Hz)
+
+=== without filter capacitor ===
+ quantity |    simulated |  theoretical |   % err
+--------------------------------------------------
+       Vm |     100.0000 |     100.0000 |   0.00%
+      2VK |       1.3823 |       1.4000 |   1.27%
+   Vo(pk) |      98.6177 |      98.6000 |   0.02%
+   Io(pk) |       9.8618 |       9.8600 |   0.02%
+      VDC |      62.3620 |      62.7707 |   0.65%
+      IDC |       6.2362 |       6.2771 |   0.65%
+     VRMS |      69.5002 |      69.7207 |   0.32%
+     IRMS |       6.9500 |       6.9721 |   0.32%
+      PDC |     388.9015 |     394.0162 |   1.30%
+      PAC |     483.0279 |     486.0980 |   0.63%
+      eta |      80.5133 |      81.0569 |   0.67%
+        r |       0.4920 |       0.4834 |   1.77%
+       FF |       1.1145 |       1.1107 |   0.34%
+      PIV |      99.3089 |     100.0000 |   0.69%
+       f0 |       100.01 |       100.00 |   0.01%
+  check: PIV per diode D1..D4 = 99.3089, 99.3088, 99.3088, 99.3089
+  check: Vdc over [120,160] ms = 62.3667 V
+  check: Vdc over [160,200] ms = 62.3620 V
+  note 'Voltage across resistor' centred at (20.0 ms, 82.1 V)
+  note 'Vin' centred at (15.0 ms, -70.0 V)
+  saved graph ngspice_figs/full_bridge.png
+  saved schematic ngspice_figs/schematic_no_filter.png
+
+=== with filter capacitor, C = 100 uF ===
+ quantity |    simulated |  theoretical |   % err
+--------------------------------------------------
+   Vc(pk) |      98.4395 |      98.6000 |   0.16%
+       fr |        99.98 |       100.00 |   0.02%
+   Vr(pp) |       0.9086 |       0.9811 |   7.39%
+  Vr(rms) |       0.2623 |       0.2832 |   7.39%
+      VDC |      97.9921 |      98.1095 |   0.12%
+       IL |       9.7992 |       9.8109 |   0.12%
+        r |     0.002677 |     0.002887 |   7.28%
+       %r |       0.2677 |       0.2887 |   7.28%
+  check: output valley (capacitor discharge minimum) = 97.5309 V
+  check: Vdc over [520,560] ms = 97.9921 V
+  check: Vdc over [560,600] ms = 97.9921 V
+  note 'Voltage across resistor' centred at (15.0 ms, 81.6 V)
+  note 'Vin' centred at (26.0 ms, 52.8 V)
+  saved graph ngspice_figs/full_bridge_with_capacitor_100u.png
+  saved schematic ngspice_figs/schematic_with_capacitor_100u.png
+
+=== with filter capacitor, C = 50 uF ===
+ quantity |    simulated |  theoretical |   % err
+--------------------------------------------------
+   Vc(pk) |      98.4985 |      98.6000 |   0.10%
+       fr |       100.00 |       100.00 |   0.00%
+   Vr(pp) |       1.7864 |       1.9525 |   8.51%
+  Vr(rms) |       0.5157 |       0.5636 |   8.51%
+      VDC |      97.6253 |      97.6238 |   0.00%
+       IL |       9.7625 |       9.7624 |   0.00%
+        r |     0.005282 |     0.005774 |   8.51%
+       %r |       0.5282 |       0.5774 |   8.51%
+  check: output valley (capacitor discharge minimum) = 96.7121 V
+  check: Vdc over [520,560] ms = 97.6253 V
+  check: Vdc over [560,600] ms = 97.6253 V
+  note 'Voltage across resistor' centred at (15.0 ms, 74.8 V)
+  note 'Vin' centred at (26.0 ms, 48.4 V)

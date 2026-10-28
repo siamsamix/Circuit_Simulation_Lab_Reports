@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.6.25)  6 OCT 2026 07:28
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.6.25)  10 OCT 2026 17:42
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -972,64 +972,64 @@ Package: fancyhdr 2025/02/07 v5.2 Extensive control of page headers and footers
 \@temptokenb=\toks51
 )
 LaTeX Font Info:    Trying to load font information for OT1+ntxtlf on input lin
-e 69.
+e 78.
 
 (/usr/share/texmf-dist/tex/latex/newtx/ot1ntxtlf.fd
 File: ot1ntxtlf.fd 2021/05/24 v1.0 font definition file for OT1/ntx/tlf
 )
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 12.0pt on input line 69.
+(Font)              scaled to size 12.0pt on input line 78.
 Package translations Info: No language package found. I am going to use `englis
-h' as default language. on input line 69.
+h' as default language. on input line 78.
  (./report.aux)
 \openout1 = `report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/ntxmi/m/it on input line 69.
+LaTeX Font Info:    Checking defaults for OML/ntxmi/m/it on input line 78.
 LaTeX Font Info:    Trying to load font information for OML+ntxmi on input line
- 69.
+ 78.
 
 (/usr/share/texmf-dist/tex/latex/newtx/omlntxmi.fd
 File: omlntxmi.fd 2015/08/25 Fontinst v1.933 font definitions for OML/ntxmi.
 )
-LaTeX Font Info:    ... okay on input line 69.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 69.
-LaTeX Font Info:    ... okay on input line 69.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 69.
-LaTeX Font Info:    ... okay on input line 69.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 69.
-LaTeX Font Info:    ... okay on input line 69.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 69.
-LaTeX Font Info:    ... okay on input line 69.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 69.
-LaTeX Font Info:    ... okay on input line 69.
-LaTeX Font Info:    Checking defaults for U/ntxexa/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 78.
+LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 78.
+LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 78.
+LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 78.
+LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 78.
+LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for U/ntxexa/m/n on input line 78.
 LaTeX Font Info:    Trying to load font information for U+ntxexa on input line 
-69.
+78.
 
 (/usr/share/texmf-dist/tex/latex/newtx/untxexa.fd
 File: untxexa.fd 2012/04/16 Fontinst v1.933 font definitions for U/ntxexa.
 )
-LaTeX Font Info:    ... okay on input line 69.
-LaTeX Font Info:    Checking defaults for LMS/ntxsy/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for LMS/ntxsy/m/n on input line 78.
 LaTeX Font Info:    Trying to load font information for LMS+ntxsy on input line
- 69.
+ 78.
 
 (/usr/share/texmf-dist/tex/latex/newtx/lmsntxsy.fd
 File: lmsntxsy.fd 2016/07/02 Fontinst v1.933 font definitions for LMS/ntxsy.
 )
-LaTeX Font Info:    ... okay on input line 69.
-LaTeX Font Info:    Checking defaults for LMX/ntxexx/m/n on input line 69.
+LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for LMX/ntxexx/m/n on input line 78.
 LaTeX Font Info:    Trying to load font information for LMX+ntxexx on input lin
-e 69.
+e 78.
 
 (/usr/share/texmf-dist/tex/latex/newtx/lmxntxexx.fd
 File: lmxntxexx.fd 2016/07/03 Fontinst v1.933 font definitions for LMX/ntxexx.
 )
-LaTeX Font Info:    ... okay on input line 69.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 69.
-LaTeX Font Info:    ... okay on input line 69.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 69.
-LaTeX Font Info:    ... okay on input line 69.
+LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 78.
+LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 78.
+LaTeX Font Info:    ... okay on input line 78.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -1089,8 +1089,8 @@ e
 ))
 \c@mv@tabular=\count381
 \c@mv@boldtabular=\count382
-LaTeX Info: Command `\dddot' is already robust on input line 69.
-LaTeX Info: Command `\ddddot' is already robust on input line 69.
+LaTeX Info: Command `\dddot' is already robust on input line 78.
+LaTeX Info: Command `\ddddot' is already robust on input line 78.
 
 (/usr/share/texmf-dist/tex/latex/translations/translations-basic-dictionary-eng
 lish.trsl
@@ -1098,7 +1098,7 @@ File: translations-basic-dictionary-english.trsl (english translation file `tra
 nslations-basic-dictionary')
 )
 Package translations Info: loading dictionary `translations-basic-dictionary' f
-or `english'. on input line 69.
+or `english'. on input line 78.
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
@@ -1115,510 +1115,561 @@ Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
 )
 Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
 ))
-Package hyperref Info: Link coloring OFF on input line 69.
+Package hyperref Info: Link coloring OFF on input line 78.
  (./report.out)
 (./report.out)
 \@outlinefile=\write4
 \openout4 = `report.out'.
 
-<../Cover_page.pdf, id=59, 597.53236pt x 845.05714pt>
+<../Cover_page.pdf, id=67, 597.53236pt x 845.05714pt>
 File: ../Cover_page.pdf Graphic file (type pdf)
 <use ../Cover_page.pdf>
-Package pdftex.def Info: ../Cover_page.pdf  used on input line 74.
+Package pdftex.def Info: ../Cover_page.pdf  used on input line 83.
 (pdftex.def)             Requested size: 597.5309pt x 845.05507pt.
-<../Cover_page.pdf, id=61, page=1, 597.53236pt x 845.05714pt>
+<../Cover_page.pdf, id=69, page=1, 597.53236pt x 845.05714pt>
 File: ../Cover_page.pdf Graphic file (type pdf)
 <use ../Cover_page.pdf, page 1>
-Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 74.
+Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 83.
 (pdftex.def)             Requested size: 597.5309pt x 845.05507pt.
 File: ../Cover_page.pdf Graphic file (type pdf)
 <use ../Cover_page.pdf, page 1>
-Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 74.
+Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 83.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
 File: ../Cover_page.pdf Graphic file (type pdf)
 <use ../Cover_page.pdf, page 1>
-Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 74.
+Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 83.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
 File: ../Cover_page.pdf Graphic file (type pdf)
 <use ../Cover_page.pdf, page 1>
-Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 74.
+Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 83.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
 File: ../Cover_page.pdf Graphic file (type pdf)
 <use ../Cover_page.pdf, page 1>
-Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 74.
+Package pdftex.def Info: ../Cover_page.pdf , page1 used on input line 83.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
  [1
 
 
  <../Cover_page.pdf>]
-<../Cover_badol.pdf, id=83, 597.53236pt x 845.05714pt>
+<../Cover_badol.pdf, id=91, 597.53236pt x 845.05714pt>
 File: ../Cover_badol.pdf Graphic file (type pdf)
 <use ../Cover_badol.pdf>
-Package pdftex.def Info: ../Cover_badol.pdf  used on input line 75.
+Package pdftex.def Info: ../Cover_badol.pdf  used on input line 84.
 (pdftex.def)             Requested size: 597.5309pt x 845.05507pt.
-<../Cover_badol.pdf, id=85, page=1, 597.53236pt x 845.05714pt>
+<../Cover_badol.pdf, id=93, page=1, 597.53236pt x 845.05714pt>
 File: ../Cover_badol.pdf Graphic file (type pdf)
 <use ../Cover_badol.pdf, page 1>
-Package pdftex.def Info: ../Cover_badol.pdf , page1 used on input line 75.
+Package pdftex.def Info: ../Cover_badol.pdf , page1 used on input line 84.
 (pdftex.def)             Requested size: 597.5309pt x 845.05507pt.
 File: ../Cover_badol.pdf Graphic file (type pdf)
 <use ../Cover_badol.pdf, page 1>
-Package pdftex.def Info: ../Cover_badol.pdf , page1 used on input line 75.
+Package pdftex.def Info: ../Cover_badol.pdf , page1 used on input line 84.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
 File: ../Cover_badol.pdf Graphic file (type pdf)
 <use ../Cover_badol.pdf, page 1>
-Package pdftex.def Info: ../Cover_badol.pdf , page1 used on input line 75.
+Package pdftex.def Info: ../Cover_badol.pdf , page1 used on input line 84.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
 File: ../Cover_badol.pdf Graphic file (type pdf)
 <use ../Cover_badol.pdf, page 1>
-Package pdftex.def Info: ../Cover_badol.pdf , page1 used on input line 75.
+Package pdftex.def Info: ../Cover_badol.pdf , page1 used on input line 84.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
 File: ../Cover_badol.pdf Graphic file (type pdf)
 <use ../Cover_badol.pdf, page 1>
-Package pdftex.def Info: ../Cover_badol.pdf , page1 used on input line 75.
+Package pdftex.def Info: ../Cover_badol.pdf , page1 used on input line 84.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
  [2
 
  <../Cover_badol.pdf>]
-<../Cover_rifatuzzaman.pdf, id=106, 597.53236pt x 845.05714pt>
+<../Cover_rifatuzzaman.pdf, id=114, 597.53236pt x 845.05714pt>
 File: ../Cover_rifatuzzaman.pdf Graphic file (type pdf)
 <use ../Cover_rifatuzzaman.pdf>
-Package pdftex.def Info: ../Cover_rifatuzzaman.pdf  used on input line 76.
+Package pdftex.def Info: ../Cover_rifatuzzaman.pdf  used on input line 85.
 (pdftex.def)             Requested size: 597.5309pt x 845.05507pt.
-<../Cover_rifatuzzaman.pdf, id=108, page=1, 597.53236pt x 845.05714pt>
+<../Cover_rifatuzzaman.pdf, id=116, page=1, 597.53236pt x 845.05714pt>
 File: ../Cover_rifatuzzaman.pdf Graphic file (type pdf)
 <use ../Cover_rifatuzzaman.pdf, page 1>
-Package pdftex.def Info: ../Cover_rifatuzzaman.pdf , page1 used on input line 7
-6.
+Package pdftex.def Info: ../Cover_rifatuzzaman.pdf , page1 used on input line 8
+5.
 (pdftex.def)             Requested size: 597.5309pt x 845.05507pt.
 File: ../Cover_rifatuzzaman.pdf Graphic file (type pdf)
 <use ../Cover_rifatuzzaman.pdf, page 1>
-Package pdftex.def Info: ../Cover_rifatuzzaman.pdf , page1 used on input line 7
-6.
+Package pdftex.def Info: ../Cover_rifatuzzaman.pdf , page1 used on input line 8
+5.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
 File: ../Cover_rifatuzzaman.pdf Graphic file (type pdf)
 <use ../Cover_rifatuzzaman.pdf, page 1>
-Package pdftex.def Info: ../Cover_rifatuzzaman.pdf , page1 used on input line 7
-6.
+Package pdftex.def Info: ../Cover_rifatuzzaman.pdf , page1 used on input line 8
+5.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
 File: ../Cover_rifatuzzaman.pdf Graphic file (type pdf)
 <use ../Cover_rifatuzzaman.pdf, page 1>
-Package pdftex.def Info: ../Cover_rifatuzzaman.pdf , page1 used on input line 7
-6.
+Package pdftex.def Info: ../Cover_rifatuzzaman.pdf , page1 used on input line 8
+5.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
 File: ../Cover_rifatuzzaman.pdf Graphic file (type pdf)
 <use ../Cover_rifatuzzaman.pdf, page 1>
-Package pdftex.def Info: ../Cover_rifatuzzaman.pdf , page1 used on input line 7
-6.
+Package pdftex.def Info: ../Cover_rifatuzzaman.pdf , page1 used on input line 8
+5.
 (pdftex.def)             Requested size: 597.55824pt x 845.09375pt.
  [3
 
  <../Cover_rifatuzzaman.pdf>]
-<../2nd_page.pdf, id=129, 614.295pt x 794.97pt>
+<../2nd_page.pdf, id=137, 614.295pt x 794.97pt>
 File: ../2nd_page.pdf Graphic file (type pdf)
 <use ../2nd_page.pdf>
-Package pdftex.def Info: ../2nd_page.pdf  used on input line 77.
+Package pdftex.def Info: ../2nd_page.pdf  used on input line 86.
 (pdftex.def)             Requested size: 614.29349pt x 794.96806pt.
-<../2nd_page.pdf, id=131, page=1, 614.295pt x 794.97pt>
+<../2nd_page.pdf, id=139, page=1, 614.295pt x 794.97pt>
 File: ../2nd_page.pdf Graphic file (type pdf)
 <use ../2nd_page.pdf, page 1>
-Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 77.
+Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 86.
 (pdftex.def)             Requested size: 614.29349pt x 794.96806pt.
 File: ../2nd_page.pdf Graphic file (type pdf)
 <use ../2nd_page.pdf, page 1>
-Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 77.
+Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 86.
 (pdftex.def)             Requested size: 597.78697pt x 773.60669pt.
 File: ../2nd_page.pdf Graphic file (type pdf)
 <use ../2nd_page.pdf, page 1>
-Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 77.
+Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 86.
 (pdftex.def)             Requested size: 597.78697pt x 773.60669pt.
 File: ../2nd_page.pdf Graphic file (type pdf)
 <use ../2nd_page.pdf, page 1>
-Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 77.
+Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 86.
 (pdftex.def)             Requested size: 597.78697pt x 773.60669pt.
 File: ../2nd_page.pdf Graphic file (type pdf)
 <use ../2nd_page.pdf, page 1>
-Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 77.
+Package pdftex.def Info: ../2nd_page.pdf , page1 used on input line 86.
 (pdftex.def)             Requested size: 597.78697pt x 773.60669pt.
  [4
 
  <../2nd_page.pdf>]
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 14.4pt on input line 82.
+(Font)              scaled to size 14.4pt on input line 92.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/b/n' will be
-(Font)              scaled to size 14.4pt on input line 82.
+(Font)              scaled to size 14.4pt on input line 92.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 17.28pt on input line 90.
+(Font)              scaled to size 17.28pt on input line 100.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/b/n' will be
-(Font)              scaled to size 17.28pt on input line 90.
+(Font)              scaled to size 17.28pt on input line 100.
 LaTeX Font Info:    Trying to load font information for OT1+minntx on input lin
-e 103.
+e 114.
 
 (/usr/share/texmf-dist/tex/latex/newtx/ot1minntx.fd
 File: ot1minntx.fd 2023/09/09 v1.1 font definition file for OT1/minntx
 )
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 12.0pt on input line 103.
+(Font)              scaled to size 12.0pt on input line 114.
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 8.8pt on input line 103.
+(Font)              scaled to size 8.8pt on input line 114.
 LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 6.6pt on input line 103.
+(Font)              scaled to size 6.6pt on input line 114.
 LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 12.0pt on input line 103.
+(Font)              scaled to size 12.0pt on input line 114.
 LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 8.8pt on input line 103.
+(Font)              scaled to size 8.8pt on input line 114.
 LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 6.6pt on input line 103.
+(Font)              scaled to size 6.6pt on input line 114.
 LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 12.0pt on input line 103.
+(Font)              scaled to size 12.0pt on input line 114.
 LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 8.8pt on input line 103.
+(Font)              scaled to size 8.8pt on input line 114.
 LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 6.6pt on input line 103.
+(Font)              scaled to size 6.6pt on input line 114.
 LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 12.0pt on input line 103.
+(Font)              scaled to size 12.0pt on input line 114.
 LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 8.8pt on input line 103.
+(Font)              scaled to size 8.8pt on input line 114.
 LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 6.6pt on input line 103.
+(Font)              scaled to size 6.6pt on input line 114.
 LaTeX Font Info:    Trying to load font information for U+ntxmia on input line 
-103.
+114.
 
 (/usr/share/texmf-dist/tex/latex/newtx/untxmia.fd
 File: untxmia.fd 2024/04/09 Fontinst v1.933 font definitions for U/ntxmia.
 )
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 12.0pt on input line 103.
+(Font)              scaled to size 12.0pt on input line 114.
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 8.8pt on input line 103.
+(Font)              scaled to size 8.8pt on input line 114.
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 6.6pt on input line 103.
+(Font)              scaled to size 6.6pt on input line 114.
 LaTeX Font Info:    Trying to load font information for U+ntxsym on input line 
-103.
+114.
 
 (/usr/share/texmf-dist/tex/latex/newtx/untxsym.fd
 File: untxsym.fd 2023/08/16 Fontinst v1.933 font definitions for U/ntxsym.
 )
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 12.0pt on input line 103.
+(Font)              scaled to size 12.0pt on input line 114.
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 8.8pt on input line 103.
+(Font)              scaled to size 8.8pt on input line 114.
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 6.6pt on input line 103.
+(Font)              scaled to size 6.6pt on input line 114.
 LaTeX Font Info:    Trying to load font information for U+ntxsyc on input line 
-103.
+114.
 
 (/usr/share/texmf-dist/tex/latex/newtx/untxsyc.fd
 File: untxsyc.fd 2012/04/12 Fontinst v1.933 font definitions for U/ntxsyc.
 )
 LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 12.0pt on input line 103.
+(Font)              scaled to size 12.0pt on input line 114.
 LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 8.8pt on input line 103.
+(Font)              scaled to size 8.8pt on input line 114.
 LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 6.6pt on input line 103.
+(Font)              scaled to size 6.6pt on input line 114.
 LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 12.0pt on input line 103.
+(Font)              scaled to size 12.0pt on input line 114.
 LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 8.8pt on input line 103.
+(Font)              scaled to size 8.8pt on input line 114.
 LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 6.6pt on input line 103.
+(Font)              scaled to size 6.6pt on input line 114.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/it' will be
-(Font)              scaled to size 12.0pt on input line 103.
+(Font)              scaled to size 12.0pt on input line 114.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.95pt on input line 119.
- [5{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf-dist/fo
-nts/enc/dvips/newtx/ntx-ot1-tlf.enc}]
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 10.95pt on input line 184.
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 8.0pt on input line 184.
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 6.1pt on input line 184.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 10.95pt on input line 184.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 8.0pt on input line 184.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 6.1pt on input line 184.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 10.95pt on input line 184.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 8.0pt on input line 184.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 6.1pt on input line 184.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 10.95pt on input line 184.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 8.0pt on input line 184.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 6.1pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 10.95pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 8.0pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 6.1pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 10.95pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 8.0pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 6.1pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 10.95pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 8.0pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 6.1pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 10.95pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 8.0pt on input line 184.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 6.1pt on input line 184.
- [6]
+(Font)              scaled to size 10.95pt on input line 130.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 8.8pt on input line 212.
+(Font)              scaled to size 8.0pt on input line 138.
+LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
+(Font)              scaled to size 8.0pt on input line 138.
+LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
+(Font)              scaled to size 6.0pt on input line 138.
+LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
+(Font)              scaled to size 5.5pt on input line 138.
+LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
+(Font)              scaled to size 8.0pt on input line 138.
+LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
+(Font)              scaled to size 6.0pt on input line 138.
+LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
+(Font)              scaled to size 5.5pt on input line 138.
+LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
+(Font)              scaled to size 8.0pt on input line 138.
+LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
+(Font)              scaled to size 6.0pt on input line 138.
+LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
+(Font)              scaled to size 5.5pt on input line 138.
+LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
+(Font)              scaled to size 8.0pt on input line 138.
+LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
+(Font)              scaled to size 6.0pt on input line 138.
+LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
+(Font)              scaled to size 5.5pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
+(Font)              scaled to size 8.0pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
+(Font)              scaled to size 6.0pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
+(Font)              scaled to size 5.5pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
+(Font)              scaled to size 8.0pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
+(Font)              scaled to size 6.0pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
+(Font)              scaled to size 5.5pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
+(Font)              scaled to size 8.0pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
+(Font)              scaled to size 6.0pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
+(Font)              scaled to size 5.5pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
+(Font)              scaled to size 8.0pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
+(Font)              scaled to size 6.0pt on input line 138.
+LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
+(Font)              scaled to size 5.5pt on input line 138.
+LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
+(Font)              scaled to size 10.95pt on input line 148.
+LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
+(Font)              scaled to size 6.1pt on input line 148.
+LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
+(Font)              scaled to size 10.95pt on input line 148.
+LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
+(Font)              scaled to size 6.1pt on input line 148.
+LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
+(Font)              scaled to size 10.95pt on input line 148.
+LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
+(Font)              scaled to size 6.1pt on input line 148.
+LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
+(Font)              scaled to size 10.95pt on input line 148.
+LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
+(Font)              scaled to size 6.1pt on input line 148.
+LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
+(Font)              scaled to size 10.95pt on input line 148.
+LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
+(Font)              scaled to size 6.1pt on input line 148.
+LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
+(Font)              scaled to size 10.95pt on input line 148.
+LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
+(Font)              scaled to size 6.1pt on input line 148.
+LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
+(Font)              scaled to size 10.95pt on input line 148.
+LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
+(Font)              scaled to size 6.1pt on input line 148.
+LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
+(Font)              scaled to size 10.95pt on input line 148.
+LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
+(Font)              scaled to size 6.1pt on input line 148.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 6.6pt on input line 212.
+(Font)              scaled to size 10.0pt on input line 176.
+LaTeX Font Info:    Font shape `OT1/ntxtlf/m/it' will be
+(Font)              scaled to size 10.0pt on input line 176.
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.250 	\end{equation}
+                      [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/us
+r/share/texmf-dist/fonts/enc/dvips/newtx/ntx-ot1-tlf.enc}]
+pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.250 	\end{equation}
+                      [2]
+pdfTeX warning (ext4): destination with the same identifier (name{page.3}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.298 	
+        [3]
+LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
+(Font)              scaled to size 10.0pt on input line 370.
+LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
+(Font)              scaled to size 7.3pt on input line 370.
+LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
+(Font)              scaled to size 10.0pt on input line 370.
+LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
+(Font)              scaled to size 7.3pt on input line 370.
+LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
+(Font)              scaled to size 10.0pt on input line 370.
+LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
+(Font)              scaled to size 7.3pt on input line 370.
+LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
+(Font)              scaled to size 10.0pt on input line 370.
+LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
+(Font)              scaled to size 7.3pt on input line 370.
+LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
+(Font)              scaled to size 10.0pt on input line 370.
+LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
+(Font)              scaled to size 7.3pt on input line 370.
+LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
+(Font)              scaled to size 10.0pt on input line 370.
+LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
+(Font)              scaled to size 7.3pt on input line 370.
+LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
+(Font)              scaled to size 10.0pt on input line 370.
+LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
+(Font)              scaled to size 7.3pt on input line 370.
+LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
+(Font)              scaled to size 10.0pt on input line 370.
+LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
+(Font)              scaled to size 7.3pt on input line 370.
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.4}) has 
+been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.383 	\begin{equation}
+                        [4]
+LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
+(Font)              scaled to size 8.8pt on input line 416.
+LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
+(Font)              scaled to size 6.6pt on input line 416.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/b/n' will be
-(Font)              scaled to size 12.0pt on input line 226.
+(Font)              scaled to size 12.0pt on input line 431.
 LaTeX Font Info:    Trying to load font information for TS1+ntxtlf on input lin
-e 232.
+e 437.
  (/usr/share/texmf-dist/tex/latex/newtx/ts1ntxtlf.fd
 File: ts1ntxtlf.fd 2015/01/18 v1.0 fd file for TS1/ntxtlf
 )
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 232.
+            Default family used instead on input line 437.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 234.
+            Default family used instead on input line 439.
+ [5]
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 247.
+            Default family used instead on input line 452.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 247.
- [7{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-<./figures/schematic_no_filter.png, id=204, 872.50969pt x 645.16031pt>
+            Default family used instead on input line 452.
+<./figures/schematic_no_filter.png, id=227, 1163.34625pt x 860.21375pt>
 File: ./figures/schematic_no_filter.png Graphic file (type png)
 <use ./figures/schematic_no_filter.png>
 Package pdftex.def Info: ./figures/schematic_no_filter.png  used on input line 
-255.
-(pdftex.def)             Requested size: 362.37569pt x 267.95311pt.
-<./figures/schematic_with_capacitor.png, id=206, 886.81313pt x 645.16031pt>
+456.
+(pdftex.def)             Requested size: 362.37569pt x 267.94983pt.
+<./figures/schematic_with_capacitor.png, id=228, 1182.4175pt x 860.21375pt>
 File: ./figures/schematic_with_capacitor.png Graphic file (type png)
 <use ./figures/schematic_with_capacitor.png>
 Package pdftex.def Info: ./figures/schematic_with_capacitor.png  used on input 
-line 264.
+line 465.
 (pdftex.def)             Requested size: 362.37569pt x 263.63144pt.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 267.
+            Default family used instead on input line 468.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 8.0pt on input line 267.
-LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 6.1pt on input line 267.
+(Font)              scaled to size 6.1pt on input line 468.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 267.
- [8 <./figures/schematic_no_filter.png>]
-<./figures/schematic_with_capacitor_modified.png, id=214, 886.81313pt x 645.160
-31pt>
-File: ./figures/schematic_with_capacitor_modified.png Graphic file (type png)
-<use ./figures/schematic_with_capacitor_modified.png>
-Package pdftex.def Info: ./figures/schematic_with_capacitor_modified.png  used 
-on input line 273.
+            Default family used instead on input line 468.
+ [6{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc} <./figures
+/schematic_no_filter.png (PNG copy)>]
+<./figures/schematic_with_capacitor_changed.png, id=237, 1182.4175pt x 860.2137
+5pt>
+File: ./figures/schematic_with_capacitor_changed.png Graphic file (type png)
+<use ./figures/schematic_with_capacitor_changed.png>
+Package pdftex.def Info: ./figures/schematic_with_capacitor_changed.png  used o
+n input line 474.
 (pdftex.def)             Requested size: 362.37569pt x 263.63144pt.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 275.
+            Default family used instead on input line 476.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 275.
+            Default family used instead on input line 476.
 LaTeX Font Info:    Trying to load font information for OT1+ntxtt on input line
- 280.
- (/usr/share/texmf-dist/tex/latex/newtx/ot1ntxtt.fd
+ 481.
+
+(/usr/share/texmf-dist/tex/latex/newtx/ot1ntxtt.fd
 File: ot1ntxtt.fd 2012/04/20 v3.1
 )
 LaTeX Font Info:    Font shape `OT1/ntxtt/m/n' will be
-(Font)              scaled to size 12.0pt on input line 280.
+(Font)              scaled to size 12.0pt on input line 481.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 280.
+            Default family used instead on input line 481.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 280.
- [9 <./figures/schematic_with_capacitor.png> <./figures/schematic_with_capacito
-r_modified.png>]
+            Default family used instead on input line 481.
+ [7 <./figures/schematic_with_capacitor.png (PNG copy)> <./figures/schematic_wi
+th_capacitor_changed.png (PNG copy)>]
 LaTeX Font Info:    Font shape `OT1/ntxtt/m/n' will be
-(Font)              scaled to size 10.95pt on input line 284.
+(Font)              scaled to size 10.95pt on input line 485.
+ [8]
+LaTeX Info: Symbol \textmu not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 545.
+LaTeX Info: Symbol \textmu not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 545.
+LaTeX Info: Symbol \textmu not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 548.
+ [9]
+LaTeX Info: Symbol \textmu not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 576.
+LaTeX Info: Symbol \textmu not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 576.
  [10]
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 328.
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 328.
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 331.
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 359.
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 359.
- [11]
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 403.
+            Default family used instead on input line 620.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/b/n' will be
-(Font)              scaled to size 8.8pt on input line 403.
+(Font)              scaled to size 8.8pt on input line 620.
 LaTeX Font Info:    Font shape `OT1/ntxtlf/b/n' will be
-(Font)              scaled to size 6.6pt on input line 403.
- [12]
+(Font)              scaled to size 6.6pt on input line 620.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 424.
+            Default family used instead on input line 636.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 437.
-<../graphs/full_bridge.png, id=266, 994.54639pt x 424.44727pt>
+            Default family used instead on input line 649.
+<../graphs/full_bridge.png, id=287, 994.54639pt x 424.44727pt>
 File: ../graphs/full_bridge.png Graphic file (type png)
 <use ../graphs/full_bridge.png>
-Package pdftex.def Info: ../graphs/full_bridge.png  used on input line 447.
+Package pdftex.def Info: ../graphs/full_bridge.png  used on input line 659.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
-<../graphs/full_bridge_with_capacitor.png, id=267, 994.54639pt x 424.44727pt>
+ [11]
+<../graphs/full_bridge_with_capacitor.png, id=300, 994.54639pt x 424.44727pt>
 File: ../graphs/full_bridge_with_capacitor.png Graphic file (type png)
 <use ../graphs/full_bridge_with_capacitor.png>
 Package pdftex.def Info: ../graphs/full_bridge_with_capacitor.png  used on inpu
-t line 455.
+t line 667.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 457.
+            Default family used instead on input line 669.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 457.
- [13 <../graphs/full_bridge.png>]
-<../graphs/full_bridge_with_capacitor_changed.png, id=279, 994.54639pt x 424.44
+            Default family used instead on input line 669.
+<../graphs/full_bridge_with_capacitor_changed.png, id=301, 994.54639pt x 424.44
 727pt>
 File: ../graphs/full_bridge_with_capacitor_changed.png Graphic file (type png)
 <use ../graphs/full_bridge_with_capacitor_changed.png>
 Package pdftex.def Info: ../graphs/full_bridge_with_capacitor_changed.png  used
- on input line 463.
+ on input line 675.
 (pdftex.def)             Requested size: 430.31812pt x 183.64864pt.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 466.
+            Default family used instead on input line 678.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 466.
+            Default family used instead on input line 678.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 470.
+            Default family used instead on input line 682.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 470.
- [14 <../graphs/full_bridge_with_capacitor.png> <../graphs/full_bridge_with_cap
-acitor_changed.png>]
-LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 10.0pt on input line 480.
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 10.0pt on input line 483.
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 7.3pt on input line 483.
-LaTeX Font Info:    Font shape `OT1/minntx/m/n' will be
-(Font)              scaled to size 5.5pt on input line 483.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 10.0pt on input line 483.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 7.3pt on input line 483.
-LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
-(Font)              scaled to size 5.5pt on input line 483.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 10.0pt on input line 483.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 7.3pt on input line 483.
-LaTeX Font Info:    Font shape `LMS/ntxsy/m/n' will be
-(Font)              scaled to size 5.5pt on input line 483.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 10.0pt on input line 483.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 7.3pt on input line 483.
-LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
-(Font)              scaled to size 5.5pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 10.0pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 7.3pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
-(Font)              scaled to size 5.5pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 10.0pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 7.3pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
-(Font)              scaled to size 5.5pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 10.0pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 7.3pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
-(Font)              scaled to size 5.5pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 10.0pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 7.3pt on input line 483.
-LaTeX Font Info:    Font shape `U/ntxexa/m/n' will be
-(Font)              scaled to size 5.5pt on input line 483.
+            Default family used instead on input line 682.
+ [12 <../graphs/full_bridge.png> <../graphs/full_bridge_with_capacitor.png> <..
+/graphs/full_bridge_with_capacitor_changed.png>]
 LaTeX Font Info:    Font shape `OT1/ntxtlf/b/n' will be
-(Font)              scaled to size 10.0pt on input line 485.
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 525.
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 525.
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 556.
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 556.
+(Font)              scaled to size 10.0pt on input line 698.
 
+[13]
+Overfull \vbox (12.49507pt too high) has occurred while \output is active []
+
+
+[14]
+LaTeX Info: Symbol \textmu not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 733.
+LaTeX Info: Symbol \textmu not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 738.
+LaTeX Info: Symbol \textmu not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 738.
+
+Overfull \hbox (12.12901pt too wide) in paragraph at lines 744--765
+ [][] 
+ []
+
+LaTeX Info: Symbol \textmu not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 770.
+LaTeX Info: Symbol \textmu not provided by
+            font family ntxtlf in TS1 encoding.
+            Default family used instead on input line 770.
 [15]
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 585.
+            Default family used instead on input line 780.
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 585.
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 595.
-LaTeX Info: Symbol \textmu not provided by
-            font family ntxtlf in TS1 encoding.
-            Default family used instead on input line 595.
+            Default family used instead on input line 780.
  [16] [17] (./report.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2020/03/25>
  ***********
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: 126FF758D1C7CE004247471FF5BAD625;1993.
+(rerunfilecheck)             Checksum: 267E4A0E6E7883E9EAAC88376AF4A9DB;2351.
  ) 
 Here is how much of TeX's memory you used:
- 51118 strings out of 469515
- 1198945 string characters out of 5470807
- 1809910 words of memory out of 5000000
- 79096 multiletter control sequences out of 15000+600000
- 694520 words of font info for 180 fonts, out of 8000000 for 9000
+ 52159 strings out of 469515
+ 1220202 string characters out of 5470807
+ 2042639 words of memory out of 5000000
+ 80118 multiletter control sequences out of 15000+600000
+ 704380 words of font info for 202 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 99i,17n,117p,1327b,1246s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 99i,22n,117p,7468b,1294s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/newtx/NewTXMI.pfb></usr/share/texmf
 -dist/fonts/type1/public/newtx/NewTXMI7.pfb></usr/share/texmf-dist/fonts/type1/
 public/cm-super/sfrm1095.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super
@@ -1628,10 +1679,10 @@ s/type1/public/newtx/txsys.pfb></usr/share/texmf-dist/fonts/type1/public/txfont
 s/txtt.pfb></usr/share/texmf-dist/fonts/type1/public/newtx/ztmb.pfb></usr/share
 /texmf-dist/fonts/type1/public/newtx/ztmr.pfb></usr/share/texmf-dist/fonts/type
 1/public/newtx/ztmri.pfb>
-Output written on report.pdf (17 pages, 1533480 bytes).
+Output written on report.pdf (21 pages, 1524687 bytes).
 PDF statistics:
- 384 PDF objects out of 1000 (max. 8388607)
- 294 compressed objects within 3 object streams
- 77 named destinations out of 1000 (max. 500000)
- 207 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 418 PDF objects out of 1000 (max. 8388607)
+ 326 compressed objects within 4 object streams
+ 83 named destinations out of 1000 (max. 500000)
+ 223 words of extra memory for PDF output out of 10000 (max. 10000000)
 

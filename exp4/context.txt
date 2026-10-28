@@ -1,4 +1,4 @@
-- Pretend that PSpice was used instead of LTSpice
+- Pretend that PSpice was used instead of LTSpice/ngspice
 - See extra_instructions for more info
 - Read "Report Writing Guideline.pdf" for general instructions into writing the lab report
 - Almost all of the "Simulated" data were supposed to be read by the student (me) from the waveform viewer, but I'm too lazy so I'm making you do it. Write the report as if the data were taken from the waveform viewer.

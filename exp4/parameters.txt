@@ -1,28 +1,28 @@
 # Full Bridge (Without Capacitor)
-R1 = 100k
+R1 = 10k
 Voltage source's DC offset = 0V
 Voltage source's amplitude = 100V
 Voltage source's frequency = 50Hz
-Diode = D1N914
-.model D1N914 D(Is=168.1E-21 N=1 Rs=.1 Ikf=0 Xti=3 Eg=1.11 Cjo=4p M=.3333 Vj=.75 Fc=.5 Isr=100p Nr=2 Bv=100 Ibv=100u Tt=11.54n)
+Diode = D1N4002
+.model D1N4002 D(Is=14.11n Rs=33.89m N=1.984 Ikf=94.81 Xti=3 Eg=1.11 Cjo=51.17p M=.2762 Vj=.3905 Fc=.5 Isr=100.0p Nr=2 Bv=100.1 Ibv=10 Tt=4.761u)
 .tran 100ms uic
 
 # Full Bridge (With Capacitor)
-R1 = 100k
+R1 = 10k
 C1 = 100u
 Voltage source's DC offset = 0V
 Voltage source's amplitude = 100V
 Voltage source's frequency = 50Hz
-Diode = D1N914
-.model D1N914 D(Is=168.1E-21 N=1 Rs=.1 Ikf=0 Xti=3 Eg=1.11 Cjo=4p M=.3333 Vj=.75 Fc=.5 Isr=100p Nr=2 Bv=100 Ibv=100u Tt=11.54n)
+Diode = D1N4002
+.model D1N4002 D(Is=14.11n Rs=33.89m N=1.984 Ikf=94.81 Xti=3 Eg=1.11 Cjo=51.17p M=.2762 Vj=.3905 Fc=.5 Isr=100.0p Nr=2 Bv=100.1 Ibv=10 Tt=4.761u)
 .tran 300ms uic
 
 # Full Bridge (With Capacitor, capacitance changed for task 4)
-R1 = 100k
-C1 = 10u
+R1 = 10k
+C1 = 50u
 Voltage source's DC offset = 0V
 Voltage source's amplitude = 100V
 Voltage source's frequency = 50Hz
-Diode = D1N914
-.model D1N914 D(Is=168.1E-21 N=1 Rs=.1 Ikf=0 Xti=3 Eg=1.11 Cjo=4p M=.3333 Vj=.75 Fc=.5 Isr=100p Nr=2 Bv=100 Ibv=100u Tt=11.54n)
+Diode = D1N4002
+.model D1N4002 D(Is=14.11n Rs=33.89m N=1.984 Ikf=94.81 Xti=3 Eg=1.11 Cjo=51.17p M=.2762 Vj=.3905 Fc=.5 Isr=100.0p Nr=2 Bv=100.1 Ibv=10 Tt=4.761u)
 .tran 300ms uic

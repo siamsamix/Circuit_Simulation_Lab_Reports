@@ -25,10 +25,10 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import FancyBboxPatch
 
 from pspice_theme import (AX_H_PT, AX_RECT, FIG_W_PT, GREEN, MARKER_FIRST_PT,
-                          MARKER_SPACING_PT, NOTE_EDGE, NOTE_SERIF, choose_font,
-                          dense_curve, label_widths_pt, load_table, major_ticks,
-                          minor_between, new_page, qty_label, rect_is_free,
-                          style_axes, text_width)
+                          MARKER_SPACING_PT, NOTE_EDGE, NOTE_SERIF, add_y_label,
+                          choose_font, dense_curve, label_widths_pt, load_table,
+                          major_ticks, minor_between, new_page, qty_label,
+                          rect_is_free, style_axes, text_width)
 
 PURPLE = "#5400ff"                    # second Probe trace colour (as in the reference)
 
@@ -36,17 +36,18 @@ VDIFF, VIN = "V(R1:1,R1:2)", "V(1)"   # column names in the LTspice exports
 NOTE_VDIFF = "Voltage across resistor"
 NOTE_VIN = "Vin"
 X_LABEL = "Time (ms)"
+Y_LABEL = "Voltage (V)"
 
 # preferred note spots (axes-fraction x, y, force): "Voltage across resistor" is pinned
 # onto a feature of the green trace (overlap allowed), "Vin" anchors inside a sine
 # trough; unless force is set, the search only moves a note if a curve is in the way
 PLOTS = (
     ("full_bridge.txt", "full_bridge.png",
-     {NOTE_VDIFF: (0.40, 0.873, True), NOTE_VIN: (0.30, 0.182, False)}, 0),
+     {NOTE_VDIFF: (0.40, 0.873, True), NOTE_VIN: (0.30, 0.182, False)}, 50e-3),
     ("full_bridge_with_capacitor.txt", "full_bridge_with_capacitor.png",
-     {NOTE_VDIFF: (0.30, 0.84, False), NOTE_VIN: (0.52, 0.72, False)}, 200e-3),
+     {NOTE_VDIFF: (0.30, 0.84, False), NOTE_VIN: (0.52, 0.72, False)}, 250e-3),
     ("full_bridge_with_capacitor_changed.txt", "full_bridge_with_capacitor_changed.png",
-     {NOTE_VDIFF: (0.30, 0.84, False), NOTE_VIN: (0.52, 0.72, False)}, 200e-3),
+     {NOTE_VDIFF: (0.30, 0.84, False), NOTE_VIN: (0.52, 0.72, False)}, 250e-3),
 )
 
 
@@ -92,9 +93,9 @@ def marker_positions(t, y, frame, first_pt):
 
 def draw_trace(ax, t, v, frame, color, marker, zorder, first_pt):
     """Solid trace with hollow white markers (coloured rims) spaced along the curve."""
-    ax.plot(t, v, color=color, linewidth=2.6, solid_joinstyle="round", zorder=zorder)
+    ax.plot(t, v, color=color, linewidth=3, solid_joinstyle="round", zorder=zorder)
     mx, my = marker_positions(t, v, frame, first_pt)
-    ax.plot(mx, my, linestyle="none", marker=marker, markersize=4.4, markeredgewidth=1.1,
+    ax.plot(mx, my, linestyle="none", marker=marker, markersize=8, markeredgewidth=1.1,
             markerfacecolor="white", markeredgecolor=color, zorder=zorder)
 
 
@@ -103,7 +104,7 @@ def note_fontsize(prop):
     return 8.0 * (0.2256 * AX_RECT[2] * FIG_W_PT) / text_width("Voltage across capacitor", 10, prop)
 
 
-def add_note_at(ax, note, frame, curve_pts, avoid_rects, prefer, fsize, prop, force=False):
+def add_note_at(ax, note, frame, curve_pts, avoid_rects, prefer, fsize, prop, text_color="black", force=False):
     """White thin-framed serif note box at `prefer`; moved to the nearest free spot unless
     force is set (overlap with the traces allowed)."""
     box_w = text_width(note, fsize, prop) + 2 * 0.0140 * AX_RECT[2] * FIG_W_PT
@@ -135,7 +136,7 @@ def add_note_at(ax, note, frame, curve_pts, avoid_rects, prefer, fsize, prop, fo
                                 facecolor="white", edgecolor=NOTE_EDGE, linewidth=1.0,
                                 zorder=10, clip_on=False))
     ax.text(fx, fy, note, transform=ax.transAxes, ha="center", va="center_baseline",
-            fontproperties=prop, fontsize=fsize, color="black", zorder=11)
+            fontproperties=prop, fontsize=fsize, color=text_color, zorder=11)
 
     rect = (cx - box_w / 2, cy - box_h / 2, cx + box_w / 2, cy + box_h / 2)
     to_data = lambda px, py: (frame.xmin + px / frame.w * (frame.xmax - frame.xmin),
@@ -145,11 +146,17 @@ def add_note_at(ax, note, frame, curve_pts, avoid_rects, prefer, fsize, prop, fo
     return rect
 
 
-def add_legend_footer(fig, entries, axis_label):
-    """Hollow-marker legend row bottom-left and the axis label centred underneath."""
+def add_legend_footer(fig, entries, axis_label, ax=None):
+    """Hollow-marker legend row starting at the left edge of the axes (the zero
+    position of the x-axis), with the axis label centred underneath."""
+    if ax is None:
+        axs = fig.get_axes()
+        ax = axs[0] if axs else None
+    x0 = ax.get_position().x0 if ax is not None else 0.0349
+
     fsize = choose_font()[1]
     widths = label_widths_pt([name for _, _, name in entries], fsize)
-    x = 0.0349
+    x = x0
     for (marker, edge, name), w in zip(entries, widths):
         fig.add_artist(Line2D([x], [0.0314], marker=marker, markersize=4.4, markeredgewidth=1.1,
                               markerfacecolor="white", markeredgecolor=edge, linestyle="none",
@@ -158,11 +165,10 @@ def add_legend_footer(fig, entries, axis_label):
         x += 0.0084 + w / FIG_W_PT + 0.020
     fig.text(0.491, 0.0137, axis_label, ha="center", va="center", color="black")
 
-
 # --------------------------------------------------------------------------- #
 # Figure assembly
 # --------------------------------------------------------------------------- #
-def make_figure(datafile, output, prefs, dpi, cut):
+def make_figure(datafile, output, prefs, dpi, cut, y_label=Y_LABEL):
     header, data = load_table(datafile)
     data = data[~np.isnan(data).any(axis=1)]   # drop truncated trailing rows
     names = [h.lower() for h in header]
@@ -187,7 +193,7 @@ def make_figure(datafile, output, prefs, dpi, cut):
     xticks = time_ticks(tmin, tmax)
     xlabels = [time_label(x, tunit) for x in xticks]
 
-    fig, ax, frame = new_page((tmin, tmax), (-lim, lim), y_labels)
+    fig, ax, frame = new_page((tmin, tmax), (-lim, lim), y_labels, reserve_y_label=True)
     style_axes(ax, xticks, xlabels, y_majors, y_labels, y_minors)
 
     # ---- traces: V(1) underneath, the voltage difference on top --------------------
@@ -208,7 +214,8 @@ def make_figure(datafile, output, prefs, dpi, cut):
     fx, fy, force = prefs[NOTE_VIN]
     add_note_at(ax, NOTE_VIN, frame, both, [rect], (fx, fy), fsize, prop, force=force)
 
-    add_legend_footer(fig, [("s", GREEN, VDIFF), ("v", PURPLE, VIN)], X_LABEL)
+    add_legend_footer(fig, [("s", GREEN, VDIFF), ("v", PURPLE, VIN)], X_LABEL, ax=ax)
+    add_y_label(fig, y_label, ax)
 
     fig.savefig(output, dpi=dpi, facecolor="white")
     print(f"  saved {output}")
@@ -219,11 +226,14 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="PSpice-style full-wave bridge rectifier plots")
     parser.add_argument("--dpi", type=int, default=260, help="output resolution (default: 260)")
+    parser.add_argument("--y-label", default=Y_LABEL,
+                        help=f"y-axis title (default: {Y_LABEL!r})")
+
     args = parser.parse_args()
 
     here = Path(__file__).resolve().parent
     for datafile, output, prefs, cut in PLOTS:
-        make_figure(str(here / datafile), str(here / output), prefs, args.dpi, cut)
+        make_figure(str(here / datafile), str(here / output), prefs, args.dpi, cut, y_label=args.y_label)
 
 
 if __name__ == "__main__":

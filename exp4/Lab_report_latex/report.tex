@@ -27,10 +27,19 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage[american]{circuitikz}
+\usetikzlibrary{arrows.meta,calc}
+
 \usepackage{caption}
 \usepackage{float}
 \usepackage{array}
 \usepackage[table]{xcolor} % row shading for Word-style table headers
+% waveform-figure colours (theory section)
+\definecolor{wvpos}{RGB}{250,226,166}
+\definecolor{wvneg}{RGB}{214,204,236}
+\definecolor{wvout}{RGB}{176,214,160}
+\definecolor{wvon}{RGB}{36,110,60}
+\definecolor{wvoff}{RGB}{110,70,150}
+\definecolor{wvvd}{RGB}{190,40,60}
 \graphicspath{{../graphs/}{./figures/}}
 
 % ----- Lists: compact, guide-style itemization -----
@@ -78,6 +87,7 @@
 	% =====================================================================
 	% HEADER BLOCK
 	% =====================================================================
+	\setcounter{page}{1}
 	\begin{center}
 		{\large\bfseries Experiment No. \expnumber}\\[4pt]
 		{\large\bfseries Name of the Experiment: Simulation and Analysis of
@@ -100,6 +110,7 @@
 	% =====================================================================
 	\section{Theory}
 	% =====================================================================
+	\subsection{Without filter capacitor}
 	A full-wave bridge rectifier converts an alternating input voltage into a unidirectional output voltage using four diodes arranged in a bridge, so that both half-cycles of the input are delivered to the load in the same direction \cite{ref:theraja}. Figure~\ref{fig:bridge-theory} shows the circuit. During the positive half-cycle of $V_{\mathrm{in}}$, diodes $D_1$ and $D_4$ are forward biased and conduct, while $D_2$ and $D_3$ are reverse biased; the load current flows from the positive source terminal through $D_1$, downward through $R_1$, and back through $D_4$. During the negative half-cycle the roles reverse: $D_2$ and $D_3$ conduct and the current flows through $R_1$ in the \emph{same} direction as before. The load voltage is therefore a rectified copy of $|V_{\mathrm{in}}|$ in both half-cycles, and the output frequency is twice the input frequency. Because the bridge returns the load current to whichever source terminal is negative, no centre-tapped transformer is required, and the peak inverse voltage appearing across each non-conducting diode is only approximately $V_m$, half of what a centre-tapped full-wave rectifier imposes \cite{ref:theraja}.
 	
 	\begin{figure}[htbp]
@@ -120,33 +131,148 @@
 		\label{fig:bridge-theory}
 	\end{figure}
 	
-	For a silicon diode, the forward voltage is approximated as $V_D = \SI{0.7}{\volt}$, and since two diodes conduct in series in each half-cycle, the total diode voltage drop is $2V_D = \SI{1.4}{\volt}$. With a sinusoidal input of amplitude $V_m$, the output is therefore a full-wave rectified waveform whose crests reach
+	\begin{figure}[htbp]
+		\centering
+		% ---------------- (a) without V_D ----------------
+		\begin{tikzpicture}[x=4.9cm,y=1.15cm,line width=0.6pt,font=\small,>={Stealth[length=2mm]}]
+			\node[align=center,font=\scriptsize] at (0.25,1.85) {\textcolor{wvon}{$D_1,D_4$ ON}\\\textcolor{wvoff}{$D_2,D_3$ OFF}};
+			\node[align=center,font=\scriptsize] at (0.75,1.85) {\textcolor{wvoff}{$D_1,D_4$ OFF}\\\textcolor{wvon}{$D_2,D_3$ ON}};
+			\node[align=center,font=\scriptsize] at (1.25,1.85) {\textcolor{wvon}{$D_1,D_4$ ON}\\\textcolor{wvoff}{$D_2,D_3$ OFF}};
+			\node[align=center,font=\scriptsize] at (1.75,1.85) {\textcolor{wvoff}{$D_1,D_4$ OFF}\\\textcolor{wvon}{$D_2,D_3$ ON}};
+			
+			% ---- input v_i(t): lobes shaded ----
+			\foreach \k in {0,1}{
+				\fill[wvpos] (\k,0) -- plot[domain=\k:\k+0.5,samples=40] (\x,{sin(360*\x)}) -- cycle;
+				\fill[wvneg] (\k+0.5,0) -- plot[domain=\k+0.5:\k+1,samples=40] (\x,{sin(360*\x)}) -- cycle;
+			}
+			\draw[->] (0,0) -- (2.12,0) node[right] {$t$};
+			\draw[->] (0,-1.3) -- (0,1.45) node[above] {$v_i(t)$};
+			\draw[very thick,samples=161,smooth,domain=0:2] plot (\x,{sin(360*\x)});
+			\draw[dashed,gray] (0,1) -- (0.25,1);
+			\draw[dashed,gray] (0,-1) -- (0.75,-1);
+			\node[left] at (0,1) {$V_m$};
+			\node[left] at (0,-1) {$-V_m$};
+			\node[anchor=east,xshift=-1.8cm] at (0,0) {Input};
+			\node[below left] at (0,0) {$0$};
+			
+			\foreach \x in {0.5,1,1.5,2}{\draw[dashed,gray,thin] (\x,1.45) -- (\x,-3.6);}
+			
+			% ---- output v_o(t) ----
+			\begin{scope}[shift={(0,-3.6)}]
+				\foreach \k in {0,0.5,1,1.5}{
+					\fill[wvout] (\k,0) -- plot[domain=\k:\k+0.5,samples=40] (\x,{sin(360*(\x-\k))}) -- cycle;
+				}
+				\draw[->] (0,0) -- (2.12,0) node[right] {$t$};
+				\draw[->] (0,0) -- (0,1.45) node[above] {$v_o(t)$};
+				\draw[very thick,samples=161,smooth,domain=0:2] plot (\x,{abs(sin(360*\x))});
+				\draw[dashed,gray] (0,1) -- (0.25,1);
+				\node[left] at (0,1) {$V_m$};
+				\node[below left] at (0,0) {$0$};
+				\node[anchor=east,xshift=-1.8cm] at (0,0.5) {Output};
+				\node[font=\scriptsize] at (0.25,0.42) {$D_1,D_4$};
+				\node[font=\scriptsize] at (0.75,0.42) {$D_2,D_3$};
+				\node[font=\scriptsize] at (1.25,0.42) {$D_1,D_4$};
+				\node[font=\scriptsize] at (1.75,0.42) {$D_2,D_3$};
+				\node[font=\footnotesize\itshape] at (1.72,1.3) {Pulsating DC};
+			\end{scope}
+			\node[below] at (0.5,-3.6) {$\frac{T}{2}$};
+			\node[below] at (1,-3.6) {$T$};
+			\node[below] at (1.5,-3.6) {$\frac{3T}{2}$};
+			\node[below] at (2,-3.6) {$2T$};
+			
+			\node at (1,-4.75) {(a)};
+		\end{tikzpicture}
+		
+		\vspace{10pt}
+		% ---------------- (b) with V_D ----------------
+		\begin{tikzpicture}[x=4.9cm,y=1.15cm,line width=0.6pt,font=\small,>={Stealth[length=2mm]}]
+			\pgfmathsetmacro{\xo}{asin(0.2)/360}
+			\node[align=center,font=\scriptsize] at (0.25,1.85) {\textcolor{wvon}{$D_1,D_4$ ON}\\\textcolor{wvoff}{$D_2,D_3$ OFF}};
+			\node[align=center,font=\scriptsize] at (0.75,1.85) {\textcolor{wvoff}{$D_1,D_4$ OFF}\\\textcolor{wvon}{$D_2,D_3$ ON}};
+			\node[align=center,font=\scriptsize] at (1.25,1.85) {\textcolor{wvon}{$D_1,D_4$ ON}\\\textcolor{wvoff}{$D_2,D_3$ OFF}};
+			\node[align=center,font=\scriptsize] at (1.75,1.85) {\textcolor{wvoff}{$D_1,D_4$ OFF}\\\textcolor{wvon}{$D_2,D_3$ ON}};
+			
+			% ---- input v_i(t): lobes shaded ----
+			\foreach \k in {0,1}{
+				\fill[wvpos] (\k,0) -- plot[domain=\k:\k+0.5,samples=40] (\x,{sin(360*\x)}) -- cycle;
+				\fill[wvneg] (\k+0.5,0) -- plot[domain=\k+0.5:\k+1,samples=40] (\x,{sin(360*\x)}) -- cycle;
+			}
+			\draw[->] (0,0) -- (2.12,0) node[right] {$t$};
+			\draw[->] (0,-1.3) -- (0,1.45) node[above] {$v_i(t)$};
+			\draw[very thick,samples=161,smooth,domain=0:2] plot (\x,{sin(360*\x)});
+			\draw[dashed,gray] (0,1) -- (0.25,1);
+			\draw[dashed,gray] (0,-1) -- (0.75,-1);
+			\node[left] at (0,1) {$V_m$};
+			\node[left] at (0,-1) {$-V_m$};
+			\node[anchor=east,xshift=-1.8cm] at (0,0) {Input};
+			\draw[wvvd,dashed,thick] (0,0.2) -- (2.05,0.2);
+			\draw[wvvd,dashed,thick] (0,-0.2) -- (2.05,-0.2);
+			\node[wvvd,left] at (0,0.2) {$2V_D$};
+			\node[wvvd,left] at (0,-0.2) {$-2V_D$};
+			
+			\foreach \x in {0.5,1,1.5,2}{\draw[dashed,gray,thin] (\x,1.45) -- (\x,-3.6);}
+			
+			% ---- output v_o(t) = |v_i| - 2V_D while |v_i| > 2V_D ----
+			\begin{scope}[shift={(0,-3.6)}]
+				\foreach \s in {0,0.5,1,1.5}{
+					\fill[wvout] (\s+\xo,0) -- plot[domain=\s+\xo:\s+0.5-\xo,samples=30] (\x,{sin(360*(\x-\s))-0.2}) -- (\s+0.5-\xo,0) -- cycle;
+					\draw[very thick,domain=\s+\xo:\s+0.5-\xo,samples=30,smooth] plot (\x,{sin(360*(\x-\s))-0.2});
+				}
+				\draw[->] (0,0) -- (2.12,0) node[right] {$t$};
+				\draw[->] (0,0) -- (0,1.45) node[above] {$v_o(t)$};
+				\draw[very thick] (0,0) -- (\xo,0);
+				\foreach \s in {0,0.5,1,1.5}{\draw[very thick] (\s+0.5-\xo,0) -- (\s+0.5+\xo,0);}
+				\draw[very thick] (2-\xo,0) -- (2,0);
+				\draw[dashed,gray] (0.25,0.8) -- (1.75,0.8);
+				\node[above,fill=white,inner sep=1pt] at (1,0.8) {$(V_m-2V_D)$};
+				\node[below left] at (0,0) {$0$};
+				\node[anchor=east,xshift=-1.8cm] at (0,0.5) {Output};
+				\node[font=\scriptsize] at (0.25,0.4) {$D_1,D_4$};
+				\node[font=\scriptsize] at (0.75,0.4) {$D_2,D_3$};
+				\node[font=\scriptsize] at (1.25,0.4) {$D_1,D_4$};
+				\node[font=\scriptsize] at (1.75,0.4) {$D_2,D_3$};
+			\end{scope}
+			\node[below] at (0.5,-3.6) {$\frac{T}{2}$};
+			\node[below] at (1,-3.6) {$T$};
+			\node[below] at (1.5,-3.6) {$\frac{3T}{2}$};
+			\node[below] at (2,-3.6) {$2T$};
+			
+			\node at (1,-4.75) {(b)};
+		\end{tikzpicture}
+		\caption{Input and output of the full-wave bridge rectifier without a filter: (a) without considering $V_D$ and (b) considering the diode drops. Each half-cycle is carried by one diode pair; with drops, a pair conducts only while $|v_i| > 2V_D$ and $v_o = |v_i| - 2V_D$. The drop $2V_D$ is exaggerated for clarity.}
+		\label{fig:rect-waves}
+	\end{figure}
+	
+	For a silicon diode, the forward voltage is approximated as $V_D = \SI{0.7}{\volt}$, and since two diodes conduct in series in each half-cycle, the total diode voltage drop is $2V_D = \SI{1.4}{\volt}$. Figure~\ref{fig:rect-waves} shows the resulting input and output waveforms, first with the diode drops neglected and then with them included: each half-cycle is carried by one diode pair, and with the drops included a pair conducts only while $|V_{\mathrm{in}}|>2V_D$. Kirchhoff's voltage law around the conducting loop (source, $D_1$, $R_1$, $D_4$) gives $V_{\mathrm{in}} = v_{D_1} + v_{\mathrm{out}} + v_{D_4}$, so with a sinusoidal input of amplitude $V_m$ the output is a full-wave rectified waveform whose crests reach
 	\begin{equation}
 		V_{p(\mathrm{out})} = V_m - 2V_D .
 		\label{eq:vp-out}
 	\end{equation}
-	Averaging the rectified sinusoid over one input period gives the DC output voltage and, through the load resistance $R_1$, the DC load current:
+	Writing the output as $v_{\mathrm{out}}(t) = V_{p(\mathrm{out})}\,|\sin\omega t|$ with $\omega = 2\pi/T$ and $T = 1/f$ the input period, the DC (average) value follows from integrating over one period. The two half-cycles are identical, so the full-period integral is twice the integral over the first half-period, which evaluates to $2/\omega$:
 	\begin{equation}
-		V_{\mathrm{dc}} = \frac{2\left(V_m - 2V_D\right)}{\pi},
-		\qquad
-		I_{\mathrm{dc}} = \frac{V_{\mathrm{dc}}}{R_1}.
+		V_{\mathrm{dc}}
+		= \frac{1}{T}\int_{0}^{T} v_{\mathrm{out}}(t)\,\mathrm{d}t
+		= \frac{2V_{p(\mathrm{out})}}{T}\int_{0}^{T/2}\sin(\omega t)\,\mathrm{d}t
+		= \frac{2\left(V_m - 2V_D\right)}{\pi},
 		\label{eq:vdc}
 	\end{equation}
-	The root-mean-square output voltage of the unfiltered waveform is
+	and Ohm's law across $R_1$ gives the DC load current, $I_{\mathrm{dc}} = V_{\mathrm{dc}}/R_1$.
+	The root-mean-square output voltage follows from the mean-square definition; using $\sin^{2}(\omega t) = \left(1-\cos 2\omega t\right)/2$, whose oscillating term integrates to zero over the half-period, the half-period integral of $\sin^{2}(\omega t)$ is $T/4$ and
 	\begin{equation}
-		V_{\mathrm{rms}} = \frac{V_m - 2V_D}{\sqrt{2}},
-		\qquad
-		I_{\mathrm{rms}} = \frac{V_{\mathrm{rms}}}{R_1},
+		V_{\mathrm{rms}}^{2}
+		= \frac{1}{T}\int_{0}^{T} v_{\mathrm{out}}^{2}(t)\,\mathrm{d}t
+		= \frac{2V_{p(\mathrm{out})}^{2}}{T}\int_{0}^{T/2}\sin^{2}(\omega t)\,\mathrm{d}t
+		= \frac{V_{p(\mathrm{out})}^{2}}{2},
 		\label{eq:vrms}
 	\end{equation}
-	from which the DC and AC load powers follow as
+	so that $V_{\mathrm{rms}} = (V_m - 2V_D)/\sqrt{2}$, and Ohm's law gives $I_{\mathrm{rms}} = V_{\mathrm{rms}}/R_1$, from which the DC and AC load powers follow as the dissipated power $I^{2}R_1$ evaluated with the DC and the RMS current, respectively:
 	\begin{equation}
 		P_{\mathrm{dc}} = I_{\mathrm{dc}}^{2}R_1,
 		\qquad
 		P_{\mathrm{ac}} = I_{\mathrm{rms}}^{2}R_1 .
 		\label{eq:powers}
 	\end{equation}
-	The rectification efficiency, form factor, and ripple factor characterize the quality of the rectification \cite{ref:theraja}:
+	The rectification efficiency, form factor, and ripple factor characterize the quality of the rectification \cite{ref:theraja}. The efficiency is the fraction of the average load power delivered as DC, the form factor compares the RMS value with the average, and the ripple factor is the RMS value of the alternating output component relative to the DC level, $r = V_{r(\mathrm{rms})}/V_{\mathrm{dc}}$; since the output splits into its DC part and a zero-mean alternating part whose mean squares add, $V_{\mathrm{rms}}^{2} = V_{\mathrm{dc}}^{2} + V_{r(\mathrm{rms})}^{2}$, the ripple factor can be computed from the total RMS value alone:
 	\begin{equation}
 		\eta = \frac{P_{\mathrm{dc}}}{P_{\mathrm{ac}}}\times 100\%,
 		\qquad
@@ -155,13 +281,26 @@
 		r = \sqrt{\left(\frac{V_{\mathrm{rms}}}{V_{\mathrm{dc}}}\right)^{2}-1}.
 		\label{eq:eta-ff-r}
 	\end{equation}
-	For the unfiltered full-wave rectified sinusoid these evaluate to $\eta \approx 81.2\%$ (the theoretical maximum), $FF \approx 1.11$, and $r \approx 0.48$. The peak inverse voltage of each diode is $PIV \approx V_m$, and the output frequency is $f_{\mathrm{out}} = 2f$, where $f$ is the input frequency. The output is still strongly pulsating, however, so a filter is required to obtain a smooth DC level.
+	Substituting the derived results \eqref{eq:vdc} and \eqref{eq:vrms} evaluates all three in closed form, independently of the amplitude $V_m$:
+	\begin{equation}
+		\eta = \frac{\left(2V_{p(\mathrm{out})}/\pi\right)^{2}/R_1}{\left(V_{p(\mathrm{out})}/\sqrt{2}\right)^{2}/R_1}
+		= \frac{8}{\pi^{2}} \approx 81.06\% ,
+		\label{eq:eta-deriv}
+	\end{equation}
+	\begin{equation}
+		FF = \frac{V_{p(\mathrm{out})}/\sqrt{2}}{2V_{p(\mathrm{out})}/\pi}
+		= \frac{\pi}{2\sqrt{2}} \approx 1.11,
+		\qquad
+		r = \sqrt{FF^{2}-1} = \sqrt{\frac{\pi^{2}}{8}-1} \approx 0.48 .
+		\label{eq:ff-deriv}
+	\end{equation}
+	The efficiency $\eta = 8/\pi^{2} \approx 81.06\%$ is thus the theoretical maximum for an ideal full-wave rectifier. The peak inverse voltage follows from the bridge node voltages: while one diode pair conducts, it clamps the two load terminals to within one diode drop of the two source terminals, so the reverse voltage across each blocking diode is the instantaneous input less one diode drop and peaks at $PIV = V_m - V_D \approx V_m$. The output frequency is $f_{\mathrm{out}} = 2f$, where $f$ is the input frequency, because both half-cycles deliver a hump to the load. The output is still strongly pulsating, however, so a filter is required to obtain a smooth DC level.
 	
+	\subsection{With filter capacitor}
 	A shunt capacitor filter, connected in parallel with $R_1$ as $C_1$ in Figure~\ref{fig:bridge-filter}, exploits the storage action of the capacitor \cite{ref:theraja-filter}.
-	
 	\begin{figure}[htbp]
 		\centering
-		\begin{circuitikz}[american]
+		\begin{circuitikz}[american,scale=0.9,transform shape]
 			\draw (0,0) to[sV,l_=$V_{\mathrm{in}}$] (0,2);
 			\draw (0,0) node[ground]{};
 			\draw (0,2) -- (2,2) node[circ]{};
@@ -180,38 +319,104 @@
 			(6.3,0.5) node[circ]{};
 			\draw (8.3,4.2) to[C,l=$C_1$] (8.3,0.5);
 		\end{circuitikz}
-		\caption{Full-wave bridge rectifier with shunt capacitor filter
-			($C_1$ connected in parallel with the load $R_1$).}
+		\caption{Full-wave bridge rectifier with shunt capacitor filter ($C_1$ in parallel with $R_1$).}
 		\label{fig:bridge-filter}
 	\end{figure}
 	
-	While $|V_{\mathrm{in}}|$ exceeds the capacitor voltage, the bridge diodes charge $C_1$ up toward the output peak; when the sinusoid falls below the capacitor voltage, the diodes turn off and $C_1$ alone supplies the load, discharging exponentially as
+	\begin{figure}[htbp]
+		\centering
+		\begin{tikzpicture}[x=4.9cm,y=1.15cm,line width=0.6pt,font=\small,>={Stealth[length=2mm]}]
+			% ---- input v_i(t): lobes shaded ----
+			\foreach \k in {0,1}{
+				\fill[wvpos] (\k,0) -- plot[domain=\k:\k+0.5,samples=40] (\x,{sin(360*\x)}) -- cycle;
+				\fill[wvneg] (\k+0.5,0) -- plot[domain=\k+0.5:\k+1,samples=40] (\x,{sin(360*\x)}) -- cycle;
+			}
+			\draw[->] (0,0) -- (2.12,0) node[right] {$t$};
+			\draw[->] (0,-1.3) -- (0,1.45) node[above] {$v_i(t)$};
+			\draw[very thick,samples=161,smooth,domain=0:2] plot (\x,{sin(360*\x)});
+			\draw[dashed,gray] (0,1) -- (0.25,1);
+			\draw[dashed,gray] (0,-1) -- (0.75,-1);
+			\node[left] at (0,1) {$V_m$};
+			\node[left] at (0,-1) {$-V_m$};
+			\node[anchor=east,xshift=-1.8cm] at (0,0) {Input};
+			\draw[wvvd,dashed,thick] (0,0.2) -- (2.05,0.2);
+			\draw[wvvd,dashed,thick] (0,-0.2) -- (2.05,-0.2);
+			\node[wvvd,left] at (0,0.2) {$2V_D$};
+			\node[wvvd,left] at (0,-0.2) {$-2V_D$};
+			
+			\foreach \x in {0.5,1,1.5,2}{\draw[dashed,gray,thin] (\x,1.45) -- (\x,-4.6);}
+			% ---- output with filter capacitor ----
+			\begin{scope}[shift={(0,-4.6)},yscale=1.8]
+				\fill[wvout!45] (0,0) -- plot[smooth] coordinates {(0.0,0.0) (0.004,0.0) (0.008,0.0) (0.012,0.0) (0.016,0.0) (0.02,0.0053) (0.024,0.0302) (0.028,0.055) (0.032,0.0797) (0.036,0.1043) (0.04,0.1287) (0.044,0.153) (0.048,0.177) (0.052,0.2009) (0.056,0.2246) (0.06,0.2481) (0.064,0.2714) (0.068,0.2944) (0.072,0.3171) (0.076,0.3396) (0.08,0.3618) (0.084,0.3836) (0.088,0.4052) (0.092,0.4264) (0.096,0.4473) (0.1,0.4678) (0.104,0.4879) (0.108,0.5077) (0.112,0.5271) (0.116,0.546) (0.12,0.5645) (0.124,0.5826) (0.128,0.6003) (0.132,0.6175) (0.136,0.6343) (0.14,0.6505) (0.144,0.6663) (0.148,0.6816) (0.152,0.6963) (0.156,0.7106) (0.16,0.7243) (0.164,0.7375) (0.168,0.7502) (0.172,0.7623) (0.176,0.7738) (0.18,0.7848) (0.184,0.7952) (0.188,0.8051) (0.192,0.8143) (0.196,0.823) (0.2,0.8311) (0.204,0.8385) (0.208,0.8454) (0.212,0.8516) (0.216,0.8573) (0.22,0.8623) (0.224,0.8667) (0.228,0.8705) (0.232,0.8736) (0.236,0.8761) (0.24,0.878) (0.244,0.8793) (0.248,0.8799) (0.252,0.8799) (0.256,0.8793) (0.26,0.878) (0.264,0.8764) (0.268,0.8748) (0.272,0.8733) (0.276,0.8717) (0.28,0.8701) (0.284,0.8685) (0.288,0.8669) (0.292,0.8653) (0.296,0.8638) (0.3,0.8622) (0.304,0.8606) (0.308,0.8591) (0.312,0.8575) (0.316,0.856) (0.32,0.8544) (0.324,0.8529) (0.328,0.8513) (0.332,0.8498) (0.336,0.8482) (0.34,0.8467) (0.344,0.8451) (0.348,0.8436) (0.352,0.8421) (0.356,0.8405) (0.36,0.839) (0.364,0.8375) (0.368,0.836) (0.372,0.8344) (0.376,0.8329) (0.38,0.8314) (0.384,0.8299) (0.388,0.8284) (0.392,0.8269) (0.396,0.8254) (0.4,0.8239) (0.404,0.8224) (0.408,0.8209) (0.412,0.8194) (0.416,0.8179) (0.42,0.8164) (0.424,0.815) (0.428,0.8135) (0.432,0.812) (0.436,0.8105) (0.44,0.809) (0.444,0.8076) (0.448,0.8061) (0.452,0.8046) (0.456,0.8032) (0.46,0.8017) (0.464,0.8003) (0.468,0.7988) (0.472,0.7974) (0.476,0.7959) (0.48,0.7945) (0.484,0.793) (0.488,0.7916) (0.492,0.7901) (0.496,0.7887) (0.5,0.7873) (0.504,0.7859) (0.508,0.7844) (0.512,0.783) (0.516,0.7816) (0.52,0.7802) (0.524,0.7787) (0.528,0.7773) (0.532,0.7759) (0.536,0.7745) (0.54,0.7731) (0.544,0.7717) (0.548,0.7703) (0.552,0.7689) (0.556,0.7675) (0.56,0.7661) (0.564,0.7647) (0.568,0.7633) (0.572,0.7619) (0.576,0.7605) (0.58,0.7592) (0.584,0.7578) (0.588,0.7564) (0.592,0.755) (0.596,0.7537) (0.6,0.7523) (0.604,0.7509) (0.608,0.7496) (0.612,0.7482) (0.616,0.7468) (0.62,0.7455) (0.624,0.7441) (0.628,0.7428) (0.632,0.7414) (0.636,0.7401) (0.64,0.7387) (0.644,0.7374) (0.648,0.7361) (0.652,0.7347) (0.656,0.7334) (0.66,0.7321) (0.664,0.7375) (0.668,0.7502) (0.672,0.7623) (0.676,0.7738) (0.68,0.7848) (0.684,0.7952) (0.688,0.8051) (0.692,0.8143) (0.696,0.823) (0.7,0.8311) (0.704,0.8385) (0.708,0.8454) (0.712,0.8516) (0.716,0.8573) (0.72,0.8623) (0.724,0.8667) (0.728,0.8705) (0.732,0.8736) (0.736,0.8761) (0.74,0.878) (0.744,0.8793) (0.748,0.8799) (0.752,0.8799) (0.756,0.8793) (0.76,0.878) (0.764,0.8764) (0.768,0.8748) (0.772,0.8733) (0.776,0.8717) (0.78,0.8701) (0.784,0.8685) (0.788,0.8669) (0.792,0.8653) (0.796,0.8638) (0.8,0.8622) (0.804,0.8606) (0.808,0.8591) (0.812,0.8575) (0.816,0.856) (0.82,0.8544) (0.824,0.8529) (0.828,0.8513) (0.832,0.8498) (0.836,0.8482) (0.84,0.8467) (0.844,0.8451) (0.848,0.8436) (0.852,0.8421) (0.856,0.8405) (0.86,0.839) (0.864,0.8375) (0.868,0.836) (0.872,0.8344) (0.876,0.8329) (0.88,0.8314) (0.884,0.8299) (0.888,0.8284) (0.892,0.8269) (0.896,0.8254) (0.9,0.8239) (0.904,0.8224) (0.908,0.8209) (0.912,0.8194) (0.916,0.8179) (0.92,0.8164) (0.924,0.815) (0.928,0.8135) (0.932,0.812) (0.936,0.8105) (0.94,0.809) (0.944,0.8076) (0.948,0.8061) (0.952,0.8046) (0.956,0.8032) (0.96,0.8017) (0.964,0.8003) (0.968,0.7988) (0.972,0.7974) (0.976,0.7959) (0.98,0.7945) (0.984,0.793) (0.988,0.7916) (0.992,0.7901) (0.996,0.7887) (1.0,0.7873) (1.004,0.7859) (1.008,0.7844) (1.012,0.783) (1.016,0.7816) (1.02,0.7802) (1.024,0.7787) (1.028,0.7773) (1.032,0.7759) (1.036,0.7745) (1.04,0.7731) (1.044,0.7717) (1.048,0.7703) (1.052,0.7689) (1.056,0.7675) (1.06,0.7661) (1.064,0.7647) (1.068,0.7633) (1.072,0.7619) (1.076,0.7605) (1.08,0.7592) (1.084,0.7578) (1.088,0.7564) (1.092,0.755) (1.096,0.7537) (1.1,0.7523) (1.104,0.7509) (1.108,0.7496) (1.112,0.7482) (1.116,0.7468) (1.12,0.7455) (1.124,0.7441) (1.128,0.7428) (1.132,0.7414) (1.136,0.7401) (1.14,0.7387) (1.144,0.7374) (1.148,0.7361) (1.152,0.7347) (1.156,0.7334) (1.16,0.7321) (1.164,0.7375) (1.168,0.7502) (1.172,0.7623) (1.176,0.7738) (1.18,0.7848) (1.184,0.7952) (1.188,0.8051) (1.192,0.8143) (1.196,0.823) (1.2,0.8311) (1.204,0.8385) (1.208,0.8454) (1.212,0.8516) (1.216,0.8573) (1.22,0.8623) (1.224,0.8667) (1.228,0.8705) (1.232,0.8736) (1.236,0.8761) (1.24,0.878) (1.244,0.8793) (1.248,0.8799) (1.252,0.8799) (1.256,0.8793) (1.26,0.878) (1.264,0.8764) (1.268,0.8748) (1.272,0.8733) (1.276,0.8717) (1.28,0.8701) (1.284,0.8685) (1.288,0.8669) (1.292,0.8653) (1.296,0.8638) (1.3,0.8622) (1.304,0.8606) (1.308,0.8591) (1.312,0.8575) (1.316,0.856) (1.32,0.8544) (1.324,0.8529) (1.328,0.8513) (1.332,0.8498) (1.336,0.8482) (1.34,0.8467) (1.344,0.8451) (1.348,0.8436) (1.352,0.8421) (1.356,0.8405) (1.36,0.839) (1.364,0.8375) (1.368,0.836) (1.372,0.8344) (1.376,0.8329) (1.38,0.8314) (1.384,0.8299) (1.388,0.8284) (1.392,0.8269) (1.396,0.8254) (1.4,0.8239) (1.404,0.8224) (1.408,0.8209) (1.412,0.8194) (1.416,0.8179) (1.42,0.8164) (1.424,0.815) (1.428,0.8135) (1.432,0.812) (1.436,0.8105) (1.44,0.809) (1.444,0.8076) (1.448,0.8061) (1.452,0.8046) (1.456,0.8032) (1.46,0.8017) (1.464,0.8003) (1.468,0.7988) (1.472,0.7974) (1.476,0.7959) (1.48,0.7945) (1.484,0.793) (1.488,0.7916) (1.492,0.7901) (1.496,0.7887) (1.5,0.7873) (1.504,0.7859) (1.508,0.7844) (1.512,0.783) (1.516,0.7816) (1.52,0.7802) (1.524,0.7787) (1.528,0.7773) (1.532,0.7759) (1.536,0.7745) (1.54,0.7731) (1.544,0.7717) (1.548,0.7703) (1.552,0.7689) (1.556,0.7675) (1.56,0.7661) (1.564,0.7647) (1.568,0.7633) (1.572,0.7619) (1.576,0.7605) (1.58,0.7592) (1.584,0.7578) (1.588,0.7564) (1.592,0.755) (1.596,0.7537) (1.6,0.7523) (1.604,0.7509) (1.608,0.7496) (1.612,0.7482) (1.616,0.7468) (1.62,0.7455) (1.624,0.7441) (1.628,0.7428) (1.632,0.7414) (1.636,0.7401) (1.64,0.7387) (1.644,0.7374) (1.648,0.7361) (1.652,0.7347) (1.656,0.7334) (1.66,0.7321) (1.664,0.7375) (1.668,0.7502) (1.672,0.7623) (1.676,0.7738) (1.68,0.7848) (1.684,0.7952) (1.688,0.8051) (1.692,0.8143) (1.696,0.823) (1.7,0.8311) (1.704,0.8385) (1.708,0.8454) (1.712,0.8516) (1.716,0.8573) (1.72,0.8623) (1.724,0.8667) (1.728,0.8705) (1.732,0.8736) (1.736,0.8761) (1.74,0.878) (1.744,0.8793) (1.748,0.8799) (1.752,0.8799) (1.756,0.8793) (1.76,0.878) (1.764,0.8764) (1.768,0.8748) (1.772,0.8733) (1.776,0.8717) (1.78,0.8701) (1.784,0.8685) (1.788,0.8669) (1.792,0.8653) (1.796,0.8638) (1.8,0.8622) (1.804,0.8606) (1.808,0.8591) (1.812,0.8575) (1.816,0.856) (1.82,0.8544) (1.824,0.8529) (1.828,0.8513) (1.832,0.8498) (1.836,0.8482) (1.84,0.8467) (1.844,0.8451) (1.848,0.8436) (1.852,0.8421) (1.856,0.8405) (1.86,0.839) (1.864,0.8375) (1.868,0.836) (1.872,0.8344) (1.876,0.8329) (1.88,0.8314) (1.884,0.8299) (1.888,0.8284) (1.892,0.8269) (1.896,0.8254) (1.9,0.8239) (1.904,0.8224) (1.908,0.8209) (1.912,0.8194) (1.916,0.8179) (1.92,0.8164) (1.924,0.815) (1.928,0.8135) (1.932,0.812) (1.936,0.8105) (1.94,0.809) (1.944,0.8076) (1.948,0.8061) (1.952,0.8046) (1.956,0.8032) (1.96,0.8017) (1.964,0.8003) (1.968,0.7988) (1.972,0.7974) (1.976,0.7959) (1.98,0.7945) (1.984,0.793) (1.988,0.7916) (1.992,0.7901) (1.996,0.7887) (2.0,0.7873)} -- (2,0) -- cycle;
+				\fill[wvpos] (0.0195,0) -- plot[domain=0.0195:0.2605,samples=24] (\x,{sin(360*(\x-0))-0.12}) -- (0.2605,0) -- cycle;
+				\fill[wvneg] (0.6625,0) -- plot[domain=0.6625:0.7605,samples=24] (\x,{sin(360*(\x-0.5))-0.12}) -- (0.7605,0) -- cycle;
+				\fill[wvpos] (1.1625,0) -- plot[domain=1.1625:1.2605,samples=24] (\x,{sin(360*(\x-1))-0.12}) -- (1.2605,0) -- cycle;
+				\fill[wvneg] (1.6625,0) -- plot[domain=1.6625:1.7605,samples=24] (\x,{sin(360*(\x-1.5))-0.12}) -- (1.7605,0) -- cycle;
+				\draw[->] (0,0) -- (2.12,0) node[right] {$t$};
+				\draw[->] (0,0) -- (0,1.45) node[above] {$v_o(t)$};
+				\draw[thick,gray,dotted,samples=161,smooth,domain=0.0192:1.9808] plot (\x,{max(abs(sin(360*\x))-0.12,0)});
+				\draw[very thick] plot[smooth] coordinates {(0.0,0.0) (0.004,0.0) (0.008,0.0) (0.012,0.0) (0.016,0.0) (0.02,0.0053) (0.024,0.0302) (0.028,0.055) (0.032,0.0797) (0.036,0.1043) (0.04,0.1287) (0.044,0.153) (0.048,0.177) (0.052,0.2009) (0.056,0.2246) (0.06,0.2481) (0.064,0.2714) (0.068,0.2944) (0.072,0.3171) (0.076,0.3396) (0.08,0.3618) (0.084,0.3836) (0.088,0.4052) (0.092,0.4264) (0.096,0.4473) (0.1,0.4678) (0.104,0.4879) (0.108,0.5077) (0.112,0.5271) (0.116,0.546) (0.12,0.5645) (0.124,0.5826) (0.128,0.6003) (0.132,0.6175) (0.136,0.6343) (0.14,0.6505) (0.144,0.6663) (0.148,0.6816) (0.152,0.6963) (0.156,0.7106) (0.16,0.7243) (0.164,0.7375) (0.168,0.7502) (0.172,0.7623) (0.176,0.7738) (0.18,0.7848) (0.184,0.7952) (0.188,0.8051) (0.192,0.8143) (0.196,0.823) (0.2,0.8311) (0.204,0.8385) (0.208,0.8454) (0.212,0.8516) (0.216,0.8573) (0.22,0.8623) (0.224,0.8667) (0.228,0.8705) (0.232,0.8736) (0.236,0.8761) (0.24,0.878) (0.244,0.8793) (0.248,0.8799) (0.252,0.8799) (0.256,0.8793) (0.26,0.878) (0.264,0.8764) (0.268,0.8748) (0.272,0.8733) (0.276,0.8717) (0.28,0.8701) (0.284,0.8685) (0.288,0.8669) (0.292,0.8653) (0.296,0.8638) (0.3,0.8622) (0.304,0.8606) (0.308,0.8591) (0.312,0.8575) (0.316,0.856) (0.32,0.8544) (0.324,0.8529) (0.328,0.8513) (0.332,0.8498) (0.336,0.8482) (0.34,0.8467) (0.344,0.8451) (0.348,0.8436) (0.352,0.8421) (0.356,0.8405) (0.36,0.839) (0.364,0.8375) (0.368,0.836) (0.372,0.8344) (0.376,0.8329) (0.38,0.8314) (0.384,0.8299) (0.388,0.8284) (0.392,0.8269) (0.396,0.8254) (0.4,0.8239) (0.404,0.8224) (0.408,0.8209) (0.412,0.8194) (0.416,0.8179) (0.42,0.8164) (0.424,0.815) (0.428,0.8135) (0.432,0.812) (0.436,0.8105) (0.44,0.809) (0.444,0.8076) (0.448,0.8061) (0.452,0.8046) (0.456,0.8032) (0.46,0.8017) (0.464,0.8003) (0.468,0.7988) (0.472,0.7974) (0.476,0.7959) (0.48,0.7945) (0.484,0.793) (0.488,0.7916) (0.492,0.7901) (0.496,0.7887) (0.5,0.7873) (0.504,0.7859) (0.508,0.7844) (0.512,0.783) (0.516,0.7816) (0.52,0.7802) (0.524,0.7787) (0.528,0.7773) (0.532,0.7759) (0.536,0.7745) (0.54,0.7731) (0.544,0.7717) (0.548,0.7703) (0.552,0.7689) (0.556,0.7675) (0.56,0.7661) (0.564,0.7647) (0.568,0.7633) (0.572,0.7619) (0.576,0.7605) (0.58,0.7592) (0.584,0.7578) (0.588,0.7564) (0.592,0.755) (0.596,0.7537) (0.6,0.7523) (0.604,0.7509) (0.608,0.7496) (0.612,0.7482) (0.616,0.7468) (0.62,0.7455) (0.624,0.7441) (0.628,0.7428) (0.632,0.7414) (0.636,0.7401) (0.64,0.7387) (0.644,0.7374) (0.648,0.7361) (0.652,0.7347) (0.656,0.7334) (0.66,0.7321) (0.664,0.7375) (0.668,0.7502) (0.672,0.7623) (0.676,0.7738) (0.68,0.7848) (0.684,0.7952) (0.688,0.8051) (0.692,0.8143) (0.696,0.823) (0.7,0.8311) (0.704,0.8385) (0.708,0.8454) (0.712,0.8516) (0.716,0.8573) (0.72,0.8623) (0.724,0.8667) (0.728,0.8705) (0.732,0.8736) (0.736,0.8761) (0.74,0.878) (0.744,0.8793) (0.748,0.8799) (0.752,0.8799) (0.756,0.8793) (0.76,0.878) (0.764,0.8764) (0.768,0.8748) (0.772,0.8733) (0.776,0.8717) (0.78,0.8701) (0.784,0.8685) (0.788,0.8669) (0.792,0.8653) (0.796,0.8638) (0.8,0.8622) (0.804,0.8606) (0.808,0.8591) (0.812,0.8575) (0.816,0.856) (0.82,0.8544) (0.824,0.8529) (0.828,0.8513) (0.832,0.8498) (0.836,0.8482) (0.84,0.8467) (0.844,0.8451) (0.848,0.8436) (0.852,0.8421) (0.856,0.8405) (0.86,0.839) (0.864,0.8375) (0.868,0.836) (0.872,0.8344) (0.876,0.8329) (0.88,0.8314) (0.884,0.8299) (0.888,0.8284) (0.892,0.8269) (0.896,0.8254) (0.9,0.8239) (0.904,0.8224) (0.908,0.8209) (0.912,0.8194) (0.916,0.8179) (0.92,0.8164) (0.924,0.815) (0.928,0.8135) (0.932,0.812) (0.936,0.8105) (0.94,0.809) (0.944,0.8076) (0.948,0.8061) (0.952,0.8046) (0.956,0.8032) (0.96,0.8017) (0.964,0.8003) (0.968,0.7988) (0.972,0.7974) (0.976,0.7959) (0.98,0.7945) (0.984,0.793) (0.988,0.7916) (0.992,0.7901) (0.996,0.7887) (1.0,0.7873) (1.004,0.7859) (1.008,0.7844) (1.012,0.783) (1.016,0.7816) (1.02,0.7802) (1.024,0.7787) (1.028,0.7773) (1.032,0.7759) (1.036,0.7745) (1.04,0.7731) (1.044,0.7717) (1.048,0.7703) (1.052,0.7689) (1.056,0.7675) (1.06,0.7661) (1.064,0.7647) (1.068,0.7633) (1.072,0.7619) (1.076,0.7605) (1.08,0.7592) (1.084,0.7578) (1.088,0.7564) (1.092,0.755) (1.096,0.7537) (1.1,0.7523) (1.104,0.7509) (1.108,0.7496) (1.112,0.7482) (1.116,0.7468) (1.12,0.7455) (1.124,0.7441) (1.128,0.7428) (1.132,0.7414) (1.136,0.7401) (1.14,0.7387) (1.144,0.7374) (1.148,0.7361) (1.152,0.7347) (1.156,0.7334) (1.16,0.7321) (1.164,0.7375) (1.168,0.7502) (1.172,0.7623) (1.176,0.7738) (1.18,0.7848) (1.184,0.7952) (1.188,0.8051) (1.192,0.8143) (1.196,0.823) (1.2,0.8311) (1.204,0.8385) (1.208,0.8454) (1.212,0.8516) (1.216,0.8573) (1.22,0.8623) (1.224,0.8667) (1.228,0.8705) (1.232,0.8736) (1.236,0.8761) (1.24,0.878) (1.244,0.8793) (1.248,0.8799) (1.252,0.8799) (1.256,0.8793) (1.26,0.878) (1.264,0.8764) (1.268,0.8748) (1.272,0.8733) (1.276,0.8717) (1.28,0.8701) (1.284,0.8685) (1.288,0.8669) (1.292,0.8653) (1.296,0.8638) (1.3,0.8622) (1.304,0.8606) (1.308,0.8591) (1.312,0.8575) (1.316,0.856) (1.32,0.8544) (1.324,0.8529) (1.328,0.8513) (1.332,0.8498) (1.336,0.8482) (1.34,0.8467) (1.344,0.8451) (1.348,0.8436) (1.352,0.8421) (1.356,0.8405) (1.36,0.839) (1.364,0.8375) (1.368,0.836) (1.372,0.8344) (1.376,0.8329) (1.38,0.8314) (1.384,0.8299) (1.388,0.8284) (1.392,0.8269) (1.396,0.8254) (1.4,0.8239) (1.404,0.8224) (1.408,0.8209) (1.412,0.8194) (1.416,0.8179) (1.42,0.8164) (1.424,0.815) (1.428,0.8135) (1.432,0.812) (1.436,0.8105) (1.44,0.809) (1.444,0.8076) (1.448,0.8061) (1.452,0.8046) (1.456,0.8032) (1.46,0.8017) (1.464,0.8003) (1.468,0.7988) (1.472,0.7974) (1.476,0.7959) (1.48,0.7945) (1.484,0.793) (1.488,0.7916) (1.492,0.7901) (1.496,0.7887) (1.5,0.7873) (1.504,0.7859) (1.508,0.7844) (1.512,0.783) (1.516,0.7816) (1.52,0.7802) (1.524,0.7787) (1.528,0.7773) (1.532,0.7759) (1.536,0.7745) (1.54,0.7731) (1.544,0.7717) (1.548,0.7703) (1.552,0.7689) (1.556,0.7675) (1.56,0.7661) (1.564,0.7647) (1.568,0.7633) (1.572,0.7619) (1.576,0.7605) (1.58,0.7592) (1.584,0.7578) (1.588,0.7564) (1.592,0.755) (1.596,0.7537) (1.6,0.7523) (1.604,0.7509) (1.608,0.7496) (1.612,0.7482) (1.616,0.7468) (1.62,0.7455) (1.624,0.7441) (1.628,0.7428) (1.632,0.7414) (1.636,0.7401) (1.64,0.7387) (1.644,0.7374) (1.648,0.7361) (1.652,0.7347) (1.656,0.7334) (1.66,0.7321) (1.664,0.7375) (1.668,0.7502) (1.672,0.7623) (1.676,0.7738) (1.68,0.7848) (1.684,0.7952) (1.688,0.8051) (1.692,0.8143) (1.696,0.823) (1.7,0.8311) (1.704,0.8385) (1.708,0.8454) (1.712,0.8516) (1.716,0.8573) (1.72,0.8623) (1.724,0.8667) (1.728,0.8705) (1.732,0.8736) (1.736,0.8761) (1.74,0.878) (1.744,0.8793) (1.748,0.8799) (1.752,0.8799) (1.756,0.8793) (1.76,0.878) (1.764,0.8764) (1.768,0.8748) (1.772,0.8733) (1.776,0.8717) (1.78,0.8701) (1.784,0.8685) (1.788,0.8669) (1.792,0.8653) (1.796,0.8638) (1.8,0.8622) (1.804,0.8606) (1.808,0.8591) (1.812,0.8575) (1.816,0.856) (1.82,0.8544) (1.824,0.8529) (1.828,0.8513) (1.832,0.8498) (1.836,0.8482) (1.84,0.8467) (1.844,0.8451) (1.848,0.8436) (1.852,0.8421) (1.856,0.8405) (1.86,0.839) (1.864,0.8375) (1.868,0.836) (1.872,0.8344) (1.876,0.8329) (1.88,0.8314) (1.884,0.8299) (1.888,0.8284) (1.892,0.8269) (1.896,0.8254) (1.9,0.8239) (1.904,0.8224) (1.908,0.8209) (1.912,0.8194) (1.916,0.8179) (1.92,0.8164) (1.924,0.815) (1.928,0.8135) (1.932,0.812) (1.936,0.8105) (1.94,0.809) (1.944,0.8076) (1.948,0.8061) (1.952,0.8046) (1.956,0.8032) (1.96,0.8017) (1.964,0.8003) (1.968,0.7988) (1.972,0.7974) (1.976,0.7959) (1.98,0.7945) (1.984,0.793) (1.988,0.7916) (1.992,0.7901) (1.996,0.7887) (2.0,0.7873)};
+				\draw[dashed,gray] (0,0.88) -- (2.06,0.88);
+				\node[left] at (0,0.88) {$V_{p(\mathrm{out})}$};
+				\node[below left] at (0,0) {$0$};
+				\node[anchor=east,xshift=-1.8cm] at (0,0.5) {Output};
+				\node[align=center,font=\scriptsize,wvon] at (0.25,1.16) {$D_1,D_4$ ON};
+				\node[align=center,font=\scriptsize,wvon] at (0.75,1.16) {$D_2,D_3$ ON};
+				\node[align=center,font=\scriptsize,wvon] at (1.25,1.16) {$D_1,D_4$ ON};
+				\node[align=center,font=\scriptsize,wvon] at (1.75,1.16) {$D_2,D_3$ ON};
+				\node[align=center,font=\scriptsize] at (0.96,0.36) {all diodes OFF,\\$C_1$ discharges\\through $R_1$};
+				\draw[dashed,gray] (1.76,0.731) -- (2.06,0.731);
+				\draw[<->] (2.06,0.731) -- (2.06,0.88);
+				\node[anchor=west,font=\footnotesize] at (2.07,0.81) {$V_{r(pp)}$};
+			\end{scope}
+			\node[below] at (0.5,-4.6) {$\frac{T}{2}$};
+			\node[below] at (1,-4.6) {$T$};
+			\node[below] at (1.5,-4.6) {$\frac{3T}{2}$};
+			\node[below] at (2,-4.6) {$2T$};
+			
+		\end{tikzpicture}
+		\caption{Theoretical input and load-voltage waveforms of the bridge rectifier with a shunt capacitor filter. The dotted curve is the unfiltered output $|v_i|-2V_D$. A diode pair conducts only during the short charging intervals near each crest; between them $C_1$ discharges through $R_1$, which produces the ripple $V_{r(pp)}$. The values of $R_1C_1$ and $2V_D$ are exaggerated for clarity.}
+		\label{fig:theoretical-waveforms}
+	\end{figure}
+	
+	Figure~\ref{fig:theoretical-waveforms} shows the resulting waveforms. While $|V_{\mathrm{in}}|$ exceeds the capacitor voltage, the bridge diodes charge $C_1$ up toward the output peak; when the sinusoid falls below the capacitor voltage, the diodes turn off and $C_1$ alone supplies the load. Kirchhoff's current law at the output node then gives $C_1\,\mathrm{d}v_C/\mathrm{d}t = -v_C/R_1$, i.e.\ $\mathrm{d}v_C/\mathrm{d}t = -v_C/(R_1C_1)$; separating the variables and integrating from the turn-off instant, where $v_C(0) = V_{p(\mathrm{out})}$, yields the exponential discharge with time constant $R_1C_1$:
 	\begin{equation}
+		\int_{V_{p(\mathrm{out})}}^{v_C}\frac{\mathrm{d}v}{v}
+		= -\frac{1}{R_1C_1}\int_{0}^{t}\mathrm{d}t'
+		\qquad\Longrightarrow\qquad
 		v_{C}(t) = V_{p(\mathrm{out})}\, e^{-t/R_1C_1}.
 		\label{eq:discharge}
 	\end{equation}
-	The output is thus a slowly decaying sawtooth that is recharged to the peak once per half-cycle, and the ripple frequency equals the output frequency $2f$. Provided the discharge is small, i.e.\ $R_1C_1 \gg T/2$ with $T = 1/f$, the discharge may be treated at constant load current $I_L$, giving the standard estimates \cite{ref:theraja-filter}
+	The output is thus a slowly decaying sawtooth that is recharged to the peak once per half-cycle, and the ripple frequency equals the output frequency $2f$. Provided the discharge is small, i.e.\ $R_1C_1 \gg T/2$ with $T = 1/f$, the load current is nearly constant at $I_L \approx V_{\mathrm{dc}}/R_1$, the capacitor voltage falls linearly, and each discharge lasts approximately one half-period, $\Delta t \approx T/2 = 1/(2f)$. Three estimates then follow \cite{ref:theraja-filter}. First, the charge lost in the discharge is $\Delta Q = I_L\,\Delta t \approx I_L/(2f)$, and since the capacitor stores $Q = C_1v_C$, this lost charge appears as the voltage sag from the peak to the valley:
 	\begin{equation}
-		V_{r(pp)} \approx \frac{I_L}{2fC_1},
-		\qquad
-		V_{r(\mathrm{rms})} = \frac{V_{r(pp)}}{2\sqrt{3}},
-		\qquad
-		V_{\mathrm{dc}} \approx V_{p(\mathrm{out})} - \frac{V_{r(pp)}}{2},
-		\label{eq:ripple-estimates}
+		V_{r(pp)} = \frac{\Delta Q}{C_1} \approx \frac{I_L\,\Delta t}{C_1} = \frac{I_L}{2fC_1}.
+		\label{eq:ripple-pp}
 	\end{equation}
-	and the ripple factor of the filtered output becomes
+	Second, the output therefore swings between the peak $V_{p(\mathrm{out})}$ and the valley $V_{p(\mathrm{out})}-V_{r(pp)}$, and the average of a linear sweep between two extremes lies at their midpoint:
+	\begin{equation}
+		V_{\mathrm{dc}} \approx \frac{V_{p(\mathrm{out})} + \left[V_{p(\mathrm{out})} - V_{r(pp)}\right]}{2} = V_{p(\mathrm{out})} - \frac{V_{r(pp)}}{2}.
+		\label{eq:vdc-filter}
+	\end{equation}
+	Third, the linear sweep is a triangular ripple of amplitude $V_{r(pp)}/2$ about the mean, and each input period contains two identical ramps $v_r(t) = (V_{r(pp)}/2)(4t/T - 1)$:
+	\begin{equation}
+		V_{r(\mathrm{rms})}^{2} = \frac{2}{T}\int_{0}^{T/2}\left[\frac{V_{r(pp)}}{2}\left(\frac{4t}{T}-1\right)\right]^{2}\mathrm{d}t = \frac{V_{r(pp)}^{2}}{12},
+		\label{eq:vrms-r}
+	\end{equation}
+	so that $V_{r(\mathrm{rms})} = V_{r(pp)}/(2\sqrt{3})$. Finally, substituting \eqref{eq:ripple-pp} and \eqref{eq:vrms-r} into $r = V_{r(\mathrm{rms})}/V_{\mathrm{dc}}$, where $I_L \approx V_{\mathrm{dc}}/R_1$ cancels $V_{\mathrm{dc}}$, gives the ripple factor of the filtered output:
 	\begin{equation}
 		r = \frac{V_{r(\mathrm{rms})}}{V_{\mathrm{dc}}}
-		\approx \frac{1}{4\sqrt{3}\, f\, C_1 R_1}.
+		\approx \frac{I_L}{4\sqrt{3}\,f\,C_1\,V_{\mathrm{dc}}}
+		= \frac{1}{4\sqrt{3}\, f\, C_1 R_1}.
 		\label{eq:r-filtered}
 	\end{equation}
-	Equations~\eqref{eq:ripple-estimates}--\eqref{eq:r-filtered} show the design trade-off directly: the ripple is inversely proportional to $C_1$, so reducing the capacitance increases the ripple and lowers the DC output level. The comparison between simulated and theoretical quantities uses the absolute percentage error
+	Equations~\eqref{eq:ripple-pp}--\eqref{eq:r-filtered} show the design trade-off directly: the ripple is inversely proportional to $C_1$, so reducing the capacitance increases the ripple and lowers the DC output level. The comparison between simulated and theoretical quantities uses the absolute percentage error
 	\begin{equation}
 		\%\,\mathrm{Error}
 		= \left|\frac{\text{Theoretical value} - \text{Simulated value}}
 		{\text{Theoretical value}}\right|\times 100 .
 		\label{eq:percentage-error}
 	\end{equation}
+	
 	
 	% =====================================================================
 	\section{List of Components}
@@ -223,15 +428,15 @@
 		\renewcommand{\arraystretch}{1.25}
 		\begin{tabular}{|c|l|l|c|}
 			\hline
-			\rowcolor{black!12}\textbf{Sl. No.} & \textbf{Component/Instrument} & \textbf{Specification/Value} & \textbf{Quantity} \\
+			\textbf{Sl. No.} & \textbf{Component/Instrument} & \textbf{Specification/Value} & \textbf{Quantity} \\
 			\hline
-			1 & Diode & D1N914 & 4 \\
+			1 & Diode & D1N4002 & 4 \\
 			\hline
-			2 & Resistor & \SI{100}{\kilo\ohm} (all circuits) & 1 \\
+			2 & Resistor & \SI{10}{\kilo\ohm} (all circuits) & 1 \\
 			\hline
 			3 & Capacitor & \SI{100}{\micro\farad} (filter capacitor) & 1 \\
 			\hline
-			4 & Capacitor & \SI{10}{\micro\farad} (modified circuit, task 4) & 1 \\
+			4 & Capacitor & \SI{50}{\micro\farad} (modified circuit, task 4) & 1 \\
 			\hline
 			5 & AC voltage source & SIN, 0 V offset, 100 V amplitude, 50 Hz & 1 \\
 			\hline
@@ -244,17 +449,13 @@
 	\section{PSpice Circuit Diagrams}
 	% The actual PSpice schematic exports, followed by the netlist code.
 	% =====================================================================
-	The three simulated circuits share the same bridge of D1N914 diodes, the same load, $R_1 = \SI{100}{\kilo\ohm}$, and the same \SI{100}{\volt}, \SI{50}{\hertz} sinusoidal source, and differ only in the filter capacitor. Figures~\ref{fig:sch1}--\ref{fig:sch3} show the PSpice schematics of the bridge rectifier without filter capacitor, with the \SI{100}{\micro\farad} filter capacitor, and with the modified \SI{10}{\micro\farad} capacitor of task 4, respectively.
+	The three simulated circuits share the same bridge of D1N4002 diodes, the same load, $R_1 = \SI{10}{\kilo\ohm}$, and the same \SI{100}{\volt}, \SI{50}{\hertz} sinusoidal source, and differ only in the filter capacitor. Figures~\ref{fig:sch1}--\ref{fig:sch3} show the PSpice schematics of the bridge rectifier without filter capacitor, with the \SI{100}{\micro\farad} filter capacitor, and with the modified \SI{50}{\micro\farad} capacitor of task 4, respectively.
 	
-	% NOTE: the schematic exports in figures/ still show the earlier D1N4002
-	% draft of the circuits (schematic_no_filter.png even has R1 = 1k); they
-	% must be re-exported from PSpice with the current D1N914 / 100k / 100 V
-	% designs.
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=0.8\textwidth]{schematic_no_filter.png}
 		\caption{PSpice schematic of the full-wave bridge rectifier without
-			filter capacitor ($R_1 = \SI{100}{\kilo\ohm}$,
+			filter capacitor ($R_1 = \SI{10}{\kilo\ohm}$,
 			$V_{\mathrm{in}} = \SI{100}{\volt}$ amplitude at \SI{50}{\hertz})}
 		\label{fig:sch1}
 	\end{figure}
@@ -264,54 +465,70 @@
 		\includegraphics[width=0.8\textwidth]{schematic_with_capacitor.png}
 		\caption{PSpice schematic of the full-wave bridge rectifier with
 			filter capacitor ($C_1 = \SI{100}{\micro\farad}$ in parallel with
-			$R_1 = \SI{100}{\kilo\ohm}$)}
+			$R_1 = \SI{10}{\kilo\ohm}$)}
 		\label{fig:sch2}
 	\end{figure}
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.8\textwidth]{schematic_with_capacitor_modified.png}
+		\includegraphics[width=0.8\textwidth]{schematic_with_capacitor_changed.png}
 		\caption{PSpice schematic of the modified bridge rectifier (task 4,
-			filter capacitor changed to $C_1 = \SI{10}{\micro\farad}$)}
+			filter capacitor changed to $C_1 = \SI{50}{\micro\farad}$)}
 		\label{fig:sch3}
 	\end{figure}
 	
 	\subsection{PSpice netlist code}
-	The same circuits were described in PSpice netlist form; each netlist was stored as a \texttt{.cir} file and simulated with a transient analysis of \SI{100}{\milli\second} for the unfiltered circuit and \SI{300}{\milli\second} for the filtered ones, using a \SI{10}{\micro\second} print step. The netlists of the unfiltered circuit and of the \SI{100}{\micro\farad} filtered circuit are listed below; the modified circuit of task 4 differs from the latter only in the capacitor statement.
+	The same circuits were described in PSpice netlist form; each netlist was stored as a \texttt{.cir} file and simulated with a transient analysis of \SI{100}{\milli\second} for all three circuits, using a \SI{10}{\micro\second} print step. The netlists of the unfiltered circuit and of the \SI{100}{\micro\farad} filtered circuit are listed below; the modified circuit of task 4 differs from the latter only in the capacitor statement.
 	
 	\textbf{Circuit 1 (without filter capacitor):}
 	{\small
 		\begin{verbatim}
-* Full-Wave Bridge Rectifier without Filter Capacitor
-V1 1 0 SIN(0 100 50)
-D1 1 2 D1N914
-D2 0 2 D1N914
-D3 3 1 D1N914
-D4 3 0 D1N914
-R1 2 3 100K
-.MODEL D1N914 D
-.TRAN 10US 100MS
-.PROBE
-.END
+			* Full-Wave Bridge Rectifier without Filter Capacitor
+			V1 1 0 SIN(0 100 50)
+			D1 1 2 D1N4002
+			D2 0 2 D1N4002
+			D3 3 1 D1N4002
+			D4 3 0 D1N4002
+			R1 2 3 10k
+			.MODEL D1N4002 D(N=1)
+			.TRAN 10US 100MS
+			.PROBE
+			.END
 	\end{verbatim}}
 	
 	\textbf{Circuit 2 (with filter capacitor):}
 	{\small
 		\begin{verbatim}
-* Full-Wave Bridge Rectifier with Filter Capacitor
-VS 1 0 SIN(0 100 50)
-D1 1 2 D1N914
-D2 0 2 D1N914
-D3 3 1 D1N914
-D4 3 0 D1N914
-C1 2 3 100U
-R1 2 3 100K
-.MODEL D1N914 D
-.TRAN 10US 300MS
-.PROBE
-.END
+			* Full-Wave Bridge Rectifier with Filter Capacitor
+			V1 1 0 SIN(0 100 50)
+			D1 1 2 D1N4002
+			D2 0 2 D1N4002
+			D3 3 1 D1N4002
+			D4 3 0 D1N4002
+			C1 2 3 100U
+			R1 2 3 10k
+			.MODEL D1N4002 D(N=1)
+			.TRAN 10US 100MS
+			.PROBE
+			.END
 	\end{verbatim}}
 	
+	\textbf{Circuit 3 (with modified filter capacitor):}
+	{\small
+		\begin{verbatim}
+			* Full-Wave Bridge Rectifier with Modified Filter Capacitor
+			V1 1 0 SIN(0 100 50)
+			D1 1 2 D1N4002
+			D2 0 2 D1N4002
+			D3 3 1 D1N4002
+			D4 3 0 D1N4002
+			C1 2 3 50U
+			R1 2 3 10k
+			.MODEL D1N4002 D(N=1)
+			.TRAN 10US 100MS
+			.PROBE
+			.END
+	\end{verbatim}}
 	
 	% =====================================================================
 	\section{Simulation/Working Procedure}
@@ -322,13 +539,13 @@ R1 2 3 100K
 	
 	\begin{enumerate}[leftmargin=0.8cm,label=\textbf{Step \arabic*:},itemsep=0.55em]
 		\item \textbf{Draw the schematic.}
-		Open PSpice Schematics and select \texttt{Draw $\rightarrow$ Get New Part} (or press \texttt{Ctrl+G}). Place the four diodes (D1N914), the load resistor $R_1$, the filter capacitor $C_1$, the sinusoidal voltage source VSIN, and the ground symbol on the workspace. Connect them with \texttt{Draw $\rightarrow$ Wire} (\texttt{Ctrl+W}) so that the bridge, the load, and the source match the theory diagrams of Figs.~\ref{fig:bridge-theory} and \ref{fig:bridge-filter} and the schematics of Figs.~\ref{fig:sch1}--\ref{fig:sch3}.
+		Open PSpice Schematics and select \texttt{Draw $\rightarrow$ Get New Part} (or press \texttt{Ctrl+G}). Place the four diodes (D1N4002), the load resistor $R_1$, the filter capacitor $C_1$, the sinusoidal voltage source VSIN, and the ground symbol on the workspace. Connect them with \texttt{Draw $\rightarrow$ Wire} (\texttt{Ctrl+W}) so that the bridge, the load, and the source match the theory diagrams of Figs.~\ref{fig:bridge-theory} and \ref{fig:bridge-filter} and the schematics of Figs.~\ref{fig:sch1}--\ref{fig:sch3}.
 		
 		\item \textbf{Assign the component values.}
-		Double-click each component and enter its attributes: $R_1 = \SI{100}{\kilo\ohm}$ for all three circuits; $C_1 = \SI{100}{\micro\farad}$ (later changed to \SI{10}{\micro\farad} for task 4); and for the VSIN source set the DC offset $V_{\mathrm{OFF}} = \SI{0}{\volt}$, the amplitude $V_{\mathrm{AMPL}} = \SI{100}{\volt}$, and the frequency $\mathrm{FREQ} = \SI{50}{\hertz}$. Save the schematic under an identifiable name.
+		Double-click each component and enter its attributes: $R_1 = \SI{10}{\kilo\ohm}$ for all three circuits; $C_1 = \SI{100}{\micro\farad}$ (later changed to \SI{50}{\micro\farad} for task 4); and for the VSIN source set the DC offset $V_{\mathrm{OFF}} = \SI{0}{\volt}$, the amplitude $V_{\mathrm{AMPL}} = \SI{100}{\volt}$, and the frequency $\mathrm{FREQ} = \SI{50}{\hertz}$. Save the schematic under an identifiable name.
 		
 		\item \textbf{Set up the transient analysis.}
-		Select \texttt{Analysis $\rightarrow$ Setup}, enable \texttt{Transient}, and enter a print step of \SI{10}{\micro\second} and a final time of \SI{100}{\milli\second} for the unfiltered circuit and \SI{300}{\milli\second} for the two filtered circuits, i.e.\ five and fifteen input periods, long enough for the slow filter charge-up to settle before the readings are taken.
+		Select \texttt{Analysis $\rightarrow$ Setup}, enable \texttt{Transient}, and enter a print step of \SI{10}{\micro\second} and a final time of \SI{100}{\milli\second} for all three circuits, i.e.\ five input periods, long enough for the filter capacitor to charge to the output peak and for the output to settle before the readings are taken.
 	\end{enumerate}
 	
 	\subsection*{Part 2: Entering the circuit through the netlist}
@@ -336,7 +553,7 @@ R1 2 3 100K
 	\begin{enumerate}[leftmargin=0.8cm,label=\textbf{Step \arabic*:},itemsep=0.55em]
 		\setcounter{enumi}{3}
 		\item \textbf{Type the netlist.}
-		As an equivalent alternative to the schematic entry, create a text file with a \texttt{.cir} extension and type the netlist exactly as listed in Section 4.4: a title line, the source statement \texttt{VS 1 0 SIN(0 100 50)}, the four diode statements with the D1N914 model, the load branch (\texttt{R1} and, for the filtered circuits, \texttt{C1}), the \texttt{.MODEL} line, the \texttt{.TRAN} command, and \texttt{.PROBE}/\texttt{.END}. Run the netlist through the PSpice A/D simulator.
+		As an equivalent alternative to the schematic entry, create a text file with a \texttt{.cir} extension and type the netlist exactly as listed in Section 4.4: a title line, the source statement \texttt{V1 1 0 SIN(0 100 50)}, the four diode statements with the D1N4002 model, the load branch (\texttt{R1} and, for the filtered circuits, \texttt{C1}), the \texttt{.MODEL} line, the \texttt{.TRAN} command, and \texttt{.PROBE}/\texttt{.END}. Run the netlist through the PSpice A/D simulator.
 	\end{enumerate}
 	
 	\subsection*{Part 3: Running the simulation and reading the waveforms}
@@ -356,8 +573,8 @@ R1 2 3 100K
 	% =====================================================================
 	\section{Calculation}
 	% =====================================================================
-	The given values are: $V_m = \SI{100}{\volt}$, $f = \SI{50}{\hertz}$ ($T = \SI{20}{\milli\second}$), $R_1 = \SI{100}{\kilo\ohm}$ for all three circuits, $V_D = \SI{0.7}{\volt}$ per silicon diode (so $2V_D = \SI{1.4}{\volt}$), $C_1 = \SI{100}{\micro\farad}$ for the filtered circuit and $C_1 = \SI{10}{\micro\farad}$ for the modified circuit of task 4.
-
+	The given values are: $V_m = \SI{100}{\volt}$, $f = \SI{50}{\hertz}$ ($T = \SI{20}{\milli\second}$), $R_1 = \SI{10}{\kilo\ohm}$ for all three circuits, $V_D = \SI{0.7}{\volt}$ per silicon diode (so $2V_D = \SI{1.4}{\volt}$), $C_1 = \SI{100}{\micro\farad}$ for the filtered circuit and $C_1 = \SI{50}{\micro\farad}$ for the modified circuit of task 4.
+	
 	\textbf{Without filter capacitor.} From \eqref{eq:vp-out},
 	\begin{equation}
 		V_{p(\mathrm{out})} = V_m - 2V_D = 100 - 1.4 = \SI{98.6}{\volt},
@@ -366,32 +583,32 @@ R1 2 3 100K
 	and the peak output current is
 	\begin{equation}
 		I_{p(\mathrm{out})} = \frac{V_{p(\mathrm{out})}}{R_1}
-		= \frac{98.6}{10^{5}} = \SI{0.986}{\milli\ampere}.
+		= \frac{98.6}{10^{4}} = \SI{9.86}{\milli\ampere}.
 		\label{eq:calc-ipk}
 	\end{equation}
 	From \eqref{eq:vdc} and \eqref{eq:vrms},
 	\begin{equation}
 		V_{\mathrm{dc}} = \frac{2 \times 98.6}{\pi} = \SI{62.77}{\volt},
 		\qquad
-		I_{\mathrm{dc}} = \frac{62.77}{10^{5}} = \SI{0.628}{\milli\ampere},
+		I_{\mathrm{dc}} = \frac{62.77}{10^{4}} = \SI{6.277}{\milli\ampere},
 		\label{eq:calc-vdc}
 	\end{equation}
 	\begin{equation}
 		V_{\mathrm{rms}} = \frac{98.6}{\sqrt{2}} = \SI{69.73}{\volt},
 		\qquad
-		I_{\mathrm{rms}} = \frac{69.73}{10^{5}} = \SI{0.697}{\milli\ampere}.
+		I_{\mathrm{rms}} = \frac{69.73}{10^{4}} = \SI{6.972}{\milli\ampere}.
 		\label{eq:calc-vrms}
 	\end{equation}
 	The output powers follow from \eqref{eq:powers}:
 	\begin{equation}
-		P_{\mathrm{dc}} = (0.6277\times 10^{-3})^{2}\times 10^{5} = \SI{39.40}{\milli\watt},
+		P_{\mathrm{dc}} = (6.2771\times 10^{-3})^{2}\times 10^{4} = \SI{394.02}{\milli\watt},
 		\qquad
-		P_{\mathrm{ac}} = (0.6973\times 10^{-3})^{2}\times 10^{5} = \SI{48.61}{\milli\watt}.
+		P_{\mathrm{ac}} = (6.9721\times 10^{-3})^{2}\times 10^{4} = \SI{486.10}{\milli\watt}.
 		\label{eq:calc-powers}
 	\end{equation}
 	Hence, from \eqref{eq:eta-ff-r},
 	\begin{equation}
-		\eta = \frac{39.40}{48.61}\times 100\% = 81.06\%,
+		\eta = \frac{394.02}{486.10}\times 100\% = 81.06\%,
 		\qquad
 		FF = \frac{69.73}{62.77} = 1.111,
 		\qquad
@@ -400,41 +617,36 @@ R1 2 3 100K
 	\end{equation}
 	The peak inverse voltage per diode is $PIV \approx V_m = \SI{100}{\volt}$, and the output frequency is $f_{\mathrm{out}} = 2f = \SI{100}{\hertz}$.
 	
-	\textbf{With filter capacitor ($C_1 = \SI{100}{\micro\farad}$).} The capacitor charges approximately to the peak output voltage, $V_{p(\mathrm{cap})} = V_m - 2V_D = \SI{98.6}{\volt}$. Since $I_L \approx V_{\mathrm{dc}}/R_1$, Eq.~\eqref{eq:ripple-estimates} gives $V_{r(pp)} \approx V_{\mathrm{dc}}/(2fC_1R_1)$. Substituting into $V_{\mathrm{dc}} \approx V_{p(\mathrm{out})} - V_{r(pp)}/2$ yields the self-consistent solution
+	\textbf{With filter capacitor ($C_1 = \SI{100}{\micro\farad}$).} The capacitor charges approximately to the peak output voltage, $V_{C(\mathrm{pk})} = V_m - 2V_D = \SI{98.6}{\volt}$. Since the discharge is small, the load current is approximated by its peak value, $I_L \approx V_{C(\mathrm{pk})}/R_1 = \SI{9.86}{\milli\ampere}$, and Eq.~\eqref{eq:ripple-pp} gives the ripple, after which Eq.~\eqref{eq:vdc-filter} gives the DC level:
 	\begin{equation}
-		V_{\mathrm{dc}}\left(1 + \frac{1}{4fC_1R_1}\right) = V_{p(\mathrm{out})}.
-		\label{eq:self-consistent}
-	\end{equation}
-	With $4fC_1R_1 = 4\times 50\times 100\times 10^{-6}\times 100\times 10^{3} = 2000$:
-	\begin{equation}
-		V_{\mathrm{dc}} = \frac{98.6}{1 + 1/2000} = \SI{98.55}{\volt},
+		V_{r(pp)} = \frac{9.86\times10^{-3}}{2(50)(100\times10^{-6})} = \SI{0.986}{\volt},
 		\qquad
-		V_{r(pp)} = \frac{98.55}{1000} = \SI{0.0986}{\volt}.
+		V_{\mathrm{dc}} \approx V_{C(\mathrm{pk})} - \frac{V_{r(pp)}}{2} = 98.6 - \frac{0.986}{2} = \SI{98.11}{\volt}.
 		\label{eq:calc-vdc-100u}
 	\end{equation}
-	The load current is $I_L = V_{\mathrm{dc}}/R_1 = \SI{0.9855}{\milli\ampere}$, the RMS ripple is
+	The load current is $I_L = V_{\mathrm{dc}}/R_1 = \SI{9.811}{\milli\ampere}$, the RMS ripple is
 	\begin{equation}
-		V_{r(\mathrm{rms})} = \frac{0.0986}{2\sqrt{3}} = \SI{0.0285}{\volt},
+		V_{r(\mathrm{rms})} = \frac{0.986}{2\sqrt{3}} = \SI{0.2846}{\volt},
 		\qquad
-		r = \frac{0.0285}{98.55} = 0.000289,
+		r = \frac{0.2846}{98.11} = 0.00290,
 		\label{eq:calc-r-100u}
 	\end{equation}
-	so the percentage ripple is $\%r = 0.0289\%$, and the ripple frequency is $f_r = 2f = \SI{100}{\hertz}$.
+	so the percentage ripple is $\%r = 0.290\%$, and the ripple frequency is $f_r = 2f = \SI{100}{\hertz}$.
 	
-	\textbf{With modified filter capacitor ($C_1 = \SI{10}{\micro\farad}$, task 4).} Now $4fC_1R_1 = 4\times 50\times 10\times 10^{-6}\times 100\times 10^{3} = 200$, so
+	\textbf{With modified filter capacitor ($C_1 = \SI{50}{\micro\farad}$, task 4).} With the same peak voltage and load-current estimate,
 	\begin{equation}
-		V_{\mathrm{dc}} = \frac{98.6}{1 + 1/200} = \SI{98.11}{\volt},
+		V_{r(pp)} = \frac{9.86\times10^{-3}}{2(50)(50\times10^{-6})} = \SI{1.972}{\volt},
 		\qquad
-		V_{r(pp)} = \frac{98.11}{100} = \SI{0.981}{\volt},
-		\label{eq:calc-vdc-10u}
+		V_{\mathrm{dc}} \approx 98.6 - \frac{1.972}{2} = \SI{97.61}{\volt},
+		\label{eq:calc-vdc-50u}
 	\end{equation}
 	\begin{equation}
-		V_{r(\mathrm{rms})} = \frac{0.981}{2\sqrt{3}} = \SI{0.283}{\volt},
+		V_{r(\mathrm{rms})} = \frac{1.972}{2\sqrt{3}} = \SI{0.5693}{\volt},
 		\qquad
-		r = \frac{0.283}{98.11} = 0.00289 ,
-		\label{eq:calc-r-10u}
+		r = \frac{0.5693}{97.61} = 0.005832 ,
+		\label{eq:calc-r-50u}
 	\end{equation}
-	so the percentage ripple is $\%r = 0.289\%$. Here the discharge time constant $R_1C_1 = \SI{1}{\second}$ is one hundred times the half-period $T/2$ (and \SI{10}{\second}, one thousand times, for $C_1 = \SI{100}{\micro\farad}$), so the small-ripple assumption $R_1C_1 \gg T/2$ behind Eqs.~\eqref{eq:ripple-estimates} and \eqref{eq:r-filtered} is comfortably satisfied for both filtered circuits.
+	so the percentage ripple is $\%r = 0.5832\%$. Here the discharge time constant $R_1C_1 = \SI{0.5}{\second}$ is fifty times the half-period $T/2$ (and \SI{1}{\second}, one hundred times, for $C_1 = \SI{100}{\micro\farad}$), so the small-ripple assumption $R_1C_1 \gg T/2$ behind Eqs.~\eqref{eq:ripple-pp}--\eqref{eq:r-filtered} is comfortably satisfied for both filtered circuits.
 	
 	% =====================================================================
 	\section{Result Analysis}
@@ -462,12 +674,12 @@ R1 2 3 100K
 		\centering
 		\includegraphics[width=0.95\textwidth]{full_bridge_with_capacitor_changed.png}
 		\caption{PSpice output: input and load-voltage waveforms of the
-			bridge rectifier with the modified $C_1 = \SI{10}{\micro\farad}$
+			bridge rectifier with the modified $C_1 = \SI{50}{\micro\farad}$
 			(task 4)}
 		\label{fig:wave3}
 	\end{figure}
 	
-	Without the capacitor (Figure~\ref{fig:wave1}) the output is a full-wave rectified waveform: the negative input half-cycles are flipped positive, the output period is \SI{10}{\milli\second} (i.e.\ $f_{\mathrm{out}} = \SI{100}{\hertz}$), and the output returns to approximately \SI{0}{\volt} between humps, where for a brief interval no diode pair conducts; the humps peak at \SI{98.28}{\volt} against the \SI{100}{\volt} input crests, the difference being the total drop of the two conducting diodes. With $R_1 = \SI{100}{\kilo\ohm}$ the filtered circuits draw only about \SI{1}{\milli\ampere}, so the capacitor discharges very little between recharges; both outputs (Figs.~\ref{fig:wave2} and \ref{fig:wave3}) also show the capacitor's initial charge-up over the first few input cycles, after which they sit almost flat just below the \SI{100}{\volt} crests, with steady-state ripples of only \SI{0.092}{\volt} ($C_1 = \SI{100}{\micro\farad}$) and \SI{0.87}{\volt} ($C_1 = \SI{10}{\micro\farad}$, task 4).
+	Without the capacitor (Figure~\ref{fig:wave1}) the output is a full-wave rectified waveform: the negative input half-cycles are flipped positive, the output period is \SI{10}{\milli\second} (i.e.\ $f_{\mathrm{out}} = \SI{100}{\hertz}$), and the output returns to approximately \SI{0}{\volt} between humps, where for a brief interval no diode pair conducts; the humps peak at \SI{98.62}{\volt} against the \SI{100}{\volt} input crests, the difference being the total drop of the two conducting diodes. With $R_1 = \SI{10}{\kilo\ohm}$ the filtered circuits draw about \SI{9.8}{\milli\ampere}, and the capacitor discharges only slightly between recharges; both outputs (Figs.~\ref{fig:wave2} and \ref{fig:wave3}) also show the capacitor's initial charge-up to the peak within the first quarter-cycle, after which they sit almost flat just below the \SI{100}{\volt} crests, with steady-state ripples of only \SI{0.91}{\volt} ($C_1 = \SI{100}{\micro\farad}$) and \SI{1.79}{\volt} ($C_1 = \SI{50}{\micro\farad}$, task 4).
 	
 	\subsection{Simulated parameters read from the waveforms}
 	The quantities read from the Probe traces with the cursor are compared below with the theoretical values calculated in Section 4.6. Table~\ref{tab:compare-1} refers to the circuit without filter capacitor. The total diode drop read at the output peak is the difference between the input and output peaks, $2V_D = V_m - V_{p(\mathrm{out})}$; the peak inverse voltage is the largest voltage appearing across a diode and is read from the diode-voltage trace \texttt{V(D2:1,D2:2)} over the half-cycle in which the opposite pair conducts.
@@ -478,46 +690,47 @@ R1 2 3 100K
 			rectifier without filter capacitor}
 		\label{tab:compare-1}
 		\footnotesize
-		\renewcommand{\arraystretch}{1.2}
-		\setlength{\tabcolsep}{3pt}
-		\begin{tabular}{|l|l|l|c|c|c|}
+		\renewcommand{\arraystretch}{1.7}
+		\setlength{\extrarowheight}{5pt}
+		\setlength{\tabcolsep}{17pt}
+		\begin{tabular}{|>{\raggedright\arraybackslash}p{2.7cm}|c|c|c|}
 			\hline
-			\rowcolor{black!12}\textbf{Quantity} & \textbf{Formula} & \textbf{Calculation} & \textbf{Theoretical} & \textbf{Simulated} & \textbf{\% Error} \\
+			\textbf{Quantity} & \textbf{Theoretical Value} & \textbf{Simulated} & \textbf{\% Error} \\
 			\hline
-			Peak input voltage & $V_m$ & given & \SI{100}{\volt} & \SI{100.0}{\volt} & $0.00$ \\
+			Peak input voltage & $\begin{aligned}V_m &= \SI{100}{\volt}\end{aligned}$ & \SI{100.0}{\volt} & $0.00$ \\
 			\hline
-			Total diode drop & $2V_D$ & $2\times 0.7$ & \SI{1.4}{\volt} & \SI{1.72}{\volt} & $23.01$ \\
+			Total diode drop & $\begin{aligned}2V_D &= 2(0.7) \\ &= \SI{1.4}{\volt}\end{aligned}$ & \SI{1.382}{\volt} & $1.29$ \\
 			\hline
-			Peak output voltage & $V_m - 2V_D$ & $100 - 1.4$ & \SI{98.6}{\volt} & \SI{98.28}{\volt} & $0.33$ \\
+			Peak output voltage & $\begin{aligned}V_{p(\mathrm{out})} &= V_m-2V_D = 100-1.4 \\ &= \SI{98.6}{\volt}\end{aligned}$ & \SI{98.62}{\volt} & $0.02$ \\
 			\hline
-			Peak output current & $(V_m - 2V_D)/R_1$ & $98.6/10^{5}$ & \SI{0.986}{\milli\ampere} & \SI{0.983}{\milli\ampere} & $0.33$ \\
+			Peak output current & $\begin{aligned}I_{p(\mathrm{out})} &= \dfrac{V_m-2V_D}{R_1} = \dfrac{100-1.4}{10^{4}} \\ &= \SI{9.86}{\milli\ampere}\end{aligned}$ & \SI{9.862}{\milli\ampere} & $0.02$ \\
 			\hline
-			DC output voltage & $2(V_m - 2V_D)/\pi$ & $2\times 98.6/\pi$ & \SI{62.77}{\volt} & \SI{62.12}{\volt} & $1.04$ \\
+			DC output voltage & $\begin{aligned}V_{\mathrm{dc}} &= \dfrac{2(V_m-2V_D)}{\pi} = \dfrac{2(100-1.4)}{\pi} \\ &= \SI{62.77}{\volt}\end{aligned}$ & \SI{62.36}{\volt} & $0.65$ \\
 			\hline
-			DC load current & $V_{\mathrm{dc}}/R_1$ & $62.77/10^{5}$ & \SI{0.628}{\milli\ampere} & \SI{0.621}{\milli\ampere} & $1.04$ \\
+			DC load current & $\begin{aligned}I_{\mathrm{dc}} &= \dfrac{V_{\mathrm{dc}}}{R_1} = \dfrac{62.77}{10^{4}} \\ &= \SI{6.277}{\milli\ampere}\end{aligned}$ & \SI{6.236}{\milli\ampere} & $0.65$ \\
 			\hline
-			RMS output voltage & $(V_m - 2V_D)/\sqrt{2}$ & $98.6/\sqrt{2}$ & \SI{69.73}{\volt} & \SI{69.25}{\volt} & $0.67$ \\
+			RMS output voltage & $\begin{aligned}V_{\mathrm{rms}} &= \dfrac{V_m-2V_D}{\sqrt{2}} = \dfrac{100-1.4}{\sqrt{2}} \\ &= \SI{69.73}{\volt}\end{aligned}$ & \SI{69.50}{\volt} & $0.32$ \\
 			\hline
-			RMS load current & $V_{\mathrm{rms}}/R_1$ & $69.73/10^{5}$ & \SI{0.697}{\milli\ampere} & \SI{0.693}{\milli\ampere} & $0.67$ \\
+			RMS load current & $\begin{aligned}I_{\mathrm{rms}} &= \dfrac{V_{\mathrm{rms}}}{R_1} = \dfrac{69.73}{10^{4}} \\ &= \SI{6.972}{\milli\ampere}\end{aligned}$ & \SI{6.950}{\milli\ampere} & $0.32$ \\
 			\hline
-			DC output power & $I_{\mathrm{dc}}^{2}R_1$ & $0.6277^{2}\times 100$ & \SI{39.40}{\milli\watt} & \SI{38.59}{\milli\watt} & $2.06$ \\
+			DC output power & $\begin{aligned}P_{\mathrm{dc}} &= I_{\mathrm{dc}}^{2}R_1 = (6.277)^2\times10 \\ &= \SI{394.02}{\milli\watt}\end{aligned}$ & \SI{388.90}{\milli\watt} & $1.30$ \\
 			\hline
-			AC load power & $I_{\mathrm{rms}}^{2}R_1$ & $0.6973^{2}\times 100$ & \SI{48.61}{\milli\watt} & \SI{47.96}{\milli\watt} & $1.35$ \\
+			AC load power & $\begin{aligned}P_{\mathrm{ac}} &= I_{\mathrm{rms}}^{2}R_1 = (6.972)^2\times10 \\ &= \SI{486.10}{\milli\watt}\end{aligned}$ & \SI{483.03}{\milli\watt} & $0.63$ \\
 			\hline
-			Efficiency & $(P_{\mathrm{dc}}/P_{\mathrm{ac}})\times 100\%$ & $(39.40/48.61)\times 100\%$ & $81.06\%$ & $80.47\%$ & $0.73$ \\
+			Efficiency & $\begin{aligned}\eta &= \dfrac{P_{\mathrm{dc}}}{P_{\mathrm{ac}}}\times100\% = \dfrac{394.02}{486.10}\times100\% \\ &= 81.06\%\end{aligned}$ & $80.51\%$ & $0.67$ \\
 			\hline
-			Form factor & $V_{\mathrm{rms}}/V_{\mathrm{dc}}$ & $69.73/62.77$ & $1.111$ & $1.115$ & $0.37$ \\
+			Form factor & $\begin{aligned}FF &= \dfrac{V_{\mathrm{rms}}}{V_{\mathrm{dc}}} = \dfrac{69.73}{62.77} \\ &= 1.111\end{aligned}$ & $1.114$ & $0.34$ \\
 			\hline
-			Ripple factor & $\sqrt{(V_{\mathrm{rms}}/V_{\mathrm{dc}})^{2}-1}$ & $\sqrt{1.111^{2}-1}$ & $0.483$ & $0.493$ & $1.92$ \\
+			Ripple factor & $\begin{aligned}r &= \sqrt{\left(\dfrac{V_{\mathrm{rms}}}{V_{\mathrm{dc}}}\right)^{2}-1} = \sqrt{1.111^{2}-1} \\ &= 0.483\end{aligned}$ & $0.492$ & $1.77$ \\
 			\hline
-			Peak inverse voltage & $\approx V_m$ & given & \SI{100}{\volt} & \SI{99.14}{\volt} & $0.86$ \\
+			Peak inverse voltage & $\begin{aligned}PIV &\approx V_m \\ &= \SI{100}{\volt}\end{aligned}$ & \SI{99.31}{\volt} & $0.69$ \\
 			\hline
-			Output frequency & $2f$ & $2\times 50$ & \SI{100}{\hertz} & \SI{99.92}{\hertz} & $0.08$ \\
+			Output frequency & $\begin{aligned}f_{\mathrm{out}} &= 2f = 2(50) \\ &= \SI{100}{\hertz}\end{aligned}$ & \SI{100.01}{\hertz} & $0.01$ \\
 			\hline
 		\end{tabular}
 	\end{table}
-	
-	Tables~\ref{tab:compare-2} and \ref{tab:compare-3} refer to the filtered circuits. The peak capacitor voltage equals the output maximum, the output valley is the minimum to which the capacitor discharges between recharges, and the ripple quantities are read from the last steady-state output period.
+	\newpage
+	Table~\ref{tab:compare-2} refers to the filtered circuit with $C_1 = \SI{100}{\micro\farad}$; the modified circuit of task 4 is compared in Section~\ref{sec:task4}. The peak capacitor voltage equals the output maximum, the output valley is the minimum to which the capacitor discharges between recharges, and the ripple quantities are read from the last steady-state output period.
 	
 	\begin{table}[H]
 		\centering
@@ -525,105 +738,85 @@ R1 2 3 100K
 			rectifier with $C_1 = \SI{100}{\micro\farad}$}
 		\label{tab:compare-2}
 		\footnotesize
-		\renewcommand{\arraystretch}{1.2}
-		\setlength{\tabcolsep}{3pt}
-		\begin{tabular}{|l|l|l|c|c|c|}
+		\renewcommand{\arraystretch}{2.6}
+		\setlength{\extrarowheight}{5pt}
+		\setlength{\tabcolsep}{12pt}
+		\begin{tabular}{|>{\raggedright\arraybackslash}p{2.7cm}|c|c|c|}
 			\hline
-			\rowcolor{black!12}\textbf{Quantity} & \textbf{Formula} & \textbf{Calculation} & \textbf{Theoretical} & \textbf{Simulated} & \textbf{\% Error} \\
+			\textbf{Quantity} & \textbf{Theoretical Value} & \textbf{Simulated} & \textbf{\% Error} \\
 			\hline
-			Peak capacitor voltage & $\approx V_m - 2V_D$ & $100 - 1.4$ & \SI{98.6}{\volt} & \SI{98.00}{\volt} & $0.61$ \\
+			Peak capacitor voltage & $\begin{aligned}V_{C(\mathrm{pk})} &= V_m-2V_D = 100-2(0.7) \\ &= \SI{98.6}{\volt}\end{aligned}$ & \SI{98.44}{\volt} & $0.16$ \\
 			\hline
-			Ripple frequency & $= 2f$ & $2\times 50$ & \SI{100}{\hertz} & \SI{100.06}{\hertz} & $0.06$ \\
+			Ripple frequency & $\begin{aligned}f_r &= 2f = 2(50) \\ &= \SI{100}{\hertz}\end{aligned}$ & \SI{99.98}{\hertz} & $0.02$ \\
 			\hline
-			Peak-to-peak ripple voltage & $\approx I_L/(2fC_1)$ & $98.55/1000$ & \SI{0.0986}{\volt} & \SI{0.0920}{\volt} & $6.62$ \\
+			Peak-to-peak ripple voltage & $\begin{aligned}V_{r(pp)} &= \dfrac{I_L}{2fC_1} \approx \dfrac{V_{C(\mathrm{pk})}/R_1}{2fC_1} = \dfrac{9.86\times10^{-3}}{2(50)(100\times10^{-6})} \\ &= \SI{0.986}{\volt}\end{aligned}$ & \SI{0.9086}{\volt} & $7.85$ \\
 			\hline
-			RMS ripple voltage & $= V_{r(pp)}/(2\sqrt{3})$ & $0.0986/(2\sqrt{3})$ & \SI{0.0285}{\volt} & \SI{0.0276}{\volt} & $2.84$ \\
+			RMS ripple voltage & $\begin{aligned}V_{r(\mathrm{rms})} &= \dfrac{V_{r(pp)}}{2\sqrt{3}} = \dfrac{0.986}{2\sqrt{3}} \\ &= \SI{0.2846}{\volt}\end{aligned}$ & \SI{0.2623}{\volt} & $7.85$ \\
 			\hline
-			Average/DC output voltage & $\approx V_{p(\mathrm{cap})} - V_{r(pp)}/2$ & $98.6/(1+1/2000)$ & \SI{98.55}{\volt} & \SI{97.96}{\volt} & $0.60$ \\
+			Average/DC output voltage & $\begin{aligned}V_{\mathrm{dc}} &\approx V_{C(\mathrm{pk})} - \dfrac{V_{r(pp)}}{2} = 98.6 - \dfrac{0.986}{2} \\ &= \SI{98.11}{\volt}\end{aligned}$ & \SI{97.99}{\volt} & $0.12$ \\
 			\hline
-			Load current & $\approx V_{\mathrm{dc}}/R_1$ & $98.55/10^{5}$ & \SI{0.9855}{\milli\ampere} & \SI{0.980}{\milli\ampere} & $0.60$ \\
+			Load current & $\begin{aligned}I_L &= \dfrac{V_{\mathrm{dc}}}{R_1} = \dfrac{98.11}{10^{4}} \\ &= \SI{9.811}{\milli\ampere}\end{aligned}$ & \SI{9.799}{\milli\ampere} & $0.12$ \\
 			\hline
-			Ripple factor & $= V_{r(\mathrm{rms})}/V_{\mathrm{dc}}$ & $0.0285/98.55$ & $0.000289$ & $0.000282$ & $2.25$ \\
+			Ripple factor & $\begin{aligned}r &= \dfrac{V_{r(\mathrm{rms})}}{V_{\mathrm{dc}}} = \dfrac{0.2846}{98.11} \\ &= 0.00290\end{aligned}$ & $0.00268$ & $7.63$ \\
 			\hline
-			Percentage ripple & $= r\times 100\%$ & $0.000289\times 100$ & $0.0289\%$ & $0.0282\%$ & $2.25$ \\
+			Percentage ripple & $\begin{aligned}\%r &= r\times100\% = 0.00290\times100\% \\ &= 0.290\%\end{aligned}$ & $0.268\%$ & $7.63$ \\
 			\hline
 		\end{tabular}
 	\end{table}
 	
-	\begin{table}[H]
-		\centering
-		\caption{Theoretical versus simulated parameters of the bridge
-			rectifier with the modified $C_1 = \SI{10}{\micro\farad}$ (task 4)}
-		\label{tab:compare-3}
-		\footnotesize
-		\renewcommand{\arraystretch}{1.2}
-		\setlength{\tabcolsep}{3pt}
-		\begin{tabular}{|l|l|l|c|c|c|}
-			\hline
-			\rowcolor{black!12}\textbf{Quantity} & \textbf{Formula} & \textbf{Calculation} & \textbf{Theoretical} & \textbf{Simulated} & \textbf{\% Error} \\
-			\hline
-			Peak capacitor voltage & $\approx V_m - 2V_D$ & $100 - 1.4$ & \SI{98.6}{\volt} & \SI{98.15}{\volt} & $0.46$ \\
-			\hline
-			Ripple frequency & $= 2f$ & $2\times 50$ & \SI{100}{\hertz} & \SI{100.04}{\hertz} & $0.04$ \\
-			\hline
-			Peak-to-peak ripple voltage & $\approx I_L/(2fC_1)$ & $98.11/100$ & \SI{0.9811}{\volt} & \SI{0.8669}{\volt} & $11.64$ \\
-			\hline
-			RMS ripple voltage & $= V_{r(pp)}/(2\sqrt{3})$ & $0.9811/(2\sqrt{3})$ & \SI{0.2832}{\volt} & \SI{0.2605}{\volt} & $8.03$ \\
-			\hline
-			Average/DC output voltage & $\approx V_{p(\mathrm{cap})} - V_{r(pp)}/2$ & $98.6/(1+1/200)$ & \SI{98.11}{\volt} & \SI{97.72}{\volt} & $0.40$ \\
-			\hline
-			Load current & $\approx V_{\mathrm{dc}}/R_1$ & $98.11/10^{5}$ & \SI{0.9811}{\milli\ampere} & \SI{0.977}{\milli\ampere} & $0.40$ \\
-			\hline
-			Ripple factor & $= V_{r(\mathrm{rms})}/V_{\mathrm{dc}}$ & $0.2832/98.11$ & $0.00289$ & $0.00267$ & $7.66$ \\
-			\hline
-			Percentage ripple & $= r\times 100\%$ & $0.00289\times 100$ & $0.289\%$ & $0.267\%$ & $7.66$ \\
-			\hline
-		\end{tabular}
-	\end{table}
 	
 	\subsection{Effect of changing the filter capacitance (task 4)}
-	Table~\ref{tab:task4} summarizes the simulated effect of reducing the filter capacitor from \SI{100}{\micro\farad} to \SI{10}{\micro\farad} while everything else is unchanged.
+	\label{sec:task4}
+	Table~\ref{tab:task4} compares the filtered rectifier before and after reducing the filter capacitor from \SI{100}{\micro\farad} to \SI{50}{\micro\farad}, with everything else unchanged. The simulated ripple values are read from the last steady-state period of Figures~\ref{fig:wave2} and \ref{fig:wave3} and are checked against the theoretical ripple of Eq.~\eqref{eq:ripple-pp}.
 	
 	\begin{table}[H]
 		\centering
-		\caption{Simulated output of the filtered rectifier before and after
+		\caption{Theoretical and simulated output of the filtered rectifier before and after
 			changing the filter capacitance}
 		\label{tab:task4}
 		\renewcommand{\arraystretch}{1.25}
 		\begin{tabular}{|l|c|c|}
 			\hline
-			\rowcolor{black!12}\textbf{Quantity} & \textbf{$C_1 = \SI{100}{\micro\farad}$} & \textbf{$C_1 = \SI{10}{\micro\farad}$} \\
+			\textbf{Quantity} & \textbf{$C_1 = \SI{100}{\micro\farad}$} & \textbf{$C_1 = \SI{50}{\micro\farad}$} \\
 			\hline
-			Discharge time constant $R_1C_1$ & \SI{10}{\second} ($1000\times T/2$) & \SI{1}{\second} ($100\times T/2$) \\
+			Discharge time constant $R_1C_1$ & \SI{1}{\second} & \SI{0.5}{\second} \\
 			\hline
-			Simulated output peak & \SI{98.00}{\volt} & \SI{98.15}{\volt} \\
+			Simulated output peak & \SI{98.44}{\volt} & \SI{98.50}{\volt} \\
 			\hline
-			Simulated output valley & \SI{97.91}{\volt} & \SI{97.28}{\volt} \\
+			Theoretical $V_{r(pp)}$ & \SI{0.986}{\volt} & \SI{1.972}{\volt} \\
 			\hline
-			Simulated $V_{r(pp)}$ & \SI{0.0920}{\volt} & \SI{0.8669}{\volt} \\
+			Simulated $V_{r(pp)}$ & \SI{0.9086}{\volt} & \SI{1.7864}{\volt} \\
 			\hline
-			Simulated $V_{\mathrm{dc}}$ & \SI{97.96}{\volt} & \SI{97.72}{\volt} \\
+			\% Error in $V_{r(pp)}$ & $7.85$ & $9.41$ \\
 			\hline
-			Simulated $V_{r(\mathrm{rms})}$ & \SI{0.0276}{\volt} & \SI{0.2605}{\volt} \\
+			Theoretical $V_{\mathrm{dc}}$ & \SI{98.11}{\volt} & \SI{97.61}{\volt} \\
 			\hline
-			Ripple factor $r$ (percentage ripple) & $0.000282$ ($0.028\%$) & $0.00267$ ($0.27\%$) \\
+			Simulated $V_{\mathrm{dc}}$ & \SI{97.99}{\volt} & \SI{97.63}{\volt} \\
+			\hline
+			Simulated $V_{r(\mathrm{rms})}$ & \SI{0.2623}{\volt} & \SI{0.5157}{\volt} \\
+			\hline
+			Theoretical ripple factor $r$ & $0.00290$ ($0.290\%$) & $0.005832$ ($0.583\%$) \\
+			\hline
+			Simulated ripple factor $r$ & $0.00268$ ($0.27\%$) & $0.00528$ ($0.53\%$) \\
 			\hline
 			Ripple frequency $f_r$ & \SI{100}{\hertz} & \SI{100}{\hertz} \\
 			\hline
 		\end{tabular}
 	\end{table}
 	
-	Reducing the capacitance tenfold increases the simulated peak-to-peak ripple from \SI{0.0920}{\volt} to \SI{0.8669}{\volt}, a factor of about $9.4$ close to the tenfold ratio predicted by $V_{r(pp)} \propto 1/C_1$, and the percentage ripple from $0.028\%$ to $0.27\%$, while the DC output level falls by only $0.24\%$ (from \SI{97.96}{\volt} to \SI{97.72}{\volt}). The output peak itself is essentially unaffected, because it is set by the source amplitude and the diode drops, not by the capacitor.
+	Halving the capacitance increases the simulated peak-to-peak ripple from \SI{0.9086}{\volt} to \SI{1.7864}{\volt}, a factor of about $1.97$ close to the twofold ratio predicted by $V_{r(pp)} \propto 1/C_1$, and the percentage ripple from $0.27\%$ to $0.53\%$, while the DC output level falls by only $0.37\%$ (from \SI{97.99}{\volt} to \SI{97.63}{\volt}). The output peak itself is essentially unaffected, because it is set by the source amplitude and the diode drops, not by the capacitor.
 	
 	% =====================================================================
 	\section{Discussion}
 	% =====================================================================
-	All three circuits behaved as the theory of Section 4.2 predicts, and at the \SI{100}{\volt} amplitude the constant-drop model is accurate enough that every DC and RMS quantity agrees with it to about $2\%$ (Tables~\ref{tab:compare-1}--\ref{tab:compare-3}); an exact integration of the D1N914 diode equation reproduces the simulated unfiltered averages to within $0.3\%$, confirming that the residuals are model idealizations rather than simulation artefacts. The one large deviation is the total diode drop itself: D1N914's saturation current ($\approx 1.7\times 10^{-19}$~A) is far smaller than that of an ordinary rectifier diode, so at the $\approx\SI{1}{\milli\ampere}$ crest each conducting diode drops about \SI{0.86}{\volt} instead of the assumed \SI{0.7}{\volt}, and the measured $2V_D$ of \SI{1.72}{\volt} carries the largest error in Table~\ref{tab:compare-1} ($23\%$). Because the real drop still varies with current in the same way as the ideal one, it lowers the crest by only $0.33\%$ and the averages by about $1\%$, while the peak inverse voltage read from the diode trace, \SI{99.14}{\volt}, confirms the $PIV \approx V_m$ estimate to $0.9\%$.
-
-	The filtered circuits confirm the small-ripple estimates once they have settled: since $R_1C_1$ reaches \SI{10}{\second}, the simulations were run for \SI{300}{\milli\second} (fifteen input periods), after which the outputs repeat to better than $0.02\%$ from period to period. The simulated ripples of \SI{0.092}{\volt} and \SI{0.867}{\volt} sit $7\%$ and $12\%$ below the estimates of Eq.~\eqref{eq:ripple-estimates} because the estimate assumes a constant discharge current over the full half-period, whereas the real current decays and the rising sinusoid catches the capacitor before the half-period ends; the estimates are therefore conservative, the safe direction for design. The task-4 variation follows $V_{r(pp)} \propto 1/C_1$ closely (a factor of $9.4$ for a tenfold reduction) while the DC level moves by only $0.24\%$; a larger capacitor buys a steadier output at the cost of size and larger charging pulses, the bridge needs no centre-tapped transformer while keeping the per-diode $PIV$ near $V_m$, and the idealized models used here (ideal source and capacitor, no ESR) mean real hardware will spread further from theory than the agreements found above.
+	All three circuits behaved as predicted, with the constant-drop model matching DC and RMS quantities to about $2\%$ (Tables~\ref{tab:compare-1}, \ref{tab:compare-2} and \ref{tab:task4}). At the \SI{9.86}{\milli\ampere} crest, the simulated D1N4002 model gives a per-diode drop of about \SI{0.691}{\volt}, so the total \SI{1.381}{\volt} drop is within $0.1\%$ of the measured \SI{1.382}{\volt}. The largest errors are in ripple factor ($1.77\%$), DC power ($1.30\%$), and total diode drop ($1.29\%$): ripple-factor error is amplified by subtracting nearly equal quantities, while power error grows with the square of voltage. The diode drop is slightly below the assumed \SI{0.7}{\volt}, and brief non-conducting intervals near zero crossings further reduce the averages. The measured PIV of \SI{99.31}{\volt} is within $0.7\%$ of $V_m$; the refined estimate $V_m-V_D$ matches it within $0.001\%$.
+	
+	The errors are small mainly because the \SI{100}{\volt} source makes the diode drop a minor effect: the total \SI{1.4}{\volt} drop is only $1.4\%$ of $V_m$, so even the small deviation from the assumed \SI{0.7}{\volt} per diode changes $V_{p(\mathrm{out})}$ by just \SI{0.02}{\volt}. For the same reason, the interval around each zero crossing where no diode pair conducts is only about $0.5\%$ of the output period, so it barely affects $V_\mathrm{dc}$ and $V_\mathrm{rms}$. In the filtered circuits, $R_1C_1\gg T/2$ keeps the discharge nearly linear, which is the condition the ripple equations assume.
+	
+	With $R_1C_1=\SI{0.5}{\second}$--\SI{1}{\second}, the filtered simulations settled well within their \SI{100}{\milli\second} run; last-period ripple readings were \SI{0.909}{\volt} and \SI{1.786}{\volt}, respectively. These are $7.8\%$ and $9.4\%$ below Eq.~\eqref{eq:ripple-pp}, which conservatively assumes constant discharge current over the full half-period; in simulation, current decays and the rising input recharges the capacitor sooner. Halving $C_1$ nearly doubles ripple (factor $1.97$) while lowering the DC level by only $0.37\%$. A larger capacitor therefore smooths the output but increases size and charging pulses. The bridge avoids a centre tap and keeps each diode's PIV near $V_m$; real components, including capacitor ESR, may cause greater deviations than these idealized simulations.
 	
 	% =====================================================================
-	\section{Reference}
+	\section{References}
 	% =====================================================================
 	\renewcommand{\refname}{} % suppress duplicate heading; \section{Reference} above serves
 	\begin{thebibliography}{9}
@@ -631,7 +824,7 @@ R1 2 3 100K
 		\textit{A Textbook of Electrical Technology}, vol.~IV:
 		\textit{Electronic Devices and Circuits}, multicolour ed. New Delhi,
 		India: S. Chand \& Company, 2006, sec.~55.8, p.~2140.
-		\bibitem{ref:theraja-filter} B. L. Theraja and R. S. Sedha,
+		\bibitem{ref:theraja-filter} B. L. Theraja and A. K. Theraja,
 		\textit{A Textbook of Electrical Technology}, vol.~IV:
 		\textit{Electronic Devices and Circuits}, multicolour ed. New Delhi,
 		India: S. Chand \& Company, 2006, sec.~55.17, pp.~2146--2148.

@@ -18,6 +18,9 @@ Scripts build their figures from:
     draw_trace(ax, x, y, frame)
     add_footer(fig, trace_name, axis_label)
     add_note(ax, note, frame, curve, avoid_rects)
+    add_footer(fig, trace_name, axis_label)
+    add_y_label(fig, y_label)
+    add_note(ax, note, frame, curve, avoid_rects)
 
 `frame` (see Frame) converts data coordinates to page points, which the marker
 spacing and cursor helpers work in.
@@ -39,10 +42,14 @@ from matplotlib.ticker import FixedLocator, NullFormatter, NullLocator
 # --------------------------------------------------------------------------- #
 FIG_W_PT, FIG_H_PT = 991.0, 423.0
 AX_RECT = (0.0257, 0.1132, 0.9539, 0.8822)       # left, bottom, width, height
-AX_LEFT_PT = AX_RECT[0] * FIG_W_PT
-AX_RIGHT_PT = (AX_RECT[0] + AX_RECT[2]) * FIG_W_PT
-AX_H_PT = AX_RECT[3] * FIG_H_PT
+AX_LEFT_PT   = AX_RECT[0] * FIG_W_PT
+AX_RIGHT_PT  = (AX_RECT[0] + AX_RECT[2]) * FIG_W_PT
+AX_BOTTOM_PT = AX_RECT[1] * FIG_H_PT
+AX_TOP_PT    = (AX_RECT[1] + AX_RECT[3]) * FIG_H_PT
+AX_H_PT      = AX_RECT[3] * FIG_H_PT
 TICK_LEN_PT, TICK_PAD_PT = 4.7, 4.0
+Y_LABEL_PAD_PT = 22.0                            # strip on the far left reserved for the y-title
+AX_PAD_PT = 5.0
 
 GREEN = "#00aa00"                                # PSpice trace colour
 NOTE_EDGE = "#999999"
@@ -235,22 +242,38 @@ def choose_font():
     return "sans-serif", 10.6
 
 
-def new_page(xlim, ylim, ylabels):
-    """White 991 x 423 pt page with an PSpice-styled axes; returns (fig, ax, frame)."""
+def new_page(xlim, ylim, ylabels, reserve_y_label=True):
+    """White 991 x 423 pt page with a PSpice-styled axes; returns (fig, ax, frame).
+
+    The plot area is inset by ``AX_PAD_PT`` on every side so the figure reads as
+    slightly "zoomed out"; when ``reserve_y_label`` is true (the default) an
+    extra ``Y_LABEL_PAD_PT``-point strip is kept clear on the far left so
+    ``add_y_label`` can place the rotated y-axis title clear of the tick labels.
+    """
     family, fsize = choose_font()
     plt.rcParams["font.family"] = family
     plt.rcParams["font.size"] = fsize
 
     widest = max(label_widths_pt(ylabels, fsize))
-    left_pt = max(AX_LEFT_PT, widest + TICK_LEN_PT + TICK_PAD_PT)
-    frame = Frame(xlim[0], xlim[1], ylim[0], ylim[1], AX_RIGHT_PT - left_pt, AX_H_PT)
+    left_pt = widest + TICK_LEN_PT + TICK_PAD_PT
+    if reserve_y_label:
+        left_pt += Y_LABEL_PAD_PT
+    left_pt = max(AX_PAD_PT, left_pt)
+
+    right_pt  = AX_RIGHT_PT  - AX_PAD_PT
+    bottom_pt = AX_BOTTOM_PT + AX_PAD_PT
+    top_pt    = AX_TOP_PT    - AX_PAD_PT
+    width_pt  = right_pt - left_pt
+    height_pt = top_pt - bottom_pt
+
+    frame = Frame(xlim[0], xlim[1], ylim[0], ylim[1], width_pt, height_pt)
 
     fig = plt.figure(figsize=(FIG_W_PT / 72.0, FIG_H_PT / 72.0), facecolor="white")
-    ax = fig.add_axes((left_pt / FIG_W_PT, AX_RECT[1], frame.w / FIG_W_PT, AX_RECT[3]))
+    ax = fig.add_axes((left_pt / FIG_W_PT, bottom_pt / FIG_H_PT,
+                       width_pt / FIG_W_PT, height_pt / FIG_H_PT))
     ax.set_xlim(xlim[0], xlim[1])
     ax.set_ylim(ylim[0], ylim[1])
     return fig, ax, frame
-
 
 def style_axes(ax, xticks, xlabels, yticks, ylabels, yminor=()):
     """PSpice grid: solid black majors, dotted minors on y only; plain outer ticks."""
@@ -282,10 +305,52 @@ def draw_trace(ax, x, y, frame):
             markerfacecolor="white", markeredgecolor=GREEN, zorder=4)
 
 
-def add_footer(fig, trace_name, axis_label):
-    """Hollow-square legend at bottom-left and the axis label centred underneath."""
-    fig.add_artist(Line2D([0.0349], [0.0314], marker="s", markersize=4.4, markeredgewidth=1.1,
+def add_footer(fig, trace_name, axis_label, ax=None):
+    """Hollow-square legend at bottom-left and the axis label centred underneath.
+
+    The legend is anchored at the left edge of the axes (the zero position of
+    the x-axis) rather than a fixed page coordinate, so it always lines up with
+    the y-axis.  If ``ax`` is not supplied the first axes on the figure is used.
+    """
+    if ax is None:
+        axs = fig.get_axes()
+        ax = axs[0] if axs else None
+    x0 = ax.get_position().x0 if ax is not None else 0.0349
+
+    y = 0.0314
+    fig.add_artist(Line2D([x0], [y], marker="s", markersize=4.4, markeredgewidth=1.1,
                           markerfacecolor="white", markeredgecolor=GREEN, linestyle="none",
                           transform=fig.transFigure))
-    fig.text(0.0433, 0.0314, trace_name, ha="left", va="center", color="black")
+    fig.text(x0 + 0.0084, y, trace_name, ha="left", va="center", color="black")
     fig.text(0.491, 0.0137, axis_label, ha="center", va="center", color="black")
+
+def add_y_label(fig, label, ax=None, gap_pt=8.0):
+    """Rotated y-axis title, vertically centred on the axes.
+
+    With an axes available (either passed in or discovered from the figure) the
+    title is placed by measuring where the tick labels really start (right edge
+    of the title ``gap_pt`` points left of them), so it can never overlap them.
+    """
+    if ax is None:
+        axs = fig.get_axes()
+        ax = axs[0] if axs else None
+    if ax is None:
+        # Bare figure with no axes: fall back to the nominal page centre.
+        y = AX_RECT[1] + AX_RECT[3] * 0.5
+        fig.text((Y_LABEL_PAD_PT / 2.0 - 2.0) / FIG_W_PT, y, label,
+                 rotation=90, ha="center", va="center", color="black")
+        return
+
+    pos = ax.get_position()
+    y = pos.y0 + pos.height * 0.5
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    ticks = [t for t in ax.get_yticklabels() if t.get_text()]
+    left_px = min(t.get_window_extent(renderer).x0 for t in ticks)
+    x_pt = left_px * 72.0 / fig.dpi - gap_pt
+    txt = fig.text(max(x_pt, 0.0) / FIG_W_PT, y, label, rotation=90,
+                   ha="right", va="center", color="black")
+    # keep it on the page if the margin is ever too small
+    x0 = txt.get_window_extent(renderer).x0
+    if x0 < 2.0 * fig.dpi / 72.0:
+        txt.set_x(txt.get_position()[0] + (2.0 * fig.dpi / 72.0 - x0) / fig.dpi * 72.0 / FIG_W_PT)
