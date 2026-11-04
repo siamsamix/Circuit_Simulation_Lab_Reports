@@ -336,7 +336,7 @@ def y_limits(arrays):
     lo = min(float(a.min()) for a in arrays)
     hi = max(float(a.max()) for a in arrays)
     if lo < 0.0 < hi:
-        lim = 1.1 * max(-lo, hi)
+        lim = 1.5 * max(-lo, hi)
         return -lim, lim
     span = hi - lo
     if span <= 1e-12 * max(abs(lo), abs(hi), 1e-30):      # flat trace
@@ -356,19 +356,26 @@ def spice_float(text):
     return float(text)
 
 
-# --------------------------------------------------------------------------- #
-# Clip levels (flat max/min plateaus of a trace)
-# --------------------------------------------------------------------------- #
-CLIP_TOL_REL = 2e-3          # flat-band halfwidth around a level, as a
-                             # fraction of the trace's y span
-CLIP_MIN_FRAC = 0.04         # total dwell near a level: >= 4 % of all samples
-CLIP_MIN_RUN = 0.02          # longest single plateau run: >= 2 % of them; a
-                             # sine crest holds under 1 %, a clamp run 3+ %,
-                             # so this floor separates the two
-CLIP_BAND_REL = 0.15         # a plateau's level must lie within this fraction
-                             # of the span of a trace's max or min
+# Clip/clamp detection tolerances.  Real diode clamps plateau with a few
+# percent of variation in the span, and multi-cycle records split the
+# flat run into one short plateau per period, so the original numbers
+# (0.2 % tolerance, 4 % dwell, 2 % run, 15 % band) could never fire on
+# anything but an ideal clamp in a one- or two-cycle record.
+CLIP_TOL_REL  = 0.015     # half-band around a candidate level (was 0.002)
+CLIP_MIN_FRAC = 0.09      # total dwell near a level             (was 0.04)
+CLIP_MIN_RUN  = 0.001     # longest single plateau run           (was 0.02)
+CLIP_BAND_REL = 0.20      # level must be within this of ymin/ymax (was 0.15)
 CLIP_COLOR = "black"
 
+def find_extrema(x, y):
+    """Global max and min of a trace, tagged by side."""
+    y = np.asarray(y, dtype=float)
+    if y.size < 2 or np.ptp(y) == 0.0:
+        return []
+    x = np.asarray(x, dtype=float)
+    imax, imin = int(np.argmax(y)), int(np.argmin(y))
+    return [("max", float(y[imax]), float(x[imax]), float(x[imax])),
+            ("min", float(y[imin]), float(x[imin]), float(x[imin]))]
 
 def find_clips(x, y, tol_rel=CLIP_TOL_REL, min_frac=CLIP_MIN_FRAC,
                min_run=CLIP_MIN_RUN, band_rel=CLIP_BAND_REL):
@@ -454,7 +461,7 @@ def _draw_levels(ax, xmin, curves, frame, prop, fsize, kind):
     axspan = frame.ymax - frame.ymin
     gap = 0.016
     for name, cx, cy in curves:
-        for level_kind, level, x0, x1 in find_clips(cx, cy):
+        for level_kind, level, x0, x1 in find_extrema(cx, cy):
             if kind == "clip":
                 label = f"{round(level, 3) + 0.0:+.3f} V"
             else:
@@ -479,8 +486,8 @@ def _draw_levels(ax, xmin, curves, frame, prop, fsize, kind):
                 xd = float(np.clip(xd, frame.xmin + wx, frame.xmax - wx))
             px, py = (float(v) for v in frame.to_pt(xd, y_lab))
             lo_off = 0.2 * fsize if va == "bottom" else -1.1 * fsize
-            rects.append((px - half_w + 0.02, py - lo_off,
-                          px + half_w + 0.02,
+            rects.append((px - half_w + 0.2, py - lo_off,
+                          px + half_w + 0.2,
                           py + (1.1 * fsize if va == "bottom" else 0.2 * fsize)))
             ax.text(xd, y_lab, label, fontproperties=prop, fontsize=fsize,
                     ha="center", va=va, color=CLIP_COLOR, zorder=7)
