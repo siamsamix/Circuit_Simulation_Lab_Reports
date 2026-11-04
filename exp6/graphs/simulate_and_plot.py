@@ -55,14 +55,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import font_manager
 from matplotlib.font_manager import FontProperties
+from matplotlib.colors import to_rgba
+from matplotlib.patches import FancyBboxPatch
 
 from plot_full_bridge import (PURPLE, add_legend_footer, add_note_at, draw_trace,
                               note_fontsize, pick_time_unit, time_label,
                               time_ticks)
 from pspice_theme import (GREEN, MARKER_FIRST_PT, MARKER_SPACING_PT, NOTE_SERIF,
                           add_y_label, dense_curve, major_ticks, minor_between,
-                          new_page, qty_label, spice_format, style_axes,
-                          text_width)
+                          new_page, qty_label, rect_is_free, spice_format,
+                          style_axes, text_width)
 
 # Trace colour and marker per curve: the first two are the reference figures'
 # green squares and violet triangles; the rest are Probe-like extras.
@@ -72,8 +74,8 @@ TRACE_STYLES = ((GREEN, "s"), (PURPLE, "v"), ("#ff0000", "D"), ("#0000ff", "o"),
 # Preferred note spots (axes-fraction x, y), one per trace, as in the
 # with-capacitor graphs of plot_full_bridge.py; add_note_at moves a note to
 # the nearest free spot if a curve is in the way.
-NOTE_SPOTS = ((0.30, 0.84), (0.52, 0.72), (0.74, 0.60),
-              (0.30, 0.50), (0.52, 0.38), (0.74, 0.26))
+NOTE_SPOTS = ((0.30, 0.5), (0.60, -0.55),
+              (0.40, 0), (0.60, 0.55))
 
 
 # Line styles the CLI accepts.  Everything matplotlib understands as a
@@ -440,45 +442,128 @@ def find_clips(x, y, tol_rel=CLIP_TOL_REL, min_frac=CLIP_MIN_FRAC,
     return out
 
 
-def draw_clip_levels(ax, curves, frame, prop, note_fsize):
-    """Dashed level lines, plateau-centre dots and "+3.549 V" labels at every
-    flat (clipped) max/min of every trace, as in the clipper figures.
+def _draw_levels(ax, xmin, curves, frame, prop, fsize, kind):
+    """Dashed level lines, plateau-centre dots and labels at flat plateaus.
 
-    The label sits above a max and below a min, nudged to the inside of the
-    axes when the level falls in the outer y margin.  Returns the labels'
-    bounding rects in frame points so the note boxes can dodge them."""
+    ``kind`` is either ``"clip"`` (clipped waveform plateau) or ``"clamp"``
+    (clamper clamp level).  Only the label text and the printed message differ.
+    Returns the labels' bounding rects in frame points so the note boxes can
+    dodge them."""
     rects = []
-    fsize = max(9.5, 0.62 * note_fsize)
+    fsize = max(9.5, 0.62 * fsize)
     axspan = frame.ymax - frame.ymin
     gap = 0.016
     for name, cx, cy in curves:
-        for kind, level, x0, x1 in find_clips(cx, cy):
-            label = f"{round(level, 3) + 0.0:+.3f} V"
+        for level_kind, level, x0, x1 in find_clips(cx, cy):
+            if kind == "clip":
+                label = f"{round(level, 3) + 0.0:+.3f} V"
+            else:
+                label = f"clamp {round(level, 3) + 0.0:+.3f} V"
             ax.axhline(level, color=CLIP_COLOR, linewidth=1.1,
                        linestyle=(0, (5.5, 2.8)), zorder=1.3)
             xd = 0.5 * (float(x0) + float(x1))
             ax.plot([xd], [level], marker="o", markersize=3.2,
                     markerfacecolor=CLIP_COLOR, markeredgecolor="none",
                     linestyle="none", zorder=7)
-            room = (frame.ymax - level) / axspan if kind == "max" \
+            room = (frame.ymax - level) / axspan if level_kind == "max" \
                 else (level - frame.ymin) / axspan
             if room >= gap + fsize / frame.h:           # normal side: outward
-                y_lab = level + (gap if kind == "max" else -gap) * axspan
-                va = "bottom" if kind == "max" else "top"
+                y_lab = level + (gap if level_kind == "max" else -gap) * axspan
+                va = "bottom" if level_kind == "max" else "top"
             else:                                       # no headroom: inward
-                y_lab = level - (gap if kind == "max" else -gap) * axspan
-                va = "top" if kind == "max" else "bottom"
+                y_lab = level - (gap if level_kind == "max" else -gap) * axspan
+                va = "top" if level_kind == "max" else "bottom"
             half_w = 0.5 * text_width(label, fsize, prop)
             if half_w > 0.0:                            # keep the label inside
                 wx = half_w / frame.w * (frame.xmax - frame.xmin)
                 xd = float(np.clip(xd, frame.xmin + wx, frame.xmax - wx))
             px, py = (float(v) for v in frame.to_pt(xd, y_lab))
             lo_off = 0.2 * fsize if va == "bottom" else -1.1 * fsize
-            rects.append((px - half_w, py - lo_off, px + half_w,
+            rects.append((px - half_w + 0.02, py - lo_off,
+                          px + half_w + 0.02,
                           py + (1.1 * fsize if va == "bottom" else 0.2 * fsize)))
             ax.text(xd, y_lab, label, fontproperties=prop, fontsize=fsize,
                     ha="center", va=va, color=CLIP_COLOR, zorder=7)
-            print(f"  clip level {label} ({kind}) on {probe_name(name)}")
+            print(f"{kind} level {label} ({level_kind}) on {probe_name(name)}")
+    return rects
+
+
+def draw_clip_levels(ax, xmin, curves, frame, prop, note_fsize):
+    """Dashed clip-level lines, plateau-centre dots and "+3.549 V" labels at every
+    flat (clipped) max/min of every trace, as in the clipper figures."""
+    return _draw_levels(ax, xmin, curves, frame, prop, note_fsize, "clip")
+
+
+def draw_clamp_levels(ax, xmin, curves, frame, prop, note_fsize):
+    """Dashed clamp-level lines, plateau-centre dots and "clamp +X.XXX V" labels at
+    the flat (clamped) level of every trace, as in the clamper figures."""
+    return _draw_levels(ax, xmin, curves, frame, prop, note_fsize, "clamp")
+
+
+def _text_colour_for(color):
+    """Black or white text depending on the perceived brightness of ``color``."""
+    r, g, b, _ = to_rgba(color)
+    return "white" if 0.299 * r + 0.587 * g + 0.114 * b < 0.60 else "black"
+
+
+def draw_trace_boxes(ax, curves, frame, avoid_rects, prop, fsize):
+    """Small coloured box next to the end of each trace, carrying its name.
+
+    Each box sits at the right edge of the axes, vertically centred on its
+    trace's end value, in the trace's own colour.  Boxes are stacked so they
+    never overlap each other or the clip-level labels (``avoid_rects``), and
+    the boxes' page-point rects are returned so the notes can dodge them."""
+    rects = []
+    if not curves:
+        return rects
+    fsize = max(8.5, 0.55 * note_fontsize(prop))
+    pad_x, pad_y = 2.0, 3.0
+    box_h = 1.85 * fsize
+    lo_cy, hi_cy = box_h / 2.0, frame.h - box_h / 2.0
+
+    def free(cx, cy):
+        return rect_is_free((cx - box_w / 2, cy - box_h / 2,
+                             cx + box_w / 2, cy + box_h / 2),
+                            (np.array([]), np.array([])), avoid_rects, 2.0, frame)
+
+    placed = []          # accepted box y-centres (page points), for stacking
+    for k, (name, cx, cy) in enumerate(curves):
+        color = TRACE_STYLES[k % len(TRACE_STYLES)][0]
+        label = probe_name(name)
+        box_w = text_width(label, fsize, prop) + 2.0 * pad_x
+        x_pt = frame.w - pad_x - 0.5 * box_w    # box's right edge at the frame edge
+        cy_pt = (float(cy[-1]) - frame.ymin) / (frame.ymax - frame.ymin) * frame.h
+        cy_pt = min(max(cy_pt, lo_cy), hi_cy)
+        # stack: shift up past any earlier box we would overlap
+        for py in placed:
+            if abs(cy_pt - py) < box_h + pad_y:
+                cy_pt = min(py + box_h + pad_y, hi_cy)
+        # if we landed on a clip label, hunt the nearest free spot along y
+        if not free(x_pt, cy_pt):
+            best, best_d = None, None
+            for trial in np.arange(lo_cy, hi_cy + 1e-9, 2.0):
+                if free(x_pt, trial) and all(abs(trial - p) >= box_h + pad_y
+                                             for p in placed):
+                    d = abs(trial - cy_pt)
+                    if best_d is None or d < best_d:
+                        best, best_d = trial, d
+            if best is not None:
+                cy_pt = best
+        placed.append(cy_pt)
+        fx, fy = x_pt / frame.w, cy_pt / frame.h
+        fw, fh = box_w / frame.w, box_h / frame.h
+        ax.add_patch(FancyBboxPatch((fx - fw / 2, fy - fh / 2), fw, fh,
+                                    boxstyle=f"round,pad=0,rounding_size={2.0 / frame.w}",
+                                    mutation_aspect=frame.w / frame.h,
+                                    transform=ax.transAxes,
+                                    facecolor=color, edgecolor="black",
+                                    linewidth=0.8, zorder=6, clip_on=False))
+        ax.text(fx, fy, label, transform=ax.transAxes, ha="center",
+                va="center_baseline", fontproperties=prop, fontsize=fsize,
+                color=_text_colour_for(color), zorder=7)
+        rects.append((x_pt - box_w / 2, cy_pt - box_h / 2,
+                      x_pt + box_w / 2, cy_pt + box_h / 2))
+        print(f"  trace box {label} at end of {probe_name(name)}")
     return rects
 
 
@@ -486,7 +571,8 @@ def draw_clip_levels(ax, curves, frame, prop, note_fsize):
 # Figure assembly (same page layout as plot_full_bridge.make_figure)
 # --------------------------------------------------------------------------- #
 def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
-               x_label=None, y_label=None, linestyles=None, clip_levels=True):
+               x_label=None, y_label=None, linestyles=None, clip_levels=True,
+               trace_boxes=True, clamp_levels=True):
     """Draw every (name, y) trace of `traces` against x on one Probe page.
 
     `notes` is a list aligned with `traces`; each element is either a note
@@ -522,7 +608,7 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
         xmax = xmin + 1.0
     if x_var.lower() == "time":
         tunit = pick_time_unit(xmax)
-        xticks = time_ticks(xmin, xmax, 30)
+        xticks = time_ticks(xmin, xmax, 20)
         xlabels = [time_label(v, tunit) for v in xticks]
         x_label = x_label or f"Time ({tunit[1]})"
     else:
@@ -563,15 +649,25 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
     fsize = note_fontsize(prop)
 
     # ---- dashed clip-level lines with value labels at flat extremes ---------
-    clip_rects = draw_clip_levels(ax, curves, frame, prop, fsize) \
+    clip_rects = draw_clip_levels(ax, xmin, curves, frame, prop, fsize) \
         if clip_levels else []
 
-    # ---- notes dodged clear of every curve and of the clip labels -----------
+    # ---- dashed clamp-level lines with value labels at clamp levels ---------
+    clamp_rects = draw_clamp_levels(ax, xmin, curves, frame, prop, fsize) \
+        if clamp_levels else []
+
+    # ---- small coloured boxes next to each trace end, carrying its name -----
+    box_rects = draw_trace_boxes(ax, curves, frame,
+                                 clip_rects + clamp_rects, prop, fsize) \
+        if trace_boxes else []
+
+    # ---- notes dodged clear of every curve, clip label, clamp label ---------
+    # ---- and trace box ------------------------------------------------------
     if any(notes):
         pts = [dense_curve(cx, cy, frame) for _, cx, cy in curves]
         every = (np.concatenate([p[0] for p in pts]),
                  np.concatenate([p[1] for p in pts]))
-        rects = list(clip_rects)
+        rects = list(clip_rects) + list(clamp_rects) + list(box_rects)
         for k, note in enumerate(notes[:count]):
             if not note:
                 continue
@@ -684,6 +780,16 @@ def main():
                 help="draw a dashed line, a plateau-centre dot and a "
                      "'+X.XXX V' label at the flat (clipped) max/min of "
                      "every trace (default: on; --no-clip-levels disables)")
+    ap.add_argument("--trace-boxes", action=argparse.BooleanOptionalAction,
+                default=True,
+                help="draw a small coloured box next to the end of each trace, "
+                     "carrying the trace name (default: on; "
+                     "--no-trace-boxes disables)")
+    ap.add_argument("--clamp-levels", action=argparse.BooleanOptionalAction,
+                default=True,
+                help="draw a dashed line, a plateau-centre dot and a "
+                     "'clamp +X.XXX V' label at the flat (clamped) level of "
+                     "every trace (default: on; --no-clamp-levels disables)")
     ap.add_argument("--note", action="append", default=None,
                     metavar="TRACE=TEXT",
                     help="framed note attached to one specific trace; TRACE "
@@ -756,11 +862,12 @@ def main():
     if p.show:      # plot_full_bridge forces the Agg backend; restore the default
         plt.switch_backend(matplotlib.rcParamsOrig["backend"])
 
-    out = Path(p.output) if p.output else Path(p.fig_dir) / f"{cir.stem}.png"
+    out = Path(p.output) if p.output else Path(p.fig_dir) / f"{cir.stem}.svg"
     out.parent.mkdir(parents=True, exist_ok=True)
     linestyles = parse_linestyles(p.linestyle, len(traces))
     fig = make_graph(vectors[x_var], traces, x_var, out, p.dpi, notes, xlim,
-                     p.x_label, p.y_label, linestyles, p.clip_levels)
+                     p.x_label, p.y_label, linestyles, p.clip_levels,
+                     p.trace_boxes, p.clamp_levels)
     print(f"  saved graph {out}")
     if p.show:
         plt.show()

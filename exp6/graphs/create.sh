@@ -58,7 +58,7 @@ echo
 
 for cir in "${cir_files[@]}"; do
     base=$(basename "$cir" .cir)
-    out="$GRAPHS_DIR/${base}.png"
+    out="$GRAPHS_DIR/${base}.svg"
 
     # note for the v(2) trace, chosen by circuit: in the series clippers
     # the output node sits on the load resistor, in the shunt clippers it
@@ -86,6 +86,7 @@ for cir in "${cir_files[@]}"; do
         -y "${yvars[@]}" \
         -t "$base" \
         -o "$out" \
+        --no-clip-levels \
         "${note_args[@]}"
 done
 
