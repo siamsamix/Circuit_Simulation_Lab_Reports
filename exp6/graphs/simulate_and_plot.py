@@ -62,7 +62,7 @@ from plot_full_bridge import (PURPLE, add_legend_footer, add_note_at, draw_trace
                               note_fontsize, pick_time_unit, time_label,
                               time_ticks)
 from pspice_theme import (AX_H_PT, AX_RECT, FIG_W_PT, GREEN, MARKER_FIRST_PT,
-                          MARKER_SPACING_PT, NOTE_SERIF, add_y_label, dense_curve, major_ticks, minor_between,
+                          MARKER_SPACING_PT, NOTE_EDGE, NOTE_SERIF, add_y_label, dense_curve, major_ticks, minor_between,
                           new_page, qty_label, rect_is_free, spice_format,
                           style_axes, text_width)
 
@@ -504,8 +504,13 @@ def _draw_levels(ax, xmin, curves, frame, prop, fsize, kind):
             rects.append((px - half_w + 0.2, py - lo_off,
                           px + half_w + 0.2,
                           py + (1.1 * fsize if va == "bottom" else 0.2 * fsize)))
+            # clamp labels get a white rectangle with a gray border behind the text
+            box = (dict(boxstyle="square,pad=0.25", facecolor="white",
+                        edgecolor=NOTE_EDGE, linewidth=1.0)
+                   if kind == "clamp" else None)
             ax.text(xd, y_lab, label, fontproperties=prop, fontsize=fsize,
-                    ha="center", va=va, color=CLIP_COLOR, zorder=7)
+                    ha="center", va=va, color=CLIP_COLOR, zorder=7,
+                    bbox=box)
             print(f"{kind} level {label} ({level_kind}) on {probe_name(name)}")
     return rects
 
