@@ -292,7 +292,8 @@ def comp_label(c, units=True):
 
 ELEN = 3.0        # length of a 2-terminal symbol
 MARGIN = 1.5      # wire either side of a symbol on the rail
-GX = 4.0          # spacing between several ground-hanging parts on one node
+GX = 2 * MARGIN + ELEN   # spacing between several ground-hanging branches on one node;
+                         # equal to the rail pitch so columns are evenly spaced
 LANE_H = 3.5      # vertical spacing of arc lanes above the rail
 HANG_PRE = 1.0    # wire between rail and a hanging part
 HANG_POST = 1.0   # wire between a hanging part and its ground symbol
@@ -881,13 +882,16 @@ class Builder:
         self._draw_part(c, pa, pb, left_node, centre=((s + e) / 2, y))
 
     def _draw_chain(self, chain, x, yg):
-        """Series parts stacked vertically below the rail at x, ending at height yg."""
+        """Series parts stacked vertically below the rail at x, ending at height yg.
+        The drop is divided into equal slots, one per part, and each symbol is centred
+        in its slot, so single-part legs sit mid-height and a two-part branch is
+        balanced about the same mid-line (symmetric about the circuit's centre)."""
         n = len(chain)
+        drop = -yg
         for k, (c, top) in enumerate(chain):
-            y1 = 0.0 if k == 0 else -(HANG_PRE + k * ELEN)
-            y2 = yg if k == n - 1 else -(HANG_PRE + (k + 1) * ELEN)
-            centre = (x, -(HANG_PRE + k * ELEN + ELEN / 2))
-            self._draw_part(c, (x, y1), (x, y2), top, centre=centre)
+            y1 = -drop * k / n
+            y2 = -drop * (k + 1) / n
+            self._draw_part(c, (x, y1), (x, y2), top)
 
     @staticmethod
     def _fold_bias_chains(comps, two):
@@ -932,9 +936,13 @@ class Builder:
         legs = sorted(legs)
         if self.t.ground_bus and len(legs) > 1:
             self.line((legs[0], yg), (legs[-1], yg))
-            for x in legs[:-1]:                 # left end (ground symbol) + T-junctions
-                self._dot((x, yg))
-            self.ground((legs[0], yg))
+            # one ground symbol, under the leg nearest the middle of the bus
+            mid = (legs[0] + legs[-1]) / 2
+            gleg = min(legs, key=lambda x: (abs(x - mid), x))
+            for x in legs:                      # T-junctions and the ground tap get dots
+                if x == gleg or legs[0] < x < legs[-1]:
+                    self._dot((x, yg))
+            self.ground((gleg, yg))
         else:
             for x in legs:
                 self.ground((x, yg))
