@@ -641,8 +641,10 @@ class Builder:
                 self.degree[a] += 1
                 self.degree[b] += 1
 
+        # Bias branches go to the front so they sit inside, next to the series element;
+        # the plain load (e.g. RL) is then the outermost leg on the right-hand edge.
         for top, chain in folds:
-            hang[top].append(chain)
+            hang[top].insert(0, chain)
             self.degree[top] += 1
 
         # x positions
