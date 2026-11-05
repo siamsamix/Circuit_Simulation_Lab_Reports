@@ -592,7 +592,7 @@ def y_ticks(ylo, yhi, unit, target=8):
 # --------------------------------------------------------------------------- #
 def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
                x_label=None, y_label=None, linestyles=None, clip_levels=True,
-               clamp_levels=True):
+               clamp_levels=()):
     """Draw every (name, y) trace of `traces` against x on one Probe page.
 
     `notes` is a list aligned with `traces`; each element is either a note
@@ -673,8 +673,10 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
         if clip_levels else []
 
     # ---- dashed clamp-level lines with value labels at clamp levels ---------
-    clamp_rects = draw_clamp_levels(ax, xmin, curves, frame, prop, fsize) \
-        if clamp_levels else []
+    # (only for the traces named by the user; `clamp_levels` holds their names)
+    clamp_curves = [c for c in curves if c[0] in set(clamp_levels or ())]
+    clamp_rects = draw_clamp_levels(ax, xmin, clamp_curves, frame, prop, fsize) \
+        if clamp_curves else []
 
     # ---- notes dodged clear of every curve, clip label, clamp label ---------
     if any(notes):
@@ -700,6 +702,27 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
 
     fig.savefig(outpath, dpi=dpi, facecolor="white")
     return fig
+
+def resolve_traces(specs, traces, option):
+    """Map trace names / 0-based indices (as given to `option`) to trace names."""
+    names = []
+    for spec in specs or ():
+        spec = spec.strip()
+        if spec.lstrip("-").isdigit():
+            idx = int(spec)
+            if not 0 <= idx < len(traces):
+                sys.exit(f"{option} index {idx} out of range "
+                         f"(0..{len(traces) - 1})")
+            names.append(traces[idx][0])
+            continue
+        match = next((n for n, _ in traces if n == spec), None) or \
+            next((n for n, _ in traces if n.lower() == spec.lower()), None)
+        if match is None:
+            sys.exit(f"{option} trace '{spec}' not found; available: "
+                     f"{[t[0] for t in traces]}")
+        names.append(match)
+    return names
+
 
 def build_notes(traces, positional_notes, keyed_notes):
     """Assemble the per-trace note list from -n/--notes and --note.
@@ -792,11 +815,13 @@ def main():
                 help="draw a dashed line, a plateau-centre dot and a "
                      "'+X.XXX V' label at the flat (clipped) max/min of "
                      "every trace (default: on; --no-clip-levels disables)")
-    ap.add_argument("--clamp-levels", action=argparse.BooleanOptionalAction,
-                default=True,
+    ap.add_argument("--clamp-levels", nargs="+", default=None,
+                metavar="TRACE",
                 help="draw a dashed line, a plateau-centre dot and a "
                      "'clamp +X.XXX V' label at the flat (clamped) level of "
-                     "every trace (default: on; --no-clamp-levels disables)")
+                     "the named traces only; each TRACE is a name given to "
+                     "-y (e.g. 'v(out)') or its 0-based index in -y order "
+                     "(default: no clamp levels)")
     ap.add_argument("--note", action="append", default=None,
                     metavar="TRACE=TEXT",
                     help="framed note attached to one specific trace; TRACE "
@@ -874,7 +899,7 @@ def main():
     linestyles = parse_linestyles(p.linestyle, len(traces))
     fig = make_graph(vectors[x_var], traces, x_var, out, p.dpi, notes, xlim,
                      p.x_label, p.y_label, linestyles, p.clip_levels,
-                     p.clamp_levels)
+                     resolve_traces(p.clamp_levels, traces, "--clamp-levels"))
     print(f"  saved graph {out}")
     if p.show:
         plt.show()
