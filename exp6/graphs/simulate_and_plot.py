@@ -61,8 +61,8 @@ from matplotlib.patches import FancyBboxPatch
 from plot_full_bridge import (PURPLE, add_legend_footer, add_note_at, draw_trace,
                               note_fontsize, pick_time_unit, time_label,
                               time_ticks)
-from pspice_theme import (GREEN, MARKER_FIRST_PT, MARKER_SPACING_PT, NOTE_SERIF,
-                          add_y_label, dense_curve, major_ticks, minor_between,
+from pspice_theme import (AX_H_PT, AX_RECT, FIG_W_PT, GREEN, MARKER_FIRST_PT,
+                          MARKER_SPACING_PT, NOTE_SERIF, add_y_label, dense_curve, major_ticks, minor_between,
                           new_page, qty_label, rect_is_free, spice_format,
                           style_axes, text_width)
 
@@ -71,11 +71,8 @@ from pspice_theme import (GREEN, MARKER_FIRST_PT, MARKER_SPACING_PT, NOTE_SERIF,
 TRACE_STYLES = ((GREEN, "s"), (PURPLE, "v"), ("#ff0000", "D"), ("#0000ff", "o"),
                 ("#00aaaa", "^"), ("#aa5500", "p"))
 
-# Preferred note spots (axes-fraction x, y), one per trace, as in the
-# with-capacitor graphs of plot_full_bridge.py; add_note_at moves a note to
-# the nearest free spot if a curve is in the way.
-NOTE_SPOTS = ((0.30, 0.5), (0.60, -0.55),
-              (0.40, 0), (0.60, 0.55))
+# Notes have no fixed spots: place_note_near_trace() searches for the free
+# position closest to the trace each note belongs to.
 
 
 # Line styles the CLI accepts.  Everything matplotlib understands as a
@@ -312,6 +309,24 @@ def probe_name(name):
     """Legend name in Probe style: v(out) -> V(out), v(1)-v(2) -> V(1)-V(2)."""
     return re.sub(r"\b([vi])\(", lambda m: m.group(1).upper() + "(", name)
 
+def nice_step_near(span, target=8):
+    """1/2/5 x 10^n step *closest* to ``span/target``.
+
+    Thresholds sit at the geometric means of consecutive nice values
+    (sqrt 2, sqrt 10, sqrt 50), so adjacent spans give similar tick
+    counts instead of jumping by ~2x at each 1-2-5 boundary."""
+    if span <= 0:
+        return 1.0
+    raw = span / target
+    mag = 10 ** np.floor(np.log10(raw))
+    norm = raw / mag
+    if norm < 1.4142135623730951:      # sqrt(2):  1 vs 2
+        return mag
+    if norm < 3.1622776601683795:      # sqrt(10): 2 vs 5
+        return 2.0 * mag
+    if norm < 7.0710678118654755:      # sqrt(50): 5 vs 10
+        return 5.0 * mag
+    return 10.0 * mag
 
 def nice_step(span, target=8):
     """1/2/5 x 10^n step giving roughly `target` divisions across `span`."""
@@ -336,8 +351,8 @@ def y_limits(arrays):
     lo = min(float(a.min()) for a in arrays)
     hi = max(float(a.max()) for a in arrays)
     if lo < 0.0 < hi:
-        lim = 1.5 * max(-lo, hi)
-        return -lim, lim
+        lim = 1.3 * max(-lo, hi)
+        return min(-lim, -60), max(lim, 60)
     span = hi - lo
     if span <= 1e-12 * max(abs(lo), abs(hi), 1e-30):      # flat trace
         half = abs(hi) * 0.1 or 1.0
@@ -513,6 +528,59 @@ def _text_colour_for(color):
     return "white" if 0.299 * r + 0.587 * g + 0.114 * b < 0.60 else "black"
 
 
+def place_note_near_trace(ax, note, k, curves, dense, frame, avoid_rects,
+                          prop, fsize, color, gap=4.0):
+    """Frame `note` right next to its own trace (curve index k).
+
+    Every grid position inside the axes is a candidate for the note's centre.
+    A candidate is acceptable when the box (plus `gap` points) touches no
+    trace -- its own or another one -- and no rect in `avoid_rects`; of the
+    acceptable ones the box closest to its own curve wins, so the note hugs
+    its trace without sitting on it.  Returns the placed rect (page points)."""
+    box_w = text_width(note, fsize, prop) + 2 * 0.0140 * AX_RECT[2] * FIG_W_PT
+    box_h = 0.0925 * AX_H_PT
+    hw, hh = box_w / 2 + gap, box_h / 2 + gap
+    every = (np.concatenate([d[0] for d in dense]),
+             np.concatenate([d[1] for d in dense]))
+
+    xs = np.arange(box_w / 2, frame.w - box_w / 2 + 1e-9, 3.0)
+    ys = np.arange(box_h / 2, frame.h - box_h / 2 + 1e-9, 3.0)
+    gx, gy = np.meshgrid(xs, ys)
+    gx, gy = gx.ravel(), gy.ravel()
+
+    # distance from every candidate box to its own curve (coarse samples)
+    ox, oy = dense[k]
+    step = max(1, len(ox) // 800)
+    ox, oy = ox[::step], oy[::step]
+    dist = np.empty(len(gx))
+    for i in range(0, len(gx), 400):
+        px, py = gx[i:i + 400, None], gy[i:i + 400, None]
+        ddx = np.maximum(np.maximum(px - hw - ox, ox - px - hw), 0.0)
+        ddy = np.maximum(np.maximum(py - hh - oy, oy - py - hh), 0.0)
+        dist[i:i + 400] = np.hypot(ddx, ddy).min(axis=1)
+    # tiny pull towards the middle keeps ties away from the frame corners
+    cost = dist + 0.02 * np.hypot(gx - frame.w / 2, gy - frame.h / 2)
+
+    def free(cx, cy):
+        return rect_is_free((cx - box_w / 2, cy - box_h / 2,
+                             cx + box_w / 2, cy + box_h / 2),
+                            every, avoid_rects, gap, frame)
+
+    best = None
+    for i in np.argsort(cost):
+        if free(gx[i], gy[i]):
+            best = int(i)
+            break
+    if best is None:            # nothing clear of every curve: closest spot,
+        best = int(np.argmin(cost))     # overlap allowed
+        print(f"  warning: no free spot for note {note!r}; overlapping")
+    cx, cy = float(gx[best]), float(gy[best])
+    print(f"  note {note!r} placed {dist[best]:.0f} pt from "
+          f"{probe_name(curves[k][0])}")
+    return add_note_at(ax, note, frame, every, [], (cx / frame.w, cy / frame.h),
+                       fsize, prop, color, force=True)
+
+
 def draw_trace_boxes(ax, curves, frame, avoid_rects, prop, fsize):
     """Small coloured box next to the end of each trace, carrying its name.
 
@@ -573,7 +641,12 @@ def draw_trace_boxes(ax, curves, frame, avoid_rects, prop, fsize):
         print(f"  trace box {label} at end of {probe_name(name)}")
     return rects
 
-
+def y_ticks(ylo, yhi, unit, target=8):
+    """Major y-tick positions with PSpice-style labels in one common unit."""
+    step = nice_step_near(yhi - ylo, target)
+    positions = [float(p) for p in major_ticks(ylo, yhi, step)]
+    positions = [0.0 if abs(p) < step * 1e-9 else p for p in positions]
+    return positions, tick_labels(positions, unit)
 # --------------------------------------------------------------------------- #
 # Figure assembly (same page layout as plot_full_bridge.make_figure)
 # --------------------------------------------------------------------------- #
@@ -671,16 +744,14 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
     # ---- notes dodged clear of every curve, clip label, clamp label ---------
     # ---- and trace box ------------------------------------------------------
     if any(notes):
-        pts = [dense_curve(cx, cy, frame) for _, cx, cy in curves]
-        every = (np.concatenate([p[0] for p in pts]),
-                 np.concatenate([p[1] for p in pts]))
+        dense = [dense_curve(cx, cy, frame) for _, cx, cy in curves]
         rects = list(clip_rects) + list(clamp_rects) + list(box_rects)
         for k, note in enumerate(notes[:count]):
             if not note:
                 continue
-            rects.append(add_note_at(ax, note, frame, every, rects,
-                                     NOTE_SPOTS[k % len(NOTE_SPOTS)], fsize, prop,
-                                     TRACE_STYLES[k % len(TRACE_STYLES)][0]))
+            rects.append(place_note_near_trace(
+                ax, note, k, curves, dense, frame, rects, prop, fsize,
+                TRACE_STYLES[k % len(TRACE_STYLES)][0]))
         if len(notes) > count:
             print(f"Warning: {len(notes)} notes for {count} traces; "
                   f"ignoring the extra ones")

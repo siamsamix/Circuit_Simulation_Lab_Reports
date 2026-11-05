@@ -1,5 +1,5 @@
 * Positive Diode Clamper
-V1 1 0 SIN(0 50 50)
+V1 1 0 SIN(0 20 50)
 C1 1 2 10u
 D1 0 2 D1N4002
 RL 2 0 100k

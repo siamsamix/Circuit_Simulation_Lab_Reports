@@ -1,5 +1,5 @@
 * Negative Diode Clamper with Positive Bias
-V1 1 0 SIN(0 50 50)
+V1 1 0 SIN(0 30 50)
 C1 1 2 10u
 D1 2 3 D1N4002
 V2 3 0 10
