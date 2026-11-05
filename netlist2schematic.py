@@ -30,8 +30,8 @@ Themes (--theme)
 ----------------
     default   plain black schematic
     capture   schematic-capture look: green wires and symbol bodies, blue pin stubs,
-              blue labels / junction discs / ground / source symbol, grey dot grid
-              (use --no-grid to drop the grid). AC sources get a sine-wave symbol
+              blue labels / junction discs / ground / source symbol, no background
+              grid (set grid="#808080" in the theme to bring the grey dot grid back). AC sources get a sine-wave symbol
               with green +/- marks and show only their name; part names sit above a
               symbol, values (as written in the netlist) below. No title, no node
               names (use --title / --node-labels to bring them back). All grounds
@@ -333,11 +333,11 @@ THEMES = {
     "default": Theme(),
     # Palette (0,128,0) green / (0,0,255) blue / (128,128,128) grey, sans-serif labels.
     "capture": Theme(
-        name="capture", wire="#008000", body="#008000", source="#0000ff", pin="#0000ff",
+        name="capture", wire="#008000", body="#008000", source="#0000ff", pin="#008000",
         marks="#008000", text="#0000ff", node_text="#0000ff", dot="#0000ff",
         ground="#0000ff", dot_radius=0.1, lw=0.6, fontsize=14,
         fonts=("Liberation Sans", "Arial", "Helvetica", "DejaVu Sans"),
-        grid="#808080", grid_pitch=0.5, split_labels=True, ac_symbols=True, dc_battery=True,
+        grid=None, grid_pitch=0.5, split_labels=True, ac_symbols=True, dc_battery=True,
         lead=0.5, units=False, show_title=False, node_labels=False, ground_bus=True,
         dpi=176),     # 176 dpi -> 0.5-unit grid pitch = 44 px, like the reference capture
 }
@@ -415,7 +415,7 @@ def _logical_start_is_first(kind):
     return kind not in "VEH"
 
 
-def place(cls, a, b, labels=(), color=None, **kw):
+def place(cls, a, b, labels=(), color=None, lead_color=None, **kw):
     """Axis-aligned element from a to b. Explicit direction+length is used because
     schemdraw sources ignore .to().  labels = [(text, loc, colour), ...]"""
     dx, dy = b[0] - a[0], b[1] - a[1]
@@ -428,6 +428,12 @@ def place(cls, a, b, labels=(), color=None, **kw):
     e = e.length(length)
     if color:
         e = e.color(color)
+    if lead_color:
+        # Source symbols keep their leads in their own first segment(s): recolour just
+        # those, so the leads are drawn once, in the wire colour, at the wire's width.
+        nlead = 2 if cls is _BatterySource else 1
+        for seg in e.segments[:nlead]:
+            seg.color = lead_color
     for text, loc, lcolor in labels:
         opts = {"loc": loc}
         if lcolor:
@@ -503,7 +509,9 @@ class Builder:
         p_from, p_to = (a, b) if start_at_p1 else (b, a)
         self.line(p1, a)
         self.line(b, p2)
-        self.d += place(cls, p_from, p_to, self._labels(c, abs(uy) < 1e-9), self._body_color(c))
+        lead_color = self.t.pin if (c.kind in "VI" and self.t.pin) else None
+        self.d += place(cls, p_from, p_to, self._labels(c, abs(uy) < 1e-9), self._body_color(c),
+                        lead_color=lead_color)
         self._decorate(c, cls, p_from, p_to)
 
     def _battery_extras(self, c, p_from, p_to, ux, uy):
@@ -567,7 +575,7 @@ class Builder:
             self._battery_extras(c, p_from, p_to, ux, uy)
             return
         lead = _lead_length(cls)
-        if self.t.pin and lead:
+        if self.t.pin and lead and c.kind not in "VI" and self.t.pin != self.t.body:
             lead = self.t.lead if self.t.lead is not None else lead
             for a, sgn in ((p_from, 1), (p_to, -1)):
                 b = (a[0] + sgn * ux * lead, a[1] + sgn * uy * lead)
@@ -770,11 +778,14 @@ class Builder:
             ax.set_ylim(y0, y1)
             f.set_size_inches((x1 - x0) * per_unit, (y1 - y0) * per_unit)
 
+        pad = self.t.grid_pitch                             # margin around the circuit
+        x0, x1, y0, y1 = x0 - pad, x1 + pad, y0 - pad, y1 + pad
+        f.set_size_inches((x1 - x0) * per_unit, (y1 - y0) * per_unit)
+        ax.set_xlim(x0, x1)
+        ax.set_ylim(y0, y1)
+
         if self.t.grid:
             import numpy as np
-            pad = self.t.grid_pitch                         # let the grid run past the circuit
-            x0, x1, y0, y1 = x0 - pad, x1 + pad, y0 - pad, y1 + pad
-            f.set_size_inches((x1 - x0) * per_unit, (y1 - y0) * per_unit)
             p = self.t.grid_pitch
             gx = np.arange(math.ceil(x0 / p), math.floor(x1 / p) + 1) * p
             gy = np.arange(math.ceil(y0 / p), math.floor(y1 / p) + 1) * p
@@ -1275,7 +1286,7 @@ def main(argv=None):
     builder = Builder(circ, theme=theme)
     builder.build()
 
-    out = args.output or base + ".png"
+    out = args.output or base + ".svg"
     builder.save(out, dpi=args.dpi or theme.dpi, show=args.show)
     print(f"Wrote {out}  ({len(circ.components)} components, theme: {theme.name})")
     for w in circ.warnings:

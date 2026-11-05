@@ -415,15 +415,26 @@ CLIP_MIN_RUN  = 0.001     # longest single plateau run           (was 0.02)
 CLIP_BAND_REL = 0.20      # level must be within this of ymin/ymax (was 0.15)
 CLIP_COLOR = "black"
 
-def find_extrema(x, y):
-    """Global max and min of a trace, tagged by side."""
+def find_extrema(x, y, tol_rel=0.01):
+    """Global max and min of a trace, tagged by side, as
+    (\"max\"/\"min\", level, x0, x1).
+
+    x0..x1 spans the FIRST run of samples that reach the level (within
+    ``tol_rel`` of the trace's span), i.e. the first peak / trough after the
+    start of the record, so the labels sit at the left of the plot rather than
+    wherever the exact extreme sample happens to fall (often the last cycle)."""
     y = np.asarray(y, dtype=float)
     if y.size < 2 or np.ptp(y) == 0.0:
         return []
     x = np.asarray(x, dtype=float)
-    imax, imin = int(np.argmax(y)), int(np.argmin(y))
-    return [("max", float(y[imax]), float(x[imax]), float(x[imax])),
-            ("min", float(y[imin]), float(x[imin]), float(x[imin]))]
+    tol = tol_rel * float(np.ptp(y))
+    out = []
+    for side, level in (("max", float(y.max())), ("min", float(y.min()))):
+        near = np.flatnonzero(y >= level - tol if side == "max"
+                              else y <= level + tol)
+        first = np.split(near, np.flatnonzero(np.diff(near) > 1) + 1)[0]
+        out.append((side, level, float(x[first[0]]), float(x[first[-1]])))
+    return out
 
 def find_clips(x, y, tol_rel=CLIP_TOL_REL, min_frac=CLIP_MIN_FRAC,
                min_run=CLIP_MIN_RUN, band_rel=CLIP_BAND_REL):
