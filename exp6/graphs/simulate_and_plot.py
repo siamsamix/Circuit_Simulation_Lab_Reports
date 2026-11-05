@@ -581,66 +581,6 @@ def place_note_near_trace(ax, note, k, curves, dense, frame, avoid_rects,
                        fsize, prop, color, force=True)
 
 
-def draw_trace_boxes(ax, curves, frame, avoid_rects, prop, fsize):
-    """Small coloured box next to the end of each trace, carrying its name.
-
-    Each box sits at the right edge of the axes, vertically centred on its
-    trace's end value, in the trace's own colour.  Boxes are stacked so they
-    never overlap each other or the clip-level labels (``avoid_rects``), and
-    the boxes' page-point rects are returned so the notes can dodge them."""
-    rects = []
-    if not curves:
-        return rects
-    fsize = max(8.5, 0.55 * note_fontsize(prop))
-    pad_x, pad_y = 2.0, 3.0
-    box_h = 1.85 * fsize
-    lo_cy, hi_cy = box_h / 2.0, frame.h - box_h / 2.0
-
-    def free(cx, cy):
-        return rect_is_free((cx - box_w / 2, cy - box_h / 2,
-                             cx + box_w / 2, cy + box_h / 2),
-                            (np.array([]), np.array([])), avoid_rects, 2.0, frame)
-
-    placed = []          # accepted box y-centres (page points), for stacking
-    for k, (name, cx, cy) in enumerate(curves):
-        color = TRACE_STYLES[k % len(TRACE_STYLES)][0]
-        label = probe_name(name)
-        box_w = text_width(label, fsize, prop) + 2.0 * pad_x
-        x_pt = frame.w - pad_x - 0.5 * box_w    # box's right edge at the frame edge
-        cy_pt = (float(cy[-1]) - frame.ymin) / (frame.ymax - frame.ymin) * frame.h
-        cy_pt = min(max(cy_pt, lo_cy), hi_cy)
-        # stack: shift up past any earlier box we would overlap
-        for py in placed:
-            if abs(cy_pt - py) < box_h + pad_y:
-                cy_pt = min(py + box_h + pad_y, hi_cy)
-        # if we landed on a clip label, hunt the nearest free spot along y
-        if not free(x_pt, cy_pt):
-            best, best_d = None, None
-            for trial in np.arange(lo_cy, hi_cy + 1e-9, 2.0):
-                if free(x_pt, trial) and all(abs(trial - p) >= box_h + pad_y
-                                             for p in placed):
-                    d = abs(trial - cy_pt)
-                    if best_d is None or d < best_d:
-                        best, best_d = trial, d
-            if best is not None:
-                cy_pt = best
-        placed.append(cy_pt)
-        fx, fy = x_pt / frame.w, cy_pt / frame.h
-        fw, fh = box_w / frame.w, box_h / frame.h
-        ax.add_patch(FancyBboxPatch((fx - fw / 2, fy - fh / 2), fw, fh,
-                                    boxstyle=f"round,pad=0,rounding_size={2.0 / frame.w}",
-                                    mutation_aspect=frame.w / frame.h,
-                                    transform=ax.transAxes,
-                                    facecolor=color, edgecolor="black",
-                                    linewidth=0.8, zorder=6, clip_on=False))
-        ax.text(fx, fy, label, transform=ax.transAxes, ha="center",
-                va="center_baseline", fontproperties=prop, fontsize=fsize,
-                color=_text_colour_for(color), zorder=7)
-        rects.append((x_pt - box_w / 2, cy_pt - box_h / 2,
-                      x_pt + box_w / 2, cy_pt + box_h / 2))
-        print(f"  trace box {label} at end of {probe_name(name)}")
-    return rects
-
 def y_ticks(ylo, yhi, unit, target=8):
     """Major y-tick positions with PSpice-style labels in one common unit."""
     step = nice_step_near(yhi - ylo, target)
@@ -652,7 +592,7 @@ def y_ticks(ylo, yhi, unit, target=8):
 # --------------------------------------------------------------------------- #
 def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
                x_label=None, y_label=None, linestyles=None, clip_levels=True,
-               trace_boxes=True, clamp_levels=True):
+               clamp_levels=True):
     """Draw every (name, y) trace of `traces` against x on one Probe page.
 
     `notes` is a list aligned with `traces`; each element is either a note
@@ -736,16 +676,10 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
     clamp_rects = draw_clamp_levels(ax, xmin, curves, frame, prop, fsize) \
         if clamp_levels else []
 
-    # ---- small coloured boxes next to each trace end, carrying its name -----
-    box_rects = draw_trace_boxes(ax, curves, frame,
-                                 clip_rects + clamp_rects, prop, fsize) \
-        if trace_boxes else []
-
     # ---- notes dodged clear of every curve, clip label, clamp label ---------
-    # ---- and trace box ------------------------------------------------------
     if any(notes):
         dense = [dense_curve(cx, cy, frame) for _, cx, cy in curves]
-        rects = list(clip_rects) + list(clamp_rects) + list(box_rects)
+        rects = list(clip_rects) + list(clamp_rects)
         for k, note in enumerate(notes[:count]):
             if not note:
                 continue
@@ -858,11 +792,6 @@ def main():
                 help="draw a dashed line, a plateau-centre dot and a "
                      "'+X.XXX V' label at the flat (clipped) max/min of "
                      "every trace (default: on; --no-clip-levels disables)")
-    ap.add_argument("--trace-boxes", action=argparse.BooleanOptionalAction,
-                default=True,
-                help="draw a small coloured box next to the end of each trace, "
-                     "carrying the trace name (default: on; "
-                     "--no-trace-boxes disables)")
     ap.add_argument("--clamp-levels", action=argparse.BooleanOptionalAction,
                 default=True,
                 help="draw a dashed line, a plateau-centre dot and a "
@@ -945,7 +874,7 @@ def main():
     linestyles = parse_linestyles(p.linestyle, len(traces))
     fig = make_graph(vectors[x_var], traces, x_var, out, p.dpi, notes, xlim,
                      p.x_label, p.y_label, linestyles, p.clip_levels,
-                     p.trace_boxes, p.clamp_levels)
+                     p.clamp_levels)
     print(f"  saved graph {out}")
     if p.show:
         plt.show()
