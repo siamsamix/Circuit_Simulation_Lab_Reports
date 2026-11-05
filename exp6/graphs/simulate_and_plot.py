@@ -345,19 +345,52 @@ def tick_labels(ticks, unit):
     return [("0" if t == 0 else spice_format(t)) + unit for t in ticks]
 
 
-def y_limits(arrays):
-    """Symmetric +/-10 % headroom for signals that cross zero (as in the
-    bridge graphs), otherwise 10 % of the span above and below."""
-    lo = min(float(a.min()) for a in arrays)
-    hi = max(float(a.max()) for a in arrays)
-    if lo < 0.0 < hi:
-        lim = 1.3 * max(-lo, hi)
-        return min(-lim, -60), max(lim, 60)
+def y_axis_scale(arrays, min_ticks=6, max_ticks=13, pad=0.08, ideal_ticks=9):
+    """Y limits and major step for the traces in `arrays`: (lo, hi, step).
+
+    * the data range gets `pad` (8 %) headroom on both sides, so no trace
+      touches the frame and the notes have room;
+    * the limits are snapped outward to multiples of a 1/2/5 x 10^n step, so
+      the frame edges are gridlines and 0 is always a tick when the range
+      crosses it;
+    * of all steps giving `min_ticks`..`max_ticks` gridlines, the one that
+      wastes the least space beyond the headroom wins, with a small penalty
+      for each gridline beyond `ideal_ticks` so labels stay legible (ties go
+      to the coarser step);
+    * traces that swing about equally either side of zero (a sine) get a
+      symmetric axis; one-sided or lopsided traces (rectified, clamped,
+      steps) keep an asymmetric one instead of wasting half the page;
+    * a flat trace is centred in a +/-10 % window (or +/-1 for zero)."""
+    lo = min(float(np.min(a)) for a in arrays)
+    hi = max(float(np.max(a)) for a in arrays)
+    mag = max(abs(lo), abs(hi))
+    if hi - lo <= 1e-9 * max(mag, 1e-30):                 # flat trace
+        half = mag * 0.1 or 1.0
+        lo, hi = lo - half, hi + half
+    elif lo < 0.0 < hi and min(-lo, hi) >= 0.6 * max(-lo, hi):
+        lo, hi = -max(-lo, hi), max(-lo, hi)               # symmetric
     span = hi - lo
-    if span <= 1e-12 * max(abs(lo), abs(hi), 1e-30):      # flat trace
-        half = abs(hi) * 0.1 or 1.0
-        return lo - half, hi + half
-    return lo - 0.1 * span, hi + 0.1 * span
+    lo_p, hi_p = lo - pad * span, hi + pad * span
+    best = None
+    decade = 10.0 ** np.floor(np.log10((hi_p - lo_p) / max_ticks))
+    for d in (decade, decade * 10.0):
+        for m in (1, 2, 5):
+            step = m * d
+            slo = np.floor(lo_p / step + 1e-9) * step
+            shi = np.ceil(hi_p / step - 1e-9) * step
+            n = int(round((shi - slo) / step)) + 1
+            if not min_ticks <= n <= max_ticks:
+                continue
+            waste = ((shi - slo) - (hi_p - lo_p)) / (shi - slo)
+            key = (round(waste + 0.02 * max(0, n - ideal_ticks), 3), -step)
+            if best is None or key < best[0]:
+                best = (key, float(slo), float(shi), float(step))
+    if best is None:                                       # fall back
+        step = nice_step(hi_p - lo_p, 8)
+        return (float(np.floor(lo_p / step) * step),
+                float(np.ceil(hi_p / step) * step), float(step))
+    _, slo, shi, step = best
+    return round(slo, 12), round(shi, 12), step
 
 
 def spice_float(text):
@@ -644,8 +677,8 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
 
     units = {guess_unit(c[0]) for c in curves}
     y_unit = units.pop() if len(units) == 1 else ""
-    ylo, yhi = y_limits([c[2] for c in curves])
-    y_majors = major_ticks(ylo, yhi, nice_step(yhi - ylo, 10))
+    ylo, yhi, y_step = y_axis_scale([c[2] for c in curves])
+    y_majors = major_ticks(ylo, yhi, y_step)
     y_minors = minor_between(y_majors, 5)
     y_labels = tick_labels(y_majors, y_unit)
 
