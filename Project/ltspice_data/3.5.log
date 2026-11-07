@@ -1,0 +1,14 @@
+LTspice 26.0.2 for Windows
+Circuit: C:\users\cachy\Desktop\Circuit Simulation Laboratory\Project\ltspice_data\3.5.net
+Start Time: Sat Nov  7 22:52:39 2026
+solver = Normal
+Maximum thread count: 4
+tnom = 27
+temp = 27
+method = trap
+Per .tran options, skipping operating point for transient analysis.
+Total elapsed time: 0.036 seconds.
+
+Files loaded:
+C:\users\cachy\Desktop\Circuit Simulation Laboratory\Project\ltspice_data\3.5.net
+

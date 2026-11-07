@@ -1,0 +1,230 @@
+\usepackage[margin=1.9cm,top=2.1cm,bottom=2.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage[siunitx,american]{circuitikz}
+\usepackage{pgfplots}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.16}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc,fit,backgrounds,external}
+\usepackage{booktabs,tabularx,array}
+\usepackage{tcolorbox}
+\usepackage{pdflscape}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage[colorlinks,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlist{itemsep=1pt,topsep=2pt,leftmargin=1.4em}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Multi-Waveform Analog Signal Generator}
+\rhead{\small Simulation Lab Project}
+\cfoot{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+% ---------- colours (one colour per test point) ----------
+\definecolor{ctp1}{HTML}{1F5FBF}
+\definecolor{ctp2}{HTML}{D1342A}
+\definecolor{ctp3}{HTML}{E08A00}
+\definecolor{ctp4}{HTML}{7B3FB5}
+\definecolor{ctp5}{HTML}{1E8E3E}
+\definecolor{ctpa}{HTML}{555555}
+
+% ---------- circuit style ----------
+\ctikzset{bipoles/length=1.1cm, label/align=straight}
+\tikzset{
+  tp/.style={circle,draw=red!70!black,text=red!70!black,fill=white,inner sep=0.8pt,font=\tiny\bfseries},
+  tap/.style={draw,rounded corners=2pt,fill=yellow!25,font=\tiny,inner sep=2pt},
+  blk/.style={draw,rounded corners=3pt,thick,minimum width=2.25cm,minimum height=1.15cm,align=center,font=\scriptsize,fill=blue!6},
+  pblk/.style={draw,rounded corners=3pt,thick,minimum width=2.3cm,minimum height=0.95cm,align=center,font=\scriptsize,fill=orange!10},
+  ph/.style={draw,rounded corners=3pt,thick,minimum width=3.6cm,minimum height=1.0cm,align=center,font=\scriptsize,fill=green!8},
+  arr/.style={-{Stealth[length=2.2mm]},thick}
+}
+\newcommand{\mF}{\,\mu\mathrm{F}}
+\newcommand{\kO}{\,\mathrm{k}\Omega}
+\newcommand{\Oh}{\,\Omega}
+\newcommand{\VCC}{$+12\,\mathrm{V}$}
+\newcommand{\tpmark}[3][above]{\node[tp,#1] at (#2) {#3};}
+
+% ---------- waveform maths ----------
+% RC-integrator steady-state triangle (V), t in ms; Vth=4.55 V, tau=4.64 ms, Vpk=0.245 V
+\newcommand{\TRI}[1]{ifthenelse(mod(#1,1)<0.5,4.55-4.795*exp(-mod(#1,1)/4.64),-4.55+4.795*exp(-(mod(#1,1)-0.5)/4.64))}
+% shaper transfer (relative to 6 V centre), Q3 loading included
+\pgfmathdeclarefunction{shp}{1}{%
+  \begingroup
+  \pgfmathparse{sign(#1)*ifthenelse(abs(#1)<1.0803,0.9442*abs(#1),ifthenelse(abs(#1)<2.1159,0.7049*abs(#1)+0.2585,0.2585*abs(#1)+1.2030))}%
+  \pgfmathsmuggle\pgfmathresult
+  \endgroup}
+
+\pgfplotsset{wf/.style={width=0.40\textwidth,height=3.5cm,grid=both,
+  grid style={line width=.1pt,draw=gray!30},major grid style={line width=.2pt,draw=gray!50},
+  tick label style={font=\scriptsize},label style={font=\scriptsize},
+  title style={font=\scriptsize\bfseries,yshift=-3pt},xlabel={$t$ (ms)},
+  no markers,thick,samples=600,smooth,every axis plot/.append style={line join=round}}}
+
+% =====================================================================
+%                     CIRCUIT MACROS (local coordinates)
+% =====================================================================
+
+% ---- Power supply : transformer, centre-tap rectifier, filter, Zener ----
+% ---- Power supply : transformer, centre-tap rectifier, filter, Zener ----
+\newcommand{\psuckt}{%
+	\draw (0,0) to[sV] (0,3);
+	\node[font=\tiny,align=right,left] at (-0.5,1.5) {220\,V\\50\,Hz};
+	\draw (0,3) -- (1.6,3) to[L] (1.6,0) -- (0,0);
+	\draw[thick] (2.35,-0.5) -- (2.35,3.5) (2.5,-0.5) -- (2.5,3.5);
+	\draw (3.25,3.6) to[L, mirror, l={$12\,\mathrm{V}$}] (3.25,1.5) to[L, mirror, l={$12\,\mathrm{V}$}] (3.25,-0.6);
+	\draw (3.25,3.6) -- (4.2,3.6) to[D, l={$D_1$}] (6.2,3.6);
+	\draw (3.25,-0.6) -- (4.2,-0.6) to[D, l_={$D_2$}] (6.2,-0.6);
+	\draw (6.2,-0.6) -- (6.2,3.6);
+	\draw (3.25,1.5) -- (4.0,1.5) node[ground]{};
+	\draw (6.2,1.5) to[short, *-] (7.4,1.5) coordinate(psuB);
+	
+	% C1: label stays on the right (left would cross the rectifier wire)
+	\draw (psuB) to[C, l={$C_1=470\,\mu\mathrm{F}$}, *-] ++(0,-2.3) node[ground]{};
+	
+	% R_S: longer run so the Zener sits well clear of C1's label
+	\draw (psuB) to[R, l={$R_S=120\,\Omega$}] ++(3.4,0) coordinate(psuR);
+	
+	% Zener: drawn downward, label on the right, two lines via \shortstack
+	\draw (psuR) to[zzD, l={\shortstack{$D_Z$\\$12\,\mathrm{V}$}}, *-] ++(0,-2.3) node[ground]{};
+	
+	\draw (psuR) -- ++(2.4,0) coordinate(psuV);
+	\draw (psuV) to[C, l={$C_2=100\,\mu\mathrm{F}$}, *-] ++(0,-2.3) node[ground]{};
+	\draw (psuV) -- ++(2.6,0) coordinate(psuV2);
+	\draw (psuV2) to[R, l={$R_L$}, *-] ++(0,-2.3) node[ground]{};
+	\draw (psuV2) to[short, -o] ++(0.9,0) node[right]{\VCC rail};
+	
+	\node[tp] at (3.0,4.0) {a};
+	\node[tp] at (6.65,2.0) {b};
+	\node[tp] at ($(psuB)+(0.5,0.55)$) {c};
+	\node[tp] at ($(psuR)+(1.0,0.55)$) {d};
+	
+	\node[font=\tiny,align=center] at (5.0,2.1) {centre\\tap};
+}
+% ---- Square source + RC integrator ----
+\newcommand{\integckt}{%
+  \draw (0,-0.6) node[ground]{} to[sqV, l_={$V_1$}] (0,2.2) coordinate(isrc);
+  \node[font=\tiny,align=right,left] at (-0.45,0.8) {1 kHz\\$\pm5$ V};
+  \draw (isrc) to[R, l={$R_{int}=510\Oh$}] ++(3.2,0) coordinate(itp2);
+  \fill (itp2) circle(1.6pt);
+  \draw (itp2) to[C, l_={$C_{int}=10\mF$}] ++(0,-2.8) node[ground]{};
+  \draw (itp2) -- ++(1.4,0) coordinate(iout);
+  \tpmark{isrc}{TP1}
+  \tpmark{itp2}{TP2}
+}
+
+% ---- Q1 : common-emitter amplifier ----
+\newcommand{\qoneckt}{%
+  \coordinate (q1in) at (0,2.2);
+  \coordinate (q1b) at (1.9,2.2);
+  \draw (q1in) to[C, l={$C_4=10\mF$}] (q1b);
+  \draw (q1b) to[R, l_={$R_{B1}=47\kO$}, *-] ++(0,3.0) node[vcc]{\VCC};
+  \draw (q1b) to[R, l_={$R_{B2}=9.1\kO$}] ++(0,-3.0) node[ground]{};
+  \node[npn, anchor=B] (Q1) at (3.4,2.2) {};
+  \draw (q1b) -- (Q1.B);
+  \node[font=\small\bfseries] at ($(Q1.C)!0.5!(Q1.E)+(0.85,0)$) {$Q_1$};
+  \draw (Q1.E) to[R, l_={$R_{E1}=150\Oh$}] ++(0,-1.5) coordinate(q1ne);
+  \draw (q1ne) to[R, l_={$R_{E2}=430\Oh$}, *-] ++(0,-1.5) node[ground]{};
+  \draw (q1ne) -- ++(1.5,0) to[C, l={$C_E=100\mF$}] ++(0,-1.5) node[ground]{};
+  \draw (Q1.C) -- ++(0,0.6) coordinate(q1n);
+  \draw (q1n) to[R, l_={$R_{C1}=2.7\kO$}, *-] ++(0,1.9) node[vcc]{\VCC};
+  \draw (q1n) to[C, l_={$C_5=10\mF$}, *-] ++(2.0,0) -- ++(0.5,0) coordinate(q1out);
+}
+
+% ---- Q2 : emitter follower ----
+\newcommand{\qtwockt}{%
+  \coordinate (q2in) at (0,2.2);
+  \coordinate (q2b) at (0.9,2.2);
+  \draw (q2in) -- (q2b);
+  \draw (q2b) to[R, l_={$R_{B3}=16\kO$}, *-] ++(0,3.0) node[vcc]{\VCC};
+  \draw (q2b) to[R, l_={$R_{B4}=22\kO$}] ++(0,-3.0) node[ground]{};
+  \node[npn, anchor=B] (Q2) at (2.3,2.2) {};
+  \draw (q2b) -- (Q2.B);
+  \node[font=\small\bfseries] at ($(Q2.C)!0.5!(Q2.E)+(0.85,0)$) {$Q_2$};
+  \draw (Q2.C) -- ++(0,2.3) node[vcc]{\VCC};
+  \draw (Q2.E) -- ++(0,-0.55) coordinate(q2e) to[R, l_={$R_{E3}=2\kO$}] ++(0,-1.8) node[ground]{};
+  \draw (q2e) to[short, *-] ++(1.8,0) coordinate(q2out);
+}
+
+% ---- diode shaper (AC-coupled, series R + 4 diode branches) ----
+\newcommand{\shapckt}{%
+  \coordinate (shin) at (0,3);
+  \draw (shin) to[C, l={$C_{sh}=10\mF$}] ++(1.9,0) coordinate(shc);
+  \draw (shc) to[R, l={$R_{SH}=2.2\kO$}] ++(2.6,0) coordinate(shx0);
+  \draw (shx0) -- ++(7.0,0) coordinate(shout);
+  % upper branches
+  \draw (6.0,3) to[R, l={$R_{P1}=6.2\kO$}, *-] (6.0,4.4) to[D, l={$D_3$}] (6.0,5.6) node[tap,above] {6.37 V};
+  \draw (8.0,3) to[R, l_={$R_{P2}=910\Oh$}, *-] (8.0,4.4) to[D, l_={$D_4$}] (8.0,5.6) node[tap,above] {7.10 V};
+  % lower branches
+  \draw (6.0,0.4) node[tap,below] {5.63 V} -- (6.0,0.4) to[D, l={$D_5$}] (6.0,1.6) to[R, l={$R_{P1}=6.2\kO$}, -*] (6.0,3);
+  \draw (8.0,0.4) node[tap,below] {4.90 V} -- (8.0,0.4) to[D, l_={$D_6$}] (8.0,1.6) to[R, l_={$R_{P2}=910\Oh$}, -*] (8.0,3);
+  % reference to ladder centre
+  \draw (10.0,3) to[R, l={$R_{ref}=100\kO$}, *-] (10.0,1.2) node[tap,below] {6.00 V};
+  \tpmark[above right]{shout}{TP4}
+  \node[font=\tiny,left] at (-0.05,3.0) {from $Q_2$};
+  \node[font=\tiny,below left] at (9.9,3.0) {node $X$};
+}
+
+% ---- bias ladder for the shaper ----
+\newcommand{\ladckt}{%
+  \draw (0,7.6) node[vcc]{\VCC} to[R, l_={$R_{T1}=1.2\kO$}] (0,6.1) coordinate(lt1);
+  \draw (lt1) to[R, l_={$R_{T2}=180\Oh$}, *-] ++(0,-1.5) coordinate(lt2);
+  \draw (lt2) to[R, l_={$R_{T3a}=91\Oh$}, *-] ++(0,-1.5) coordinate(ltc);
+  \draw (ltc) to[R, l_={$R_{T3b}=91\Oh$}, *-] ++(0,-1.5) coordinate(lt3);
+  \draw (lt3) to[R, l_={$R_{T4}=180\Oh$}, *-] ++(0,-1.5) coordinate(lt4);
+  \draw (lt4) to[R, l_={$R_{T5}=1.2\kO$}, *-] ++(0,-1.9) node[ground]{};
+  \draw (lt1) -- ++(0.8,0) node[tap,right]{7.10 V};
+  \draw (lt2) -- ++(0.8,0) node[tap,right]{6.37 V};
+  \draw (ltc) -- ++(0.8,0) node[tap,right]{6.00 V};
+  \draw (lt3) -- ++(0.8,0) node[tap,right]{5.63 V};
+  \draw (lt4) -- ++(0.8,0) node[tap,right]{4.90 V};
+}
+
+% ---- Q3 : output emitter follower (+ optional clamp) ----
+\newcommand{\qthreeckt}{%
+  \coordinate (q3in) at (0,2.2);
+  \coordinate (q3b) at (2.0,2.2);
+  \draw (q3in) to[C, l={$C_{10}=10\mF$}] (q3b);
+  \draw (q3b) to[R, l_={$R_{B5}=100\kO$}, *-] ++(0,3.0) node[vcc]{\VCC};
+  \draw (q3b) to[R, l_={$R_{B6}=100\kO$}] ++(0,-3.0) node[ground]{};
+  \node[npn, anchor=B] (Q3) at (3.5,2.2) {};
+  \draw (q3b) -- (Q3.B);
+  \node[font=\small\bfseries] at ($(Q3.C)!0.5!(Q3.E)+(0.85,0)$) {$Q_3$};
+  \draw (Q3.C) -- ++(0,2.3) node[vcc]{\VCC};
+  \draw (Q3.E) -- ++(0,-0.55) coordinate(q3e) to[R, l_={$R_{E4}=1.8\kO$}] ++(0,-1.8) node[ground]{};
+  \draw (q3e) to[C, l={$C_{out}=10\mF$}, *-] ++(3.4,0) coordinate(q3o);
+  \draw (q3o) to[R, l_={$R_{Load}=10\kO$}, *-] ++(0,-1.8) node[ground]{};
+  \draw (q3o) -- ++(1.9,0) coordinate(q3d) to[short, -o] ++(0.8,0) coordinate(q3out);
+  \draw[gray] (q3d) ++(0,-1.8) node[ground]{} to[D, l_={$D_7$ (opt.)}, *-] (q3d);
+  \tpmark{q3out}{TP5}
+}
+
+\newcommand{\mini}[4]{\begin{tikzpicture}\begin{axis}[width=2.9cm,height=1.55cm,scale only axis,axis lines=left,ticks=none,
+   ymin=#2,ymax=#3,xmin=0,xmax=2,domain=0:2,samples=300,no markers,thick,smooth]\addplot[#4]{#1};\end{axis}\end{tikzpicture}}%
+
+% =====================================================================
+%        PARTIAL BUILD SUPPORT  (see the selector banner in main.tex)
+% =====================================================================
+% \quickbuild{<comma-separated section files>} typesets only the listed
+% files in a fast pass. Inactive by default: section files are then read
+% with \input (no forced page breaks), so a full build keeps the exact
+% original layout.
+\newif\ifpartialbuild
+\newcommand{\quickbuild}[1]{\partialbuildtrue\includeonly{#1}}
+\newcommand{\buildfile}[1]{\ifpartialbuild\include{#1}\else\input{#1}\fi}
+
+% =====================================================================
+%               TikZ/pgfplots picture externalization
+% =====================================================================
+% Every top-level tikzpicture is compiled once into figures/*.pdf.
+% Later compiles reuse the cached PDF unless that picture's source
+% changed. Requires -shell-escape (wired up in latexmkrc).
+% Note: \mini is defined here (not in the body) because external
+% figure jobs only include the preamble + the picture.
+\newif\ifusefigurescache
+\usefigurescachetrue      % set \usefigurescachefalse to fall back to inline figures
+\ifusefigurescache
+  \tikzexternalize[prefix=figures/]
+\fi
