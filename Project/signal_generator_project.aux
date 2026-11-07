@@ -1,0 +1,55 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Project at a glance}{2}{section.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces System block diagram. The small plots show the waveform at the output of each signal-chain block (two periods, steady state, from the hand-calculation model of Section~\ref {sec:wave}).}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:blocks}{{1}{2}{System block diagram. The small plots show the waveform at the output of each signal-chain block (two periods, steady state, from the hand-calculation model of Section~\ref {sec:wave})}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Design targets}{2}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Test points}{2}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Workflow}{2}{section.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Build order. After every phase compare node voltages and waveforms with the expected values in Section~\ref {sec:expected} before continuing.}}{3}{figure.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Stage-by-stage design}{3}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Power supply: transformer, rectifier, filter, Zener (Exp.\ 11, 04, 05)}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces DC adapter. Markers a--d are the nodes whose waveforms are plotted in Fig.~\ref {fig:psuwave}. Marker b is the rectifier output with $C_1$ removed (Exp.\,04, no filter); with $C_1$ connected the same node gives waveform c.}}{3}{figure.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Power-supply waveforms over two mains cycles (40\,ms). The ripple falls from 0.745\,V$_{pp}$ across $C_1$ to about 52\,mV$_{pp}$ after the Zener.}}{4}{figure.4}\protected@file@percent }
+\newlabel{fig:psuwave}{{4}{4}{Power-supply waveforms over two mains cycles (40\,ms). The ripple falls from 0.745\,V$_{pp}$ across $C_1$ to about 52\,mV$_{pp}$ after the Zener}{figure.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Square source and RC integrator (Exp.\ 01)}{5}{subsection.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Square source and RC integrator. The integrator sees $Q_1$'s input impedance $Z_{in1}=5.2\,\mathrm  {k}\Omega $ in parallel with $C_{int}$.}}{5}{figure.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces The square wave is integrated into a triangle of $0.49\,\mathrm  {V_{pp}}$. The slight exponential curvature is the 1.4\,\% non-linearity of the RC charging curve.}}{5}{figure.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}$Q_1$: common-emitter amplifier (Exp.\ 08, 09)}{6}{subsection.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces $Q_1$ common-emitter amplifier with voltage-divider bias and a partly bypassed emitter resistor (gain set by $R_{E1}$).}}{6}{figure.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces $Q_1$ amplifies the 0.49\,V$_{pp}$ triangle by $-12.6$ to 6.2\,V$_{pp}$. The minus sign means the output is 180$^\circ $ out of phase with the input.}}{6}{figure.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}$Q_2$: emitter-follower buffer}{7}{subsection.3.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces $Q_2$ emitter follower. Its emitter sits at about 6\,V DC, which becomes the common centre level of the shaper.}}{7}{figure.9}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces The follower reproduces the triangle with gain 0.99 and shifts it to a 6\,V DC level. Low output impedance now isolates $Q_1$ from the shaper.}}{8}{figure.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Diode shaper: triangle to sine (Exp.\ 06)}{8}{subsection.3.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Shaper (left) and its bias ladder (right). The yellow boxes are the same four tap voltages in both drawings: the ladder produces them, the branches use them. Upper branches conduct when $V_X$ rises above tap + 0.65\,V; lower branches when it falls below tap $-$ 0.65\,V.}}{9}{figure.11}\protected@file@percent }
+\newlabel{fig:shaper}{{11}{9}{Shaper (left) and its bias ladder (right). The yellow boxes are the same four tap voltages in both drawings: the ladder produces them, the branches use them. Upper branches conduct when $V_X$ rises above tap + 0.65\,V; lower branches when it falls below tap $-$ 0.65\,V}{figure.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Left: the slope falls from 0.94 to 0.71 to 0.26 as branches turn on, tracking the ideal sine. Right: the pointed triangle (orange) becomes the shaped wave (purple), close to the ideal sine (dotted).}}{9}{figure.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}$Q_3$: output emitter follower (and optional Exp.\ 07 clamp)}{11}{subsection.3.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces $Q_3$ output stage. The high input impedance (37.7\,k$\Omega $) keeps the shaper slopes unchanged. The dashed diode $D_7$ is the optional negative clamp.}}{11}{figure.13}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Left: the output sine, $\pm 1.97$\,V. Right: with the optional clamp $D_7$ the negative peaks are held at about $-0.7$\,V, so the whole sine rides on a DC level (dashed = unclamped, solid = clamped, not to scale of the diode knee).}}{11}{figure.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Complete signal-chain schematic}{12}{section.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Complete signal chain: square source $\rightarrow $ RC integrator $\rightarrow $ $Q_1$ $\rightarrow $ $Q_2$ $\rightarrow $ diode shaper $\rightarrow $ $Q_3$ $\rightarrow $ output. Test points TP1--TP5 are marked in red.}}{12}{figure.15}\protected@file@percent }
+\newlabel{fig:full}{{15}{12}{Complete signal chain: square source $\rightarrow $ RC integrator $\rightarrow $ $Q_1$ $\rightarrow $ $Q_2$ $\rightarrow $ diode shaper $\rightarrow $ $Q_3$ $\rightarrow $ output. Test points TP1--TP5 are marked in red}{figure.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Waveform evolution through the circuit}{13}{section.5}\protected@file@percent }
+\newlabel{sec:wave}{{5}{13}{Waveform evolution through the circuit}{section.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces All test points on the same time axis (three 1\,ms periods). Read top to bottom: square, triangle, amplified triangle, shaped wave, final sine. The final sine is 180$^\circ $ out of phase with the square wave because $Q_1$ inverts.}}{13}{figure.16}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Harmonic content before and after the shaper. The third harmonic falls from 11.1\,\% to 1.2\,\%; the model THD of the final output is about 1.6\,\% (ideal 0.65\,V diodes). Real diodes have a soft knee; the circuit-level simulation of Section~\ref {sec:sim} gives 2.0\,\%.}}{13}{figure.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Supply current budget and bill of materials}{14}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Circuit-level simulation with 2N2222 models}{14}{section.7}\protected@file@percent }
+\newlabel{sec:sim}{{7}{14}{Circuit-level simulation with 2N2222 models}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Power supply}{15}{subsection.7.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Simulated supply with the signal chain connected as its load (two mains cycles). The filter ripple is 0.64\,V$_{pp}$ around 16.1\,V and the rail is 12.01\,V with 37\,mV$_{pp}$ of ripple.}}{15}{figure.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Signal chain}{15}{subsection.7.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Simulated waveforms at the five test points with 2N2222 and 1N4148 models (settled state, three periods). The dashed curve on TP5 is the hand model of Section~\ref {sec:wave}; the two agree closely.}}{15}{figure.19}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Harmonics of the simulated output. The second harmonic (1.5\,\%) comes mainly from $Q_1$, which swings $\pm $1.5\,mA on a 2\,mA bias; the third (1.0\,\%) is the residual of the piecewise-linear shaping. Total THD = 2.0\,\%.}}{16}{figure.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Hand calculation versus simulation}{16}{subsection.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Sensitivity to transistor gain}{16}{subsection.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Simulation procedure and expected results}{16}{section.8}\protected@file@percent }
+\newlabel{sec:expected}{{8}{16}{Simulation procedure and expected results}{section.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Troubleshooting}{17}{subsection.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Report outline and demonstration plan}{17}{section.9}\protected@file@percent }
+\newlabel{sec:report}{{9}{17}{Report outline and demonstration plan}{section.9}{}}
+\gdef \@abspage@last{19}
