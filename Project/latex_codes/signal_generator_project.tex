@@ -1318,6 +1318,7 @@ t dc vcc
 \usepackage{float}
 \usepackage{enumitem}
 \usepackage{fancyhdr}
+\usepackage{pdfpages}
 \usepackage[colorlinks,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
 
 \setlength{\parindent}{0pt}
@@ -1510,31 +1511,7 @@ t dc vcc
 
 \begin{document}
 
-\begin{titlepage}
-\centering
-\vspace*{1.2cm}
-{\Large Department of Electrical and Electronic Engineering\\ University of Dhaka}\\[0.5cm]
-{\large Simulation Laboratory (Electronic Circuits) \quad Project --- Week 13}\\[1.4cm]
-{\Huge\bfseries Multi-Waveform Analog\\[4pt] Signal Generator}\\[0.5cm]
-{\Large Square $\rightarrow$ Triangle $\rightarrow$ Sine with a Regulated DC Adapter}\\[0.8cm]
-{\large Project workflow, design calculations, circuit diagrams\\ and waveform evolution}\\[1.2cm]
-
-\begin{tikzpicture}
-\begin{axis}[width=0.78\textwidth,height=4.4cm,hide axis,domain=0:3,samples=700,no markers,thick,
-  ymin=-6.2,ymax=6.2,xmin=0,xmax=3]
-\addplot[ctp1] {5.7*sign(sin(360*x))};
-\addplot[ctp3,smooth] {-12.47*\TRI{x}*1.55};
-\addplot[ctp5,smooth] {0.99*shp(-12.47*\TRI{x})*2.9};
-\end{axis}
-\end{tikzpicture}
-
-\vfill
-\begin{tabular}{ll}
-Name / ID: & \rule{6cm}{0.4pt}\\[6pt]
-Section / Date: & \rule{6cm}{0.4pt}\\[6pt]
-Course teacher: & \rule{6cm}{0.4pt}
-\end{tabular}\\[1cm]
-\end{titlepage}
+\includepdf[pages=1,pagecommand={\thispagestyle{empty}}]{../Cover Page of Project Report.pdf}
 
 \tableofcontents
 \newpage

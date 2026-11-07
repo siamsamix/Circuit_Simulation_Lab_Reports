@@ -1,22 +1,22 @@
-\contentsline {section}{\numberline {1}Project at a glance}{2}{section.1}%
-\contentsline {subsection}{\numberline {1.1}Design targets}{2}{subsection.1.1}%
-\contentsline {subsection}{\numberline {1.2}Test points}{2}{subsection.1.2}%
-\contentsline {section}{\numberline {2}Workflow}{2}{section.2}%
-\contentsline {section}{\numberline {3}Stage-by-stage design}{3}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Power supply: transformer, rectifier, filter, Zener (Exp.\ 11, 04, 05)}{3}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Square source and RC integrator (Exp.\ 01)}{5}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}$Q_1$: common-emitter amplifier (Exp.\ 08, 09)}{6}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}$Q_2$: emitter-follower buffer}{7}{subsection.3.4}%
-\contentsline {subsection}{\numberline {3.5}Diode shaper: triangle to sine (Exp.\ 06)}{8}{subsection.3.5}%
-\contentsline {subsection}{\numberline {3.6}$Q_3$: output emitter follower (and optional Exp.\ 07 clamp)}{11}{subsection.3.6}%
-\contentsline {section}{\numberline {4}Complete signal-chain schematic}{12}{section.4}%
-\contentsline {section}{\numberline {5}Waveform evolution through the circuit}{13}{section.5}%
-\contentsline {section}{\numberline {6}Supply current budget and bill of materials}{14}{section.6}%
-\contentsline {section}{\numberline {7}Circuit-level simulation with 2N2222 models}{14}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Power supply}{15}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Signal chain}{15}{subsection.7.2}%
-\contentsline {subsection}{\numberline {7.3}Hand calculation versus simulation}{16}{subsection.7.3}%
-\contentsline {subsection}{\numberline {7.4}Sensitivity to transistor gain}{16}{subsection.7.4}%
-\contentsline {section}{\numberline {8}Simulation procedure and expected results}{16}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Troubleshooting}{17}{subsection.8.1}%
-\contentsline {section}{\numberline {9}Report outline and demonstration plan}{17}{section.9}%
+\contentsline {section}{\numberline {1}Project at a glance}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Design targets}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Test points}{3}{subsection.1.2}%
+\contentsline {section}{\numberline {2}Workflow}{3}{section.2}%
+\contentsline {section}{\numberline {3}Stage-by-stage design}{4}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Power supply: transformer, rectifier, filter, Zener (Exp.\ 11, 04, 05)}{4}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Square source and RC integrator (Exp.\ 01)}{6}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}$Q_1$: common-emitter amplifier (Exp.\ 08, 09)}{7}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}$Q_2$: emitter-follower buffer}{8}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Diode shaper: triangle to sine (Exp.\ 06)}{9}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}$Q_3$: output emitter follower (and optional Exp.\ 07 clamp)}{12}{subsection.3.6}%
+\contentsline {section}{\numberline {4}Complete signal-chain schematic}{13}{section.4}%
+\contentsline {section}{\numberline {5}Waveform evolution through the circuit}{14}{section.5}%
+\contentsline {section}{\numberline {6}Supply current budget and bill of materials}{15}{section.6}%
+\contentsline {section}{\numberline {7}Circuit-level simulation with 2N2222 models}{15}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Power supply}{16}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Signal chain}{16}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}Hand calculation versus simulation}{17}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}Sensitivity to transistor gain}{17}{subsection.7.4}%
+\contentsline {section}{\numberline {8}Simulation procedure and expected results}{17}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Troubleshooting}{18}{subsection.8.1}%
+\contentsline {section}{\numberline {9}Report outline and demonstration plan}{18}{section.9}%
