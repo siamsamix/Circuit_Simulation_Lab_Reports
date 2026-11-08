@@ -36,7 +36,7 @@
 \usepackage{float}
 \usepackage{pdflscape}
 \usepackage[table]{xcolor}    % header shading for Word-style tables
-\graphicspath{{figures/}{./figures/}}
+\graphicspath{{figures/}{./figures/}{../ltspice_data/}}
 
 % ----- Lists: compact, guide-style itemization -----
 \usepackage{enumitem}
@@ -844,59 +844,26 @@
 	% =====================================================================
 	\section{Working Diagram}
 	% =====================================================================
-	The simulated circuits are reproduced in Figs.~\ref{fig:wd-psu}--\ref{fig:wd-chain}, in the same order as the procedure. All stages are supplied from the \SI{12}{\volt} rail of Fig.~\ref{fig:wd-psu}, and the measurement points of Table~\ref{tab:testpoints} are labelled in every schematic.
+	The two simulated circuits are shown in Figs.~\ref{fig:wd-psu} and \ref{fig:wd-chain}. Figure~\ref{fig:wd-psu} is the supply of Section~2.1 as entered in LTspice: the mains source drives the primary $L_1$, the coupled inductances $L_1$--$L_3$ form the centre-tapped transformer, $D_1$ and $D_2$ rectify, $C_1$ filters, and $R_S$, the Zener and $C_2$ regulate and smooth the rail. Figure~\ref{fig:wd-chain} is the complete generator, in which every stage of Section~2 is connected in cascade and supplied from the \SI{12.157}{\volt} rail measured on that supply. The test points TP1--TP5 and the terminals of the three transistors are labelled by name, so that they can be probed directly, and the four shaper taps are applied from ideal sources at the voltages that the bias ladder produces, the ladder itself having been simulated separately.
 
-	% TODO (figures): insert the LTspice schematic exports here, for example
-	%   \includegraphics[width=0.85\textwidth]{figures/wd_psu.png}
-	% and delete the corresponding \figph placeholder.
+	% TODO (figure/text): the supply schematic shows RS = 1.2 kOhm and a 100 kOhm test load,
+	% whereas Section 3.1 designs Rs = 120 Ohm for the 20 mA taken by the complete chain.
+	% Change the schematic value or reword Section 3.1 before submission.
 	\begin{figure}[H]
 		\centering
-		\figph[6.5cm]{LTspice schematic of the regulated \SI{12}{\volt} power supply (transformer, rectifier, $C_1$, $R_S$, Zener, $C_2$)}
-		\caption{Simulated circuit of the regulated dc supply}
+		\includegraphics[width=\textwidth]{3.1.png}
+		\caption{LTspice schematic of the regulated dc supply}
 		\label{fig:wd-psu}
 	\end{figure}
 
-	\begin{figure}[H]
-		\centering
-		\figph[6.5cm]{LTspice schematic of the square-wave source and the RC integrator}
-		\caption{Simulated circuit of the square-wave source and the RC integrator}
-		\label{fig:wd-int}
-	\end{figure}
-
-	\begin{figure}[H]
-		\centering
-		\figph[6.5cm]{LTspice schematic of the common-emitter amplifier $Q_1$}
-		\caption{Simulated circuit of the common-emitter amplifier}
-		\label{fig:wd-q1}
-	\end{figure}
-
-	\begin{figure}[H]
-		\centering
-		\figph[6.5cm]{LTspice schematic of the emitter follower $Q_2$}
-		\caption{Simulated circuit of the emitter follower}
-		\label{fig:wd-q2}
-	\end{figure}
-
-	\begin{figure}[H]
-		\centering
-		\figph[7.0cm]{LTspice schematic of the diode shaper and its bias ladder}
-		\caption{Simulated circuit of the diode shaper and the bias ladder}
-		\label{fig:wd-shaper}
-	\end{figure}
-
-	\begin{figure}[H]
-		\centering
-		\figph[6.5cm]{LTspice schematic of the output emitter follower $Q_3$ (with the optional clamp)} 
-		\caption{Simulated circuit of the output stage}
-		\label{fig:wd-q3}
-	\end{figure}
-
-	\begin{figure}[H]
-		\centering
-		\figph[7.0cm]{LTspice schematic of the complete signal chain with TP1--TP5 labelled}
-		\caption{Simulated circuit of the complete generator}
-		\label{fig:wd-chain}
-	\end{figure}
+	\begin{landscape}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.98\linewidth]{4.png}
+			\caption{LTspice schematic of the complete analog signal generator}
+			\label{fig:wd-chain}
+		\end{figure}
+	\end{landscape}
 
 	\begin{table}[H]
 		\centering
@@ -1091,10 +1058,10 @@
 
 	With the \SI{100}{\kilo\ohm} load used for the supply test, the voltage across $C_1$ settles at \SI{16.287}{\volt} with \SI{13.6}{\milli\volt} peak-to-peak ripple, and the regulated rail settles at \SI{12.157}{\volt} with a ripple too small to be resolved, the Zener current being \SI{3.32}{\milli\ampere}. The ripple is much smaller than the \SI{0.745}{\volt} of the design calculation because the calculation assumes the \SI{35}{\milli\ampere} drawn by the complete signal chain, whereas the \SI{100}{\kilo\ohm} test resistor draws only \SI{0.12}{\milli\ampere}; the Zener holds the rail to within \SI{0.16}{\volt} of its nominal value even at this light load.
 
-	Down the signal chain the waveforms have the expected shapes. TP1 is a $10\,\mathrm{V_{pp}}$ square wave, TP2 a triangle, TP3 the same triangle inverted and amplified about a \SI{5.79}{\volt} level, TP4 the shaped wave and TP5 a sine wave of $3.85\,\mathrm{V_{pp}}$, centred on zero because of the output coupling capacitor. The small residual curvature of the triangle at TP2 is the non-linearity predicted by Eq.~\eqref{eq:int-nl} and evaluated in Eq.~\eqref{eq:calc-intnl}.
+	Down the signal chain the waveforms have the expected shapes. TP1 is a square wave of $10.000\,\mathrm{V_{pp}}$, TP2 a triangle of $0.4897\,\mathrm{V_{pp}}$ whose small residual curvature is the non-linearity predicted by Eq.~\eqref{eq:int-nl} and evaluated in Eq.~\eqref{eq:calc-intnl}, and TP3 the same triangle inverted and amplified to $6.057\,\mathrm{V_{pp}}$ about a dc level of \SI{6.105}{\volt}. TP4 is the shaped wave of $3.783\,\mathrm{V_{pp}}$ about \SI{6.026}{\volt}, and TP5 is a sine wave of $3.757\,\mathrm{V_{pp}}$ centred on zero, its mean of \SI{-0.029}{\volt} being the only offset left by the output coupling capacitor.
 
 	\subsection{Calculated and simulated values}
-	The quantities measured from the simulated waveforms are compared with the calculated values of Section~7 in Table~\ref{tab:compare}. Table~\ref{tab:taps} compares the ladder taps generated by the bias network of Fig.~\ref{fig:wd-shaper} with their design values.
+	The quantities measured from the simulated waveforms are compared with the calculated values of Section~7 in Table~\ref{tab:compare}. Table~\ref{tab:taps} compares the five tap voltages produced by the bias ladder, which was simulated separately, with their design values.
 
 	\begin{longtable}{|l|c|c|c|}
 		\caption{Calculated and simulated values of the complete circuit}
@@ -1109,39 +1076,39 @@
 		\endhead
 		\hline
 		\endlastfoot
-		Regulated rail voltage & \SI{12.00}{\volt} & \SI{12.157}{\volt} & 1.31 \\
+		Supply rail feeding the chain & \SI{12.00}{\volt} & \SI{12.157}{\volt} & 1.31 \\
 		\hline
 		Square wave at TP1, $V_{pp}$ & \SI{10.00}{\volt} & \SI{10.000}{\volt} & 0.00 \\
 		\hline
 		Triangle at TP2, $V_{pp}$ & \SI{0.490}{\volt} & \SI{0.4897}{\volt} & 0.06 \\
 		\hline
-		Amplified triangle at TP3, $V_{pp}$ & \SI{6.10}{\volt} & \SI{5.860}{\volt} & 3.94 \\
+		Amplified triangle at TP3, $V_{pp}$ & \SI{6.10}{\volt} & \SI{6.057}{\volt} & 0.70 \\
 		\hline
-		Shaped wave at TP4, $V_{pp}$ & \SI{3.99}{\volt} & \SI{3.878}{\volt} & 2.81 \\
+		Shaped wave at TP4, $V_{pp}$ & \SI{3.99}{\volt} & \SI{3.783}{\volt} & 5.19 \\
 		\hline
-		Output at TP5, $V_{pp}$ & \SI{3.90}{\volt} & \SI{3.849}{\volt} & 1.31 \\
+		Output at TP5, $V_{pp}$ & \SI{3.90}{\volt} & \SI{3.757}{\volt} & 3.67 \\
 		\hline
-		$Q_1$ base voltage $V_{B1}$ & \SI{1.80}{\volt} & \SI{1.810}{\volt} & 0.56 \\
+		$Q_1$ base voltage $V_{B1}$ & \SI{1.80}{\volt} & \SI{1.891}{\volt} & 5.06 \\
 		\hline
-		$Q_1$ emitter voltage $V_{E1}$ & \SI{1.10}{\volt} & \SI{1.028}{\volt} & 6.57 \\
+		$Q_1$ emitter voltage $V_{E1}$ & \SI{1.10}{\volt} & \SI{1.222}{\volt} & 11.09 \\
 		\hline
-		$Q_1$ collector voltage $V_{C1}$ & \SI{6.92}{\volt} & \SI{7.264}{\volt} & 4.97 \\
+		$Q_1$ collector voltage $V_{C1}$ & \SI{6.92}{\volt} & \SI{6.504}{\volt} & 6.01 \\
 		\hline
-		$Q_1$ collector current $I_{C1}$ & \SI{1.88}{\milli\ampere} & \SI{1.764}{\milli\ampere} & 6.17 \\
+		$Q_1$ collector current $I_{C1}$ & \SI{1.88}{\milli\ampere} & \SI{2.106}{\milli\ampere} & 12.02 \\
 		\hline
-		$Q_2$ emitter voltage $V_{E2}$ & \SI{5.97}{\volt} & \SI{5.795}{\volt} & 2.93 \\
+		$Q_2$ emitter voltage $V_{E2}$ & \SI{5.97}{\volt} & \SI{6.105}{\volt} & 2.26 \\
 		\hline
-		$Q_2$ emitter current $I_{E2}$ & \SI{2.99}{\milli\ampere} & \SI{2.853}{\milli\ampere} & 4.58 \\
+		$Q_2$ emitter current $I_{E2}$ & \SI{2.99}{\milli\ampere} & \SI{3.060}{\milli\ampere} & 2.34 \\
 		\hline
-		$Q_3$ emitter voltage $V_{E3}$ & \SI{4.16}{\volt} & \SI{4.342}{\volt} & 4.38 \\
+		$Q_3$ emitter voltage $V_{E3}$ & \SI{4.16}{\volt} & \SI{4.965}{\volt} & 19.35 \\
 		\hline
-		$Q_3$ emitter current $I_{E3}$ & \SI{2.31}{\milli\ampere} & \SI{2.414}{\milli\ampere} & 4.50 \\
+		$Q_3$ emitter current $I_{E3}$ & \SI{2.31}{\milli\ampere} & \SI{2.755}{\milli\ampere} & 19.26 \\
 		\hline
-		Supply current of the signal chain & \SI{11.9}{\milli\ampere} & \SI{11.67}{\milli\ampere} & 1.92 \\
+		Supply current of the generator & \SI{11.9}{\milli\ampere} & \SI{12.58}{\milli\ampere} & 5.71 \\
 		\hline
-		Distortion of the triangle at TP3 (2nd to 9th) & 12.05\,\% & 11.47\,\% & 4.81 \\
+		Distortion of the triangle at TP3 (2nd to 9th) & 12.05\,\% & 11.69\,\% & 2.99 \\
 		\hline
-		Distortion of the output at TP5 (2nd to 9th) & 1.60\,\% & 2.60\,\% & 62.5 \\
+		Distortion of the output at TP5 (2nd to 9th) & 1.60\,\% & 2.57\,\% & 60.6 \\
 		\hline
 	\end{longtable}
 
@@ -1169,7 +1136,7 @@
 		\end{tabular}
 	\end{table}
 
-	The waveform amplitudes agree closely with the design: the triangle, the amplified triangle, the shaped wave and the final output are all within about 4\,\% of their calculated values, and the distortion of the triangle is within 5\,\% of the ideal $1/n^2$ series, which confirms that the integrator and the amplifier behave as designed. The largest differences are in the dc quantities of the transistor stages, which are all within about 7\,\% of the hand calculation; the error in the dc level of $Q_1$ shifts the emitter of $Q_2$ and hence the centre of the shaper, which is why the shaped and output amplitudes, rather than the dc levels, are the quantities that matter for this design.
+	The signal amplitudes agree closely with the design: the triangle is within 0.1\,\%, the amplified triangle within 0.7\,\% and the shaped wave and output within about 5\,\% of their calculated values, and the distortion of the triangle is within 3\,\% of the ideal $1/n^2$ series. The largest errors are in the dc quantities of the transistor stages, reaching 19\,\% in the emitter voltage and current of $Q_3$. They share one cause. The 2N2222 model has a current gain of about 205 at these operating currents (the measured base currents are 10 to 15\,$\mu$A for collector currents of 2 to 3\,mA), twice the $\beta=100$ assumed in Section~7, so the bias dividers are loaded less than the hand calculation assumes. For $Q_3$ the divider term $R_{TH}/(\beta+1)$ falls from \SI{495}{\ohm} to \SI{237}{\ohm}, which raises $I_E$ from \SI{2.31}{\milli\ampere} to about \SI{2.65}{\milli\ampere} and $V_E$ to about \SI{4.8}{\volt}, close to the measured \SI{2.755}{\milli\ampere} and \SI{4.965}{\volt}. The base of $Q_1$ is raised in the same way, and its emitter follows the model's base-emitter voltage of \SI{0.67}{\volt} rather than the assumed \SI{0.70}{\volt}.
 
 	\subsection{Harmonic distortion}
 	The measured harmonic amplitudes of the triangle and of the output are listed in Table~\ref{tab:harmonics}, and the spectrum of the output is shown in Fig.~\ref{fig:ra-fft}.
@@ -1183,42 +1150,35 @@
 			\hline
 			\rowcolor{black!12}\textbf{Harmonic} & \textbf{Triangle at TP2} & \textbf{Triangle at TP3} & \textbf{Output at TP5} \\
 			\hline
-			2nd & 0.00 & 2.32 & 2.00 \\
+			2nd & 0.00 & 1.53 & 2.12 \\
 			\hline
-			3rd & 11.12 & 10.34 & 1.25 \\
+			3rd & 11.12 & 10.67 & 0.96 \\
 			\hline
-			4th & 0.00 & 0.73 & 0.53 \\
+			4th & 0.00 & 0.45 & 0.07 \\
 			\hline
-			5th & 4.00 & 3.65 & 0.54 \\
+			5th & 4.00 & 3.81 & 0.58 \\
 			\hline
-			6th & 0.00 & 0.35 & 0.09 \\
+			6th & 0.00 & 0.21 & 0.04 \\
 			\hline
-			7th & 2.04 & 1.85 & 0.29 \\
+			7th & 2.04 & 1.94 & 0.33 \\
 			\hline
-			8th & 0.00 & 0.21 & 0.24 \\
+			8th & 0.00 & 0.12 & 0.07 \\
 			\hline
-			9th & 1.24 & 1.12 & 0.23 \\
+			9th & 1.24 & 1.17 & 0.58 \\
 			\hline
-			Total distortion (2nd to 9th) & 12.08 & 11.47 & 2.60 \\
+			Total distortion (2nd to 9th) & 12.08 & 11.69 & 2.57 \\
 			\hline
 		\end{tabular}
 	\end{table}
 
-	% TODO (data): the 2.00% second harmonic below was measured on the circuit as
-	% simulated, whose shaper input is dc-referenced to the Q2 emitter. If the final
-	% schematic includes the ac coupling C_sh and the R_ref centre reference of
-	% Fig.~\ref{fig:shaper}, re-read the harmonics and update the last row of
-	% Table~\ref{tab:compare} and the paragraph that follows it.
-	The triangle shows only odd harmonics, and their amplitudes fall almost exactly as $1/n^2$: the measured 11.12, 4.00, 2.04 and 1.24\,\% of the third to the ninth harmonic are within 0.1\,\% of the ideal values, so the integrator converts the square wave into a triangle with negligible additional distortion. After the shaper the third harmonic has fallen from 10.34\,\% to 1.25\,\%, which is the purpose of the shaper, but the total distortion falls only to 2.60\,\% because a second harmonic appears that the triangle does not contain. Its amplitude of 2.00\,\% is the largest single contribution to the residual distortion of the output, and it is caused by the difference between the dc centre of the shaper input and the centre of the tap ladder of Table~\ref{tab:taps}: the input centre sits at \SI{5.795}{\volt} whereas the taps are symmetric about \SI{6.00}{\volt}, so the upper branches turn on later and the lower branches earlier than the design intends, which clips the two half-cycles unequally.
+	The triangle shows only odd harmonics, and their amplitudes fall almost exactly as $1/n^2$: the measured 11.12, 4.00, 2.04 and 1.24\,\% of the third to the ninth harmonic are within 0.1\,\% of the ideal values, so the integrator converts the square wave into a triangle with negligible additional distortion. After the shaper the third harmonic has fallen from 10.67\,\% to 0.96\,\%, which is the purpose of the shaper, and the total distortion of the output is 2.57\,\%. The residual is dominated by the 2.12\,\% second harmonic, which the shaper does not create: the amplified triangle at TP3 already carries a second harmonic of 1.53\,\%, because the collector current of $Q_1$ swings from 0.66 to 3.60\,mA about a bias of 2.11\,mA and the stage is therefore driven well into its exponential region. The shaper then raises the relative weight of that component from 1.53\,\% to 2.12\,\%, since it compresses the fundamental to 73\,\% of its amplitude at node $X$ while the asymmetry is not reduced in the same proportion.
 
 	% =====================================================================
 	\section{Discussion}
 	% =====================================================================
-	The generator behaved as designed. The integrator produced a triangle of $0.4897\,\mathrm{V_{pp}}$ against the calculated $0.490\,\mathrm{V_{pp}}$, an error of 0.06\,\%, and its harmonic amplitudes reproduced the $1/n^2$ series of an ideal triangle, so the conversion from a square wave is essentially distortion-free. The amplifier raised this to $5.86\,\mathrm{V_{pp}}$ against $6.10\,\mathrm{V_{pp}}$, and after the shaper the output settled at $3.85\,\mathrm{V_{pp}}$ against $3.90\,\mathrm{V_{pp}}$, errors of 3.9\,\% and 1.3\,\%. The third harmonic of the output fell from 10.3\,\% to 1.3\,\%, which is the shaping action the circuit was designed for, and the total distortion of the shaped wave is 2.6\,\%. The bias ladder was the most accurate part of the circuit, its five taps matching the design values to better than 0.1\,\%.
+	The generator behaved as designed. The integrator turned the $10.000\,\mathrm{V_{pp}}$ square wave into a triangle of $0.4897\,\mathrm{V_{pp}}$ against the calculated $0.490\,\mathrm{V_{pp}}$, whose harmonics follow the $1/n^2$ series of an ideal triangle, so the conversion is essentially distortion-free. The amplifier raised this to $6.057\,\mathrm{V_{pp}}$ against $6.10\,\mathrm{V_{pp}}$, and the shaper delivered $3.757\,\mathrm{V_{pp}}$ against $3.90\,\mathrm{V_{pp}}$, errors of 0.7\,\% and 3.7\,\%, while reducing the third harmonic from 10.67\,\% to 0.96\,\%. The total distortion of the output is 2.57\,\% against 1.60\,\% predicted for ideal diodes, and the bias ladder was the most accurate part of the circuit, its five taps matching the design to better than 0.1\,\%.
 
-	The remaining differences have identifiable causes. The dc quantities are the least accurate, with errors of up to 6.6\,\% in the emitter voltage of $Q_1$: the transistor model used in the simulation has a base-emitter voltage of about \SI{0.78}{\volt} at \SI{1.8}{\milli\ampere}, not the \SI{0.7}{\volt} assumed in the calculations, and a larger $V_{BE}$ lowers every emitter voltage and hence every stage current. This shift propagates to the shaper, whose input centre lands about \SI{0.2}{\volt} below the centre of the tap ladder, and that asymmetry is the origin of the 2.0\,\% second harmonic, which accounts for almost all of the gap between the calculated 1.6\,\% and the simulated 2.6\,\% total distortion. It is also the reason the shaper is ac coupled and referred to the ladder centre in the final design, which removes the dependence on the dc level of $Q_2$. The supply measurements are consistent with the design in a different way: the rail held \SI{12.157}{\volt}, 1.3\,\% above nominal, and its ripple was unmeasurably small at the light test load, since the design ripple figures apply to the \SI{35}{\milli\ampere} of the complete chain.
-
-	The design is deliberately insensitive to the transistor parameters: the emitter degeneration of $Q_1$, the voltage-divider bias of all three stages and the ac-coupled shaper all keep the operating point and the output amplitude nearly independent of $\beta$, which is why the amplitudes agree with the hand calculation despite the dc shift. The main limitations are the fixed operating frequency, since the triangle amplitude is proportional to $1/f$, and the piecewise-linear nature of the sine, whose distortion of a few per cent is set by the number of break points rather than by the quality of the components; adding a third diode branch on each side would reduce it. Real component tolerances, the transformer's regulation and the diode soft knee would add a few tenths of a per cent to these figures in a hardware implementation.
+	The remaining differences are traceable to the transistor model rather than to the design. Its current gain is about 205 at the operating currents, twice the 100 assumed, so the bias dividers are loaded less than the calculation expects and every dc level shifts, most visibly at $Q_3$, whose emitter reaches \SI{4.965}{\volt} against \SI{4.16}{\volt}; the amplitudes survive unharmed because each stage is ac coupled and the emitter degeneration fixes the gain. The distortion is limited by the amplifier, not by the shaper: $Q_1$ swings its collector current over a factor of five, so the triangle already carries a 1.53\,\% second harmonic before shaping, and the shaper only makes its relative weight larger while removing the third. The remaining limitations are inherent to the topology: the triangle amplitude is proportional to $1/f$, so the generator is a fixed-frequency design, and the sine is piecewise linear, so its distortion is set by the number of break points and would improve with a third branch on each side.
 
 	% =====================================================================
 	\section{Reference}

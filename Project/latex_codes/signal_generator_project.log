@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.10.30)  8 NOV 2026 04:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.10.30)  8 NOV 2026 08:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1690,48 +1690,63 @@ LaTeX Font Info:    Font shape `OT1/ntxtt/m/n' will be
 LaTeX Info: Symbol \textmu not provided by
             font family ntxtlf in TS1 encoding.
             Default family used instead on input line 838.
-LaTeX Font Info:    Font shape `OT1/ntxtlf/m/it' will be
-(Font)              scaled to size 12.0pt on input line 854.
+<../ltspice_data/3.1.png, id=365, 1432.60219pt x 455.45157pt>
+File: ../ltspice_data/3.1.png Graphic file (type png)
+<use ../ltspice_data/3.1.png>
+Package pdftex.def Info: ../ltspice_data/3.1.png  used on input line 854.
+(pdftex.def)             Requested size: 452.9679pt x 144.00311pt.
  [17]
-[18] [19] [20]
+[18 <../ltspice_data/3.1.png>]
+<../ltspice_data/4.png, id=383, 1434.86063pt x 342.5297pt>
+File: ../ltspice_data/4.png Graphic file (type png)
+<use ../ltspice_data/4.png>
+Package pdftex.def Info: ../ltspice_data/4.png  used on input line 862.
+(pdftex.def)             Requested size: 686.49373pt x 163.88449pt.
+ [19
+
+ <../ltspice_data/4.png>] [20
+
+]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 984.
+(hyperref)                removing `math shift' on input line 951.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 984.
+(hyperref)                removing `subscript' on input line 951.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 984.
+(hyperref)                removing `math shift' on input line 951.
 
 [21]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1014.
+(hyperref)                removing `math shift' on input line 981.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1014.
+(hyperref)                removing `subscript' on input line 981.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1014.
+(hyperref)                removing `math shift' on input line 981.
 
 [22]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1055.
+(hyperref)                removing `math shift' on input line 1022.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 1055.
+(hyperref)                removing `subscript' on input line 1022.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 1055.
+(hyperref)                removing `math shift' on input line 1022.
 
+LaTeX Font Info:    Font shape `OT1/ntxtlf/m/it' will be
+(Font)              scaled to size 12.0pt on input line 1040.
 [23] [24] [25] [26] [27] [28] (./signal_generator_project.aux)
  ***********
 LaTeX2e <2025-11-01>
@@ -1742,10 +1757,10 @@ d.
 (rerunfilecheck)             Checksum: 5999B00BA6D4D8D10159F388763223CF;5312.
  ) 
 Here is how much of TeX's memory you used:
- 64833 strings out of 469515
- 1646959 string characters out of 5470806
- 3106255 words of memory out of 5000000
- 92562 multiletter control sequences out of 15000+600000
+ 64869 strings out of 469515
+ 1648217 string characters out of 5470806
+ 3106540 words of memory out of 5000000
+ 92603 multiletter control sequences out of 15000+600000
  709947 words of font info for 211 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  99i,19n,117p,1356b,2560s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1758,10 +1773,10 @@ ype1/public/newtx/txsys.pfb></usr/share/texmf-dist/fonts/type1/public/txfonts/t
 xtt.pfb></usr/share/texmf-dist/fonts/type1/public/newtx/ztmb.pfb></usr/share/te
 xmf-dist/fonts/type1/public/newtx/ztmr.pfb></usr/share/texmf-dist/fonts/type1/p
 ublic/newtx/ztmri.pfb>
-Output written on signal_generator_project.pdf (30 pages, 814211 bytes).
+Output written on signal_generator_project.pdf (30 pages, 881965 bytes).
 PDF statistics:
- 568 PDF objects out of 1000 (max. 8388607)
- 500 compressed objects within 5 object streams
- 153 named destinations out of 1000 (max. 500000)
- 292 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 562 PDF objects out of 1000 (max. 8388607)
+ 492 compressed objects within 5 object streams
+ 148 named destinations out of 1000 (max. 500000)
+ 302 words of extra memory for PDF output out of 10000 (max. 10000000)
 
