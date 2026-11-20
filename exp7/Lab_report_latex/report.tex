@@ -1,0 +1,1036 @@
+% circuit-sim-lab-report — report.tex
+% Course 0714-EEE-2102, Circuit Simulation Laboratory
+% Experiment 7 — input and output characteristics of a BJT in CB, CE and CC
+%
+% Compile (twice, from Lab_report_latex/):
+%   env pdflatex -interaction=nonstopmode report.tex
+
+\documentclass[12pt,a4paper]{article}
+
+% ----- Page geometry: A4, 1 inch margins all sides -----
+\usepackage[margin=1in]{geometry}
+
+% ----- Times New Roman (text + math) -----
+\usepackage{newtxtext,newtxmath}
+
+% ----- Spacing: 1.5 line spacing, 6 pt paragraph spacing -----
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip}          % paragraph gaps instead of indents
+\setlength{\parskip}{6pt plus 1pt}
+
+% ----- Math, SI units -----
+\usepackage{amsmath}
+\usepackage{siunitx}
+
+% ----- Graphics, tables, captions, floats -----
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{array}
+\graphicspath{{../graphs/}{../schematics/}{./figures/}}
+
+% ----- Lists: compact, guide-style itemization -----
+\usepackage{enumitem}
+\setlist{nosep, leftmargin=2em, label=\textbullet}
+
+% ----- Front matter and PDF output -----
+\usepackage{pdfpages}
+\usepackage[hidelinks]{hyperref}
+
+% ----- Headings: bold, left-aligned, 14/15 pt -----
+\usepackage{titlesec}
+\titleformat{\section}
+{\normalfont\Large\bfseries}{\thesection}{0.8em}{}
+\titleformat{\subsection}
+{\normalfont\large\bfseries}{\thesubsection}{0.8em}{}
+\titlespacing*{\section}{0pt}{*3}{*2}
+\titlespacing*{\subsection}{0pt}{*2.5}{*1.5}
+
+% ----- Captions: centered, 11 pt, figures below / tables above -----
+\captionsetup{font=small, labelfont=normalfont, justification=centering}
+\captionsetup[table]{position=above, skip=4pt}
+\captionsetup[figure]{position=below, skip=4pt}
+
+% ----- Page number: bottom-center -----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% ----- Experiment number: sections then number 7.1-7.9 -----
+\newcommand{\expnumber}{7}
+\renewcommand{\thesection}{\expnumber.\arabic{section}}
+
+\begin{document}
+
+% =====================================================================
+% FRONT MATTER (pages 1-2): cover page and task sheet
+% =====================================================================
+\includepdf[pages={1}]{../covers.pdf}
+\includepdf[pages={1}]{../Exp 07.pdf}
+\setcounter{page}{1}
+
+% =====================================================================
+% HEADER BLOCK
+% =====================================================================
+\begin{center}
+	{\large\bfseries Experiment No. \expnumber}\\[4pt]
+	{\large\bfseries Name of the Experiment: Simulation and Analysis of
+		Input and Output Characteristics of BJT in Common-Base,
+		Common-Emitter, and Common-Collector Configurations Using PSpice}
+\end{center}
+\vspace{6pt}
+
+% =====================================================================
+\section{Objective}
+% =====================================================================
+The purposes of this experiment are-
+\begin{enumerate}[label=\roman*.]
+	\item To design and simulate the input and output characteristics of an NPN BJT (2N3904) in the common-base, common-emitter and common-collector configurations using PSpice.
+	\item To repeat the characteristic families for a PNP BJT (2N3906) with all supply voltages and currents reversed.
+	\item To identify the cutoff, active and saturation regions of each configuration from the simulated curves.
+	\item To determine the current gain, input resistance and output resistance of every configuration from the simulated characteristics and to verify them against the theoretical values through percentage-error analysis.
+\end{enumerate}
+
+% =====================================================================
+\section{Theory}
+% =====================================================================
+A bipolar junction transistor consists of two pn junctions that share a
+thin base region \cite{ref:sedra}. In the NPN device the emitter and collector are n-type
+and the base is p-type; in the PNP device the doping is reversed. In the
+forward-active region the emitter-base junction is forward biased and the
+collector-base junction is reverse biased. Nearly all the carriers
+injected by the emitter are collected by the collector, so the collector
+current is a fraction $\alpha$ of the emitter current and the base
+current is the small remainder. The three terminal currents are related
+by Kirchhoff's current law as
+\begin{equation}
+	I_E = I_C + I_B .
+	\label{eq:kcl}
+\end{equation}
+For the PNP device the currents flow in the opposite sense, entering the
+emitter and leaving through the collector and the base. All the
+characteristics of the PNP transistor are therefore the mirror images of
+the NPN curves, and they are plotted in this report as magnitudes so
+that the two devices can be compared directly.
+
+Which terminal is held common to the input and the output decides the
+configuration and, with it, which quantity is the input and which is the
+output. In the common-base (CB) connection the base is grounded, the
+input is applied between emitter and base and the output is taken
+between collector and base. In the common-emitter (CE) connection the
+emitter is grounded, the input is between base and emitter and the
+output between collector and emitter. In the common-collector (CC)
+connection the collector is grounded, the input is again between base
+and emitter, and the output is taken at the emitter \cite{ref:theraja}.
+The same device
+therefore presents three different pairs of characteristics, because
+each connection measures the transistor from a different pair of
+terminals.
+
+Each configuration has an input characteristic, in which the input
+current is plotted against the input voltage at a fixed output voltage,
+and an output characteristic, in which the output current is plotted
+against the output voltage for a set of fixed input currents. Following
+the definitions of the three connections, the four quantities used below
+are
+\begin{equation}
+	\alpha = \frac{I_C}{I_E}, \qquad
+	\beta = \frac{I_C}{I_B}, \qquad
+	\gamma = \frac{I_E}{I_B} .
+	\label{eq:gains}
+\end{equation}
+Only two of the three gains are independent, since elimination of the
+currents in \eqref{eq:kcl} gives
+\begin{equation}
+	\gamma = 1 + \beta, \qquad
+	\beta = \frac{\alpha}{1-\alpha}, \qquad
+	\alpha = \frac{\beta}{1+\beta} .
+	\label{eq:gainrel}
+\end{equation}
+Thus $\alpha$ lies just below unity, while $\beta$ and $\gamma$ are large
+and differ by one.
+
+The input characteristic is the characteristic of a forward-biased pn
+junction, so the input current rises exponentially with the input
+voltage,
+\begin{equation}
+	I_C = I_S \exp\!\left(\frac{V_{BE}}{V_T}\right)
+	\left(1+\frac{V_{CE}}{V_A}\right),
+	\label{eq:shockley}
+\end{equation}
+where $I_S$ is the saturation current, $V_T = kT/q \approx
+\SI{25.85}{\milli\volt}$ at \SI{27}{\celsius} and $V_A$ is the Early
+voltage. Because the curve is exponential, it stays almost at zero up to
+a knee of about \SI{0.5}{\volt} and then turns sharply upward; a
+larger output voltage shifts the curve slightly to the left through the
+last factor of \eqref{eq:shockley}. The output characteristic is almost
+horizontal in the active region, because there the collector current is
+fixed by the base-emitter voltage rather than by the collector voltage;
+the slow upward slope is the Early effect described by the same factor.
+
+The resistances required by the experiment are small-signal quantities,
+defined as the slopes of the characteristics at the operating point,
+\begin{equation}
+	R_{\mathrm{in}} = \left.\frac{\Delta V_{\mathrm{in}}}
+	{\Delta I_{\mathrm{in}}}\right|_{V_{\mathrm{out}}\ \mathrm{const}},
+	\qquad
+	R_{\mathrm{out}} = \left.\frac{\Delta V_{\mathrm{out}}}
+	{\Delta I_{\mathrm{out}}}\right|_{I_{\mathrm{in}}\ \mathrm{const}} .
+	\label{eq:resdef}
+\end{equation}
+For the transistor these slopes are described by the dynamic emitter
+resistance, the dynamic base resistance and the output resistance,
+\begin{equation}
+	r_e = \frac{V_T}{I_E}, \qquad
+	r_\pi = \frac{\beta V_T}{I_C}, \qquad
+	r_o = \frac{V_A + V_{CE}}{I_C}.
+	\label{eq:small}
+\end{equation}
+The CB input sees the forward-biased emitter junction directly, so its
+input resistance is $r_e$ and is only a few ohms. The CE and CC inputs
+see the base current, which is $\beta$ times smaller, so their input
+resistances are $r_\pi$, larger by the same factor. On the output side
+the CB connection with a fixed emitter current has an output resistance
+of about $\beta r_o$, while the CE and CC connections present $r_o$
+itself, so the CB output resistance is the largest of the three. These
+expectations are summarized as
+\begin{equation}
+	R_{\mathrm{in,CB}} \approx r_e, \qquad
+	R_{\mathrm{in,CE}} \approx R_{\mathrm{in,CC}} \approx r_\pi,
+	\label{eq:rinexp}
+\end{equation}
+\begin{equation}
+	R_{\mathrm{out,CB}} \approx \beta r_o, \qquad
+	R_{\mathrm{out,CE}} \approx R_{\mathrm{out,CC}} \approx r_o .
+	\label{eq:routexp}
+\end{equation}
+
+The three operating regions follow from the bias of the two junctions.
+In cutoff both junctions are reverse biased and all the currents are
+negligible. In saturation both junctions are forward biased: the
+collector cannot collect the injected carriers and the output current
+falls steeply as the output voltage approaches zero, which is the steep
+part at the left of every output family. Between these extremes lies the
+active region, where the output curves are flat and nearly equally
+spaced. The experiment is simulated at \SI{27}{\celsius} with the
+standard Gummel-Poon models of the 2N3904 and the 2N3906, whose
+parameters include the Early voltage ($V_A = \SI{74.03}{\volt}$ for the
+NPN and \SI{18.7}{\volt} for the PNP), the finite current gain and the
+base and collector series resistances that are neglected in the
+idealized equations above.
+
+% =====================================================================
+\section{List of Components}
+% =====================================================================
+\begin{table}[H]
+	\centering
+	\caption{Components, instruments, and software used}
+	\label{tab:components}
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|c|l|l|c|}
+		\hline
+		\textbf{Sl. No.} & \textbf{Component/Instrument} & \textbf{Specification/Value} & \textbf{Quantity} \\
+		\hline
+		1 & NPN transistor & 2N3904 & 1 \\
+		\hline
+		2 & PNP transistor & 2N3906 & 1 \\
+		\hline
+		3 & DC voltage source & \SI{0}{\volt} to \SI{20}{\volt} ($V_{CB}$, $V_{CE}$, $V_{CC}$) & 2 \\
+		\hline
+		4 & DC current source & \SI{20}{\micro\ampere} to \SI{5}{\milli\ampere} ($I_B$, $I_E$) & 1 \\
+		\hline
+		5 & Simulation software & PSpice & 1 \\
+		\hline
+		6 & Personal computer & Windows-based workstation & 1 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Working Procedure}
+% =====================================================================
+\begin{enumerate}[label=\arabic*., leftmargin=2.4em]
+	\item Open PSpice Schematics, place the 2N3904 from the evaluation
+	      library and attach a ground to its base for the common-base
+	      connection.
+	\item For the CB input characteristic connect the voltage source
+	      $V_{EE}$ between emitter and ground and the source $V_{CB}$
+	      between collector and ground. Set $V_{CB} = \SI{5}{\volt}$ and
+	      sweep $V_{EE}$ from \SI{0}{\volt} to \SI{-0.72}{\volt} in steps
+	      of \SI{5}{\milli\volt}.
+	\item Plot the emitter current $I_E$ against $V_{EB} = -V_E$, save the
+	      trace, then repeat the sweep with $V_{CB} = \SI{10}{\volt}$ and
+	      place both curves on the same graph.
+	\item For the CB output characteristic replace $V_{EE}$ by a current
+	      source $I_{EE} = \SI{1}{\milli\ampere}$ and sweep $V_{CB}$ from
+	      \SI{-0.75}{\volt} to \SI{10}{\volt} in steps of
+	      \SI{50}{\milli\volt}. Plot $I_C$ against $V_{CB}$ and repeat the
+	      sweep for $I_{EE} = 2, 3, 4$ and \SI{5}{\milli\ampere}.
+	\item For the CE input characteristic ground the emitter, connect
+	      $V_{BB}$ between base and ground and $V_{CE}$ between collector
+	      and ground. With $V_{CE} = \SI{5}{\volt}$ sweep $V_{BB}$ from
+	      \SI{0}{\volt} to \SI{0.75}{\volt} and plot $I_B$ against
+	      $V_{BE}$; repeat with $V_{CE} = \SI{20}{\volt}$.
+	\item For the CE output characteristic replace $V_{BB}$ by a current
+	      source $I_B = \SI{20}{\micro\ampere}$ and sweep $V_{CE}$ from
+	      \SI{0}{\volt} to \SI{10}{\volt}. Plot $I_C$ against $V_{CE}$ and
+	      repeat for $I_B = 40, 60$ and \SI{80}{\micro\ampere}.
+	\item For the CC input characteristic ground the collector, place
+	      $V_{CE}$ in the emitter branch and $V_{BB}$ in the base branch.
+	      Sweep $V_{BB}$ and plot $I_B$ against $V_{BE}$ for $V_{CE} = 1,
+	      2, 5, 10$ and \SI{20}{\volt}.
+	\item For the CC output characteristic drive the base with the current
+	      source $I_B$, set the collector supply $V_{CC} =
+	      \SI{5}{\volt}$ and sweep the emitter supply $V_E$ from
+	      \SI{0}{\volt} to \SI{5}{\volt}. Plot $I_E$ against $V_{CE}$ and
+	      repeat for $I_B = 40, 60$ and \SI{80}{\micro\ampere}.
+	\item Using the cursor, read the collector currents of the CB output
+	      family at $V_{CB} = \SI{5}{\volt}$ for $I_E = 4$ and
+	      \SI{5}{\milli\ampere}, and of the CE output family at
+	      $V_{CE} = \SI{5}{\volt}$ for $I_B = 40$ and
+	      \SI{60}{\micro\ampere}; evaluate the current gain from the
+	      differences of these readings.
+	\item Read the emitter-base voltages at which the CB
+	      input characteristic passes \SI{3}{\milli\ampere} and
+	      \SI{5}{\milli\ampere}, and the base-emitter voltages at which the
+	      CE and CC input characteristics pass \SI{40}{\micro\ampere} and
+	      \SI{60}{\micro\ampere}; form the input resistances from the
+	      voltage differences divided by the current differences.
+	\item Read the CB and CE output currents at \SI{5}{\volt} and
+	      \SI{10}{\volt} and the CC output current at \SI{3}{\volt} and
+	      \SI{5}{\volt}; form the output resistances from the voltage
+	      differences divided by the current differences.
+	\item Repeat steps 1 to 11 with the 2N3906, reversing the polarity of
+	      every voltage source and the direction of every current source,
+	      and plot all PNP currents as magnitudes.
+	\item Tabulate the simulated gains and resistances, calculate the
+	      theoretical values and the percentage errors, and compare the
+	      three configurations for both transistors.
+\end{enumerate}
+
+% =====================================================================
+\section{Working Diagram}
+% =====================================================================
+The twelve measurement circuits are drawn in Figures~\ref{fig:sch-cb-npn}
+to~\ref{fig:sch-cc-pnp}. In every drawing the transistor is vertical,
+with the collector at the top, the emitter at the bottom and the base to
+the left, and every source branch returns to a common ground rail. The
+base is grounded in the CB circuits, the emitter is grounded in the CE
+circuits and the collector is grounded in the CC circuits, which makes
+the common terminal of each configuration visible at a glance. The PNP
+circuits are the mirror images of the NPN circuits, with the battery
+polarities and the current directions reversed.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.48\textwidth]{../schematics/cb_input_npn.png}\hfill
+	\includegraphics[width=0.48\textwidth]{../schematics/cb_output_npn.png}
+	\caption{Common-base circuits for the NPN transistor:
+		(a) input-characteristic circuit, $V_{CB} = \SI{5}{\volt}$, $V_{EE}$
+		swept; (b) output-characteristic circuit, $I_{EE}$ set to
+		\SI{1}{\milli\ampere}, $V_{CB}$ swept.}
+	\label{fig:sch-cb-npn}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.48\textwidth]{../schematics/ce_input_npn.png}\hfill
+	\includegraphics[width=0.48\textwidth]{../schematics/ce_output_npn.png}
+	\caption{Common-emitter circuits for the NPN transistor:
+		(a) input-characteristic circuit, $V_{CE} = \SI{5}{\volt}$, $V_{BB}$
+		swept; (b) output-characteristic circuit, $I_B =
+		\SI{20}{\micro\ampere}$, $V_{CE}$ swept.}
+	\label{fig:sch-ce-npn}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.48\textwidth]{../schematics/cc_input_npn.png}\hfill
+	\includegraphics[width=0.48\textwidth]{../schematics/cc_output_npn.png}
+	\caption{Common-collector circuits for the NPN transistor:
+		(a) input-characteristic circuit, $V_{CE} = \SI{1}{\volt}$, $V_{BB}$
+		swept; (b) output-characteristic circuit, $I_B =
+		\SI{20}{\micro\ampere}$, $V_E$ swept with $V_{CC} =
+		\SI{5}{\volt}$.}
+	\label{fig:sch-cc-npn}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.48\textwidth]{../schematics/cb_input_pnp.png}\hfill
+	\includegraphics[width=0.48\textwidth]{../schematics/cb_output_pnp.png}
+	\caption{Common-base circuits for the PNP transistor:
+		(a) input-characteristic circuit, $|V_{CB}| = \SI{5}{\volt}$,
+		$V_{EE}$ swept; (b) output-characteristic circuit, $I_{EE} =
+		\SI{1}{\milli\ampere}$, $V_{CB}$ swept. All sources are reversed
+		with respect to Figure~\ref{fig:sch-cb-npn}.}
+	\label{fig:sch-cb-pnp}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.48\textwidth]{../schematics/ce_input_pnp.png}\hfill
+	\includegraphics[width=0.48\textwidth]{../schematics/ce_output_pnp.png}
+	\caption{Common-emitter circuits for the PNP transistor:
+		(a) input-characteristic circuit, $|V_{CE}| = \SI{5}{\volt}$,
+		$V_{BB}$ swept; (b) output-characteristic circuit, $I_B =
+		\SI{20}{\micro\ampere}$, $V_{CE}$ swept.}
+	\label{fig:sch-ce-pnp}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.48\textwidth]{../schematics/cc_input_pnp.png}\hfill
+	\includegraphics[width=0.48\textwidth]{../schematics/cc_output_pnp.png}
+	\caption{Common-collector circuits for the PNP transistor:
+		(a) input-characteristic circuit, $|V_{CE}| = \SI{1}{\volt}$,
+		$V_{BB}$ swept; (b) output-characteristic circuit, $I_B =
+		\SI{20}{\micro\ampere}$, $V_E$ swept with $|V_{CC}| =
+		\SI{5}{\volt}$.}
+	\label{fig:sch-cc-pnp}
+\end{figure}
+
+\subsection{Netlist code}
+Each circuit was also described in netlist form and simulated with a DC
+sweep of the input voltage or current, the output quantity being held at
+the value shown in the corresponding schematic. Four representative
+netlists are listed below; the remaining eight differ only in the swept
+element, the sweep limits and the transistor model card
+(\texttt{Q2N3904} or \texttt{Q2N3906}). The \texttt{.SAVE} statement
+keeps the collector, base and emitter currents of the device so that
+they can be read directly from the raw output, and the ends of the
+titles and comments recall the bias of each run.
+
+\textbf{Circuit 1 (CB input, NPN):}
+{\small
+\begin{verbatim}
+* Common-base input characteristic (NPN 2N3904)
+* V_CB = 5 V
+VEE e 0 0
+Q1 c 0 e Q2N3904
+VCB c 0 5
+.MODEL Q2N3904 NPN(IS=6.734F XTI=3 EG=1.11 VAF=74.03 BF=416.4 NE=1.259
++ ISE=6.734F IKF=.06678 XTB=1.5 BR=.7371 NC=2 ISC=0 IKR=0 RC=1
++ CJC=3.638P MJC=.3085 VJC=.75 FC=.5 CJE=4.493P MJE=.2593 VJE=.75
++ TR=239.5N TF=301.2P ITF=.4 VTF=4 XTF=2 RB=10)
+.SAVE all @q1[ic] @q1[ib] @q1[ie]
+.DC VEE 0 -0.72 -0.005
+.PROBE
+.END
+\end{verbatim}}
+
+\textbf{Circuit 2 (CE output, NPN):}
+{\small
+\begin{verbatim}
+* Common-emitter output characteristic (NPN 2N3904)
+* I_B = 20 uA
+IB 0 b 2e-05
+Q1 c b 0 Q2N3904
+VCE c 0 0
+.MODEL Q2N3904 NPN(IS=6.734F XTI=3 EG=1.11 VAF=74.03 BF=416.4 NE=1.259
++ ISE=6.734F IKF=.06678 XTB=1.5 BR=.7371 NC=2 ISC=0 IKR=0 RC=1
++ CJC=3.638P MJC=.3085 VJC=.75 FC=.5 CJE=4.493P MJE=.2593 VJE=.75
++ TR=239.5N TF=301.2P ITF=.4 VTF=4 XTF=2 RB=10)
+.SAVE all @q1[ic] @q1[ib] @q1[ie]
+.DC VCE 0 10 0.05
+.PROBE
+.END
+\end{verbatim}}
+
+\textbf{Circuit 3 (CC input, NPN):}
+{\small
+\begin{verbatim}
+* Common-collector input characteristic (NPN 2N3904)
+* collector common, V_CE = 1 V
+VBB b 0 -0.5
+Q1 0 b e Q2N3904
+VCE e 0 -1
+.MODEL Q2N3904 NPN(IS=6.734F XTI=3 EG=1.11 VAF=74.03 BF=416.4 NE=1.259
++ ISE=6.734F IKF=.06678 XTB=1.5 BR=.7371 NC=2 ISC=0 IKR=0 RC=1
++ CJC=3.638P MJC=.3085 VJC=.75 FC=.5 CJE=4.493P MJE=.2593 VJE=.75
++ TR=239.5N TF=301.2P ITF=.4 VTF=4 XTF=2 RB=10)
+.SAVE all @q1[ic] @q1[ib] @q1[ie]
+.DC VBB -0.7 -0.25 0.005
+.PROBE
+.END
+\end{verbatim}}
+
+\textbf{Circuit 4 (CE output, PNP):}
+{\small
+\begin{verbatim}
+* Common-emitter output characteristic (PNP 2N3906)
+* I_B = 20 uA
+IB 0 b -2e-05
+Q1 c b 0 Q2N3906
+VCE c 0 0
+.MODEL Q2N3906 PNP(IS=1.41F XTI=3 EG=1.11 VAF=18.7 BF=180.7 NE=1.5
++ ISE=0 IKF=.12 XTB=1.5 BR=4 NC=2 ISC=0 IKR=0 RC=2.5
++ CJC=9.728P MJC=.5776 VJC=.75 FC=.5 CJE=8.063P MJE=.3677 VJE=.75
++ TR=33.42N TF=179.3P ITF=.4 VTF=4 XTF=2 RB=8.9)
+.SAVE all @q1[ic] @q1[ib] @q1[ie]
+.DC VCE 0 -10 -0.05
+.PROBE
+.END
+\end{verbatim}}
+
+% =====================================================================
+\section{Calculation}
+% =====================================================================
+The gain and resistance formulas of Section 7.2 contain the bias
+currents, which are read from the simulated curves. The input
+resistances follow from the chord slopes of \eqref{eq:resdef} applied to
+the exponential input characteristic,
+\begin{equation}
+	R_{\mathrm{in,CB}} = \frac{V_T \ln\!\left(I_{E2}/I_{E1}\right)}
+	{I_{E2}-I_{E1}},
+	\qquad
+	R_{\mathrm{in,CE}} = R_{\mathrm{in,CC}} =
+	\frac{V_T \ln\!\left(I_{B2}/I_{B1}\right)}{I_{B2}-I_{B1}},
+	\label{eq:rinchord}
+\end{equation}
+and the output resistances follow from the two output characteristics,
+\begin{equation}
+	R_{\mathrm{out,CB}} = \frac{V_{CB2}-V_{CB1}}
+	{I_E\left(\alpha_2-\alpha_1\right)},
+	\qquad
+	R_{\mathrm{out,CE}} = \frac{V_A+V_{CE}}{I_C},
+	\qquad
+	R_{\mathrm{out,CC}} = \frac{V_A+V_{CB}}{I_E},
+	\label{eq:routchord}
+\end{equation}
+with
+\begin{equation}
+	\alpha_k = \frac{1+V_k/V_A}{1+V_k/V_A+1/\beta} .
+	\label{eq:alphav}
+\end{equation}
+
+\subsection{Theoretical values}
+With the datasheet-typical gain $\beta = 200$ at \SI{10}{\milli\ampere}
+\cite{ref:2n3904,ref:2n3906} and the Early voltage of the 2N3904 model,
+$V_A = \SI{74.03}{\volt}$,
+the current gains of \eqref{eq:gains} and \eqref{eq:gainrel} are
+\begin{equation}
+	\alpha = \frac{200}{201} = 0.9950, \qquad
+	\beta = 200.0, \qquad
+	\gamma = 201.0 .
+\end{equation}
+The CB input resistance is evaluated between $I_{E1} = \SI{3}{\milli\ampere}$
+and $I_{E2} = \SI{5}{\milli\ampere}$, so
+\begin{equation}
+	R_{\mathrm{in,CB}} = \frac{25.85\times10^{-3}\ln(5/3)}
+	{2\times10^{-3}} = \SI{6.602}{\ohm},
+\end{equation}
+and the CE and CC input resistances are evaluated between
+$I_{B1} = \SI{40}{\micro\ampere}$ and $I_{B2} = \SI{60}{\micro\ampere}$,
+\begin{equation}
+	R_{\mathrm{in,CE}} = R_{\mathrm{in,CC}} =
+	\frac{25.85\times10^{-3}\ln(60/40)}{20\times10^{-6}}
+	= \SI{524.1}{\ohm} .
+\end{equation}
+For the CB output resistance the two values of $\alpha$ at
+\SI{5}{\volt} and \SI{10}{\volt} are
+\begin{equation}
+	\alpha_1 = \frac{1+5/74.03}{1+5/74.03+1/200} = 0.99534, \qquad
+	\alpha_2 = \frac{1+10/74.03}{1+10/74.03+1/200} = 0.99561,
+\end{equation}
+so that, with $I_E = \SI{4}{\milli\ampere}$,
+\begin{equation}
+	R_{\mathrm{out,CB}} = \frac{5}{4\times10^{-3}(0.99561-0.99534)}
+	= \SI{4.526}{\mega\ohm} .
+\end{equation}
+The CE output resistance is evaluated at the midpoint of the measured
+span $V_{CE} = \SI{7.5}{\volt}$, where $I_C = \SI{10.46}{\milli\ampere}$,
+\begin{equation}
+	R_{\mathrm{out,CE}} = \frac{74.03+7.5}{10.46\times10^{-3}}
+	= \SI{7.798}{\kilo\ohm},
+\end{equation}
+and the CC output resistance at $V_{CB} \approx \SI{4}{\volt}$, where
+$I_E = \SI{10.06}{\milli\ampere}$,
+\begin{equation}
+	R_{\mathrm{out,CC}} = \frac{74.03+4}{10.06\times10^{-3}}
+	= \SI{7.754}{\kilo\ohm} .
+\end{equation}
+The percentage error is evaluated as
+\begin{equation}
+	\%\,\mathrm{Error} = \frac{\text{Theoretical}-\text{Simulated}}
+	{\text{Theoretical}}\times100,
+	\label{eq:err}
+\end{equation}
+so that, for example, the gain $\alpha$ of the NPN transistor gives
+$(0.99502-0.99440)/0.99502\times100 = 0.06\%$.
+
+For the 2N3906 the same expressions are used with
+$V_A = \SI{18.7}{\volt}$; only the output resistances change
+appreciably, because the PNP Early voltage is about four times smaller.
+Equation \eqref{eq:alphav} then gives $\alpha_1 = 0.99607$ and
+$\alpha_2 = 0.99675$, so that
+\begin{equation}
+	R_{\mathrm{out,CB}} = \frac{5}{4\times10^{-3}(0.99675-0.99607)}
+	= \SI{1.832}{\mega\ohm},
+\end{equation}
+\begin{equation}
+	R_{\mathrm{out,CE}} = \frac{18.7+7.5}{13.59\times10^{-3}}
+	= \SI{1.928}{\kilo\ohm}, \qquad
+	R_{\mathrm{out,CC}} = \frac{18.7+4}{11.78\times10^{-3}}
+	= \SI{1.927}{\kilo\ohm} .
+\end{equation}
+The theoretical gains, input resistances and output resistances of both
+polarities are collected in Tables~\ref{tab:npn} and~\ref{tab:pnp}
+beside the simulated values, and the percentage errors follow from
+\eqref{eq:err}.
+
+\subsection{Simulated values}
+The simulated quantities are obtained from the same formulas with the
+currents and voltages read from the curves. For the NPN device the
+collector current of the CB output family is \SI{3.976}{\milli\ampere}
+at $I_E = \SI{4}{\milli\ampere}$ and \SI{4.970}{\milli\ampere} at
+$I_E = \SI{5}{\milli\ampere}$, both at $V_{CB} = \SI{5}{\volt}$, hence
+\begin{equation}
+	\alpha = \frac{4.970-3.976}{5-4} = 0.9944 .
+\end{equation}
+The CB input characteristic passes \SI{3}{\milli\ampere} at
+\SI{693.05}{\milli\volt} and \SI{5}{\milli\ampere} at
+\SI{707.07}{\milli\volt}, so
+\begin{equation}
+	R_{\mathrm{in,CB}} = \frac{707.07-693.05}{2}
+	= \SI{7.008}{\ohm},
+\end{equation}
+and the CB output current rises from \SI{3.976}{\milli\ampere} at
+\SI{5}{\volt} to \SI{3.977}{\milli\ampere} at \SI{10}{\volt} for the
+same emitter current, giving
+\begin{equation}
+	R_{\mathrm{out,CB}} = \frac{5}{(3.977-3.976)\times10^{-3}}
+	= \SI{3.764}{\mega\ohm} .
+\end{equation}
+At $V_{CE} = \SI{5}{\volt}$ the CE output family gives
+\SI{6.685}{\milli\ampere} and \SI{10.132}{\milli\ampere} for
+$I_B = \SI{40}{\micro\ampere}$ and \SI{60}{\micro\ampere}, and the CE
+input characteristic gives \SI{715.72}{\milli\volt} and
+\SI{727.76}{\milli\volt} at the same base currents, so
+\begin{equation}
+	\beta = \frac{10.132-6.685}{20\times10^{-3}} = 172.4, \qquad
+	R_{\mathrm{in,CE}} = \frac{727.76-715.72}{20}
+	= \SI{602.0}{\ohm} .
+\end{equation}
+The CE output current rises from \SI{10.132}{\milli\ampere} at
+\SI{5}{\volt} to \SI{10.779}{\milli\ampere} at \SI{10}{\volt}, hence
+\begin{equation}
+	R_{\mathrm{out,CE}} = \frac{5}{(10.779-10.132)\times10^{-3}}
+	= \SI{7.728}{\kilo\ohm} .
+\end{equation}
+The CC output family gives \SI{6.554}{\milli\ampere} and
+\SI{9.933}{\milli\ampere} at $V_{CE} = \SI{3}{\volt}$ and
+\SI{10.062}{\milli\ampere}, \SI{10.192}{\milli\ampere} at \SI{4}{\volt}
+and \SI{5}{\volt}, so
+\begin{equation}
+	\gamma = \frac{9.933-6.554}{20\times10^{-3}} = 168.9, \qquad
+	R_{\mathrm{out,CC}} = \frac{5-3}{10.192-9.933}
+	= \SI{7.728}{\kilo\ohm} .
+\end{equation}
+The CC input characteristic coincides with the CE characteristic at the
+same output voltage, so $R_{\mathrm{in,CC}} = R_{\mathrm{in,CE}} =
+\SI{602.0}{\ohm}$.
+
+The PNP transistor is treated in the same way with the magnitudes of the
+currents. The CB output family gives \SI{3.982}{\milli\ampere} and
+\SI{4.978}{\milli\ampere} at $I_E = 4$ and \SI{5}{\milli\ampere}, and
+the CB input characteristic passes \SI{3}{\milli\ampere} at
+\SI{728.49}{\milli\volt} and \SI{5}{\milli\ampere} at
+\SI{742.11}{\milli\volt}, so
+\begin{equation}
+	\alpha = 0.9954, \qquad
+	R_{\mathrm{in,CB}} = \SI{6.806}{\ohm}, \qquad
+	R_{\mathrm{out,CB}} = \SI{1.580}{\mega\ohm} .
+\end{equation}
+At $V_{CE} = \SI{5}{\volt}$ the CE family gives \SI{8.382}{\milli\ampere}
+and \SI{12.256}{\milli\ampere} for $I_B = 40$ and
+\SI{60}{\micro\ampere}, with input voltages \SI{757.19}{\milli\volt} and
+\SI{767.86}{\milli\volt}, so
+\begin{equation}
+	\beta = 193.7, \qquad
+	R_{\mathrm{in,CE}} = \SI{533.5}{\ohm}, \qquad
+	R_{\mathrm{out,CE}} = \SI{1.871}{\kilo\ohm} .
+\end{equation}
+The CC output family gives \SI{7.692}{\milli\ampere} and
+\SI{11.247}{\milli\ampere} at $V_{CE} = \SI{3}{\volt}$, and
+\SI{11.782}{\milli\ampere} and \SI{12.316}{\milli\ampere} at
+\SI{4}{\volt} and \SI{5}{\volt}, so
+\begin{equation}
+	\gamma = 177.8, \qquad
+	R_{\mathrm{in,CC}} = \SI{533.5}{\ohm}, \qquad
+	R_{\mathrm{out,CC}} = \SI{1.871}{\kilo\ohm} .
+\end{equation}
+
+% =====================================================================
+\section{Result Analysis}
+% =====================================================================
+Figures~\ref{fig:cb-in-npn} to~\ref{fig:cc-out-pnp} reproduce the twelve
+characteristic families obtained from the DC sweeps. The two upper
+curves of every input family run almost on top of each other, the
+output families fan out in equally spaced traces and the knees of all
+curves lie near the expected junction voltages. The extracted gains and
+resistances are collected in Tables~\ref{tab:npn} and~\ref{tab:pnp}, and
+the three configurations are compared side by side in
+Table~\ref{tab:compare}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{cb_input_npn.png}
+	\caption{PSpice output: input characteristic of the NPN transistor in
+		CB configuration for $V_{CB} = 5$ and \SI{10}{\volt}. The current
+		is negligible below the \SI{0.5}{\volt} knee and rises
+		exponentially above it; the \SI{10}{\volt} curve lies slightly to
+		the left because of the Early effect.}
+	\label{fig:cb-in-npn}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{cb_output_npn.png}
+	\caption{PSpice output: output characteristic of the NPN transistor in
+		CB configuration for $I_E = 1$ to \SI{5}{\milli\ampere}. The
+		saturation region lies at negative $V_{CB}$, the active region is
+		almost flat and slightly rising, and each trace sits at
+		$I_C \approx 0.994\,I_E$.}
+	\label{fig:cb-out-npn}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{ce_input_npn.png}
+	\caption{PSpice output: input characteristic of the NPN transistor in
+		CE configuration for $V_{CE} = 5$ and \SI{20}{\volt}. The base
+		current reaches \SI{125}{\micro\ampere} at
+		\SI{0.75}{\volt}, and the two curves nearly coincide because the
+		Early effect on the base current is small.}
+	\label{fig:ce-in-npn}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{ce_output_npn.png}
+	\caption{PSpice output: output characteristic of the NPN transistor in
+		CE configuration for $I_B = 20$ to \SI{80}{\micro\ampere}. The
+		knee at about \SI{0.2}{\volt} separates the saturation region from
+		the active region, where the traces are flat and equally spaced by
+		about \SI{3.4}{\milli\ampere} per \SI{20}{\micro\ampere}.}
+	\label{fig:ce-out-npn}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{cc_input_npn.png}
+	\caption{PSpice output: input characteristic of the NPN transistor in
+		CC configuration for $V_{CE} = 1, 2, 5, 10$ and \SI{20}{\volt}.
+		The five curves are practically identical, which confirms that the
+		base current is set by the base-emitter voltage alone.}
+	\label{fig:cc-in-npn}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{cc_output_npn.png}
+	\caption{PSpice output: output characteristic of the NPN transistor in
+		CC configuration for $I_B = 20$ to \SI{80}{\micro\ampere}. The
+		emitter current is the largest terminal current, so the traces lie
+		about one base current above the corresponding CE traces.}
+	\label{fig:cc-out-npn}
+\end{figure}
+
+The CB input characteristic of Figure~\ref{fig:cb-in-npn} shows the
+exponential behavior of \eqref{eq:shockley}: the emitter current is
+practically zero up to about \SI{0.5}{\volt}, reaches
+\SI{3}{\milli\ampere} at \SI{0.693}{\volt} and \SI{5}{\milli\ampere} at
+\SI{0.707}{\volt}, and the \SI{10}{\volt} curve is displaced to the left
+of the \SI{5}{\volt} curve by the Early effect. Its chord slope between
+these two points gives the \SI{7.008}{\ohm} input resistance, close to
+the \SI{6.602}{\ohm} calculated in Section~7.6. The CB output family of
+Figure~\ref{fig:cb-out-npn} falls steeply for negative $V_{CB}$, where
+the collector junction is forward biased and the device is saturated,
+and levels off at $I_C \approx 0.994\,I_E$ once $V_{CB}$ becomes
+positive; the small positive slope in the active region, about
+\SI{1.3}{\micro\ampere} over \SI{5}{\volt} at $I_E = \SI{4}{\milli\ampere}$,
+is the Early effect from which $R_{\mathrm{out,CB}} =
+\SI{3.764}{\mega\ohm}$ is obtained. The nearly horizontal traces also
+show that the CB connection delivers almost the whole emitter current to
+the collector, since $\alpha$ differs from unity by only a few parts per
+thousand.
+
+The CE input family of Figure~\ref{fig:ce-in-npn} has the same shape as
+the CB family, but the ordinate is the base current, which is several
+hundred times smaller; the curve therefore rises only to
+\SI{125}{\micro\ampere} at \SI{0.75}{\volt}. The same change of junction
+voltage now drives a current about ninety times smaller, so the input
+resistance is \SI{602.0}{\ohm}, about ninety times the CB value. The CE output family
+of Figure~\ref{fig:ce-out-npn} shows the saturation knee at
+\SI{0.2}{\volt}, then flat traces spaced by about
+\SI{3.4}{\milli\ampere} per \SI{20}{\micro\ampere} of base current. The
+collector current reaches \SI{10.13}{\milli\ampere} at
+$V_{CE} = \SI{5}{\volt}$ for $I_B = \SI{60}{\micro\ampere}$, giving
+$\beta = 172.4$, and the upward slope between \SI{5}{\volt} and
+\SI{10}{\volt} gives $R_{\mathrm{out,CE}} = \SI{7.728}{\kilo\ohm}$.
+The saturation region is wider in the CE family than in the CB family
+because the collector-emitter voltage has to supply both junction
+voltages before the collector junction becomes reverse biased.
+
+The CC input family of Figure~\ref{fig:cc-in-npn} is almost a single
+curve: all five traces pass through the same points to within the
+resolution of the plot, because the input is again the base-emitter
+junction with a fixed collector voltage. The extracted input resistance
+is therefore identical to the CE value, \SI{602.0}{\ohm}. In the CC
+output family of Figure~\ref{fig:cc-out-npn} the ordinate is the emitter
+current, so each trace lies about one base current above the CE trace at
+the same base current. At $V_{CE} = \SI{3}{\volt}$ the emitter current
+rises from \SI{6.554}{\milli\ampere} to \SI{9.933}{\milli\ampere} as
+$I_B$ goes from \SI{40}{\micro\ampere} to \SI{60}{\micro\ampere}, which
+gives $\gamma = 168.9$, and the rise of \SI{0.259}{\milli\ampere} from
+\SI{3}{\volt} to \SI{5}{\volt} at $I_B = \SI{60}{\micro\ampere}$ gives
+$R_{\mathrm{out,CC}} = \SI{7.728}{\kilo\ohm}$. The output characteristic
+confirms that the CC connection has the same output resistance as the CE
+connection, while its output current is larger by the base current.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{cb_input_pnp.png}
+	\caption{PSpice output: input characteristic of the PNP transistor in
+		CB configuration for $|V_{CB}| = 5$ and \SI{10}{\volt}. The curve
+		is the mirror image of Figure~\ref{fig:cb-in-npn} and reaches
+		\SI{9.6}{\milli\ampere} at \SI{0.76}{\volt}.}
+	\label{fig:cb-in-pnp}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{cb_output_pnp.png}
+	\caption{PSpice output: output characteristic of the PNP transistor in
+		CB configuration for $|I_E| = 1$ to \SI{5}{\milli\ampere}. The
+		saturation region now lies at positive $V_{CB}$ and the traces rise
+		more steeply in the active region than for the NPN, because the PNP
+		Early voltage is only \SI{18.7}{\volt}.}
+	\label{fig:cb-out-pnp}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{ce_input_pnp.png}
+	\caption{PSpice output: input characteristic of the PNP transistor in
+		CE configuration for $|V_{CE}| = 5$ and \SI{20}{\volt}. The base
+		current reaches \SI{197}{\micro\ampere} at \SI{0.80}{\volt},
+		slightly above the NPN value.}
+	\label{fig:ce-in-pnp}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{ce_output_pnp.png}
+	\caption{PSpice output: output characteristic of the PNP transistor in
+		CE configuration for $|I_B| = 20$ to \SI{80}{\micro\ampere}. The
+		spacing is about \SI{3.9}{\milli\ampere} per \SI{20}{\micro\ampere},
+		somewhat wider than the NPN spacing, and the traces rise more visibly with
+		$|V_{CE}|$.}
+	\label{fig:ce-out-pnp}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{cc_input_pnp.png}
+	\caption{PSpice output: input characteristic of the PNP transistor in
+		CC configuration for $|V_{CE}| = 1, 2, 5, 10$ and
+		\SI{20}{\volt}. As in the NPN case, the five curves coincide.}
+	\label{fig:cc-in-pnp}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{cc_output_pnp.png}
+	\caption{PSpice output: output characteristic of the PNP transistor in
+		CC configuration for $|I_B| = 20$ to \SI{80}{\micro\ampere}. The
+		emitter current reaches \SI{11.25}{\milli\ampere} at
+		$|V_{CE}| = \SI{3}{\volt}$ for $|I_B| = \SI{60}{\micro\ampere}$.}
+	\label{fig:cc-out-pnp}
+\end{figure}
+
+The PNP families in Figures~\ref{fig:cb-in-pnp} to~\ref{fig:cc-out-pnp}
+repeat every feature of the NPN families with the polarities reversed.
+The CB input curve turns up at about \SI{0.72}{\volt} and reaches
+\SI{9.6}{\milli\ampere} at \SI{0.76}{\volt}, close to the NPN knee,
+because the emitter-base junction is the same kind of junction in both
+devices. The larger Early effect of the PNP model is unmistakable in the
+output families: between \SI{5}{\volt} and \SI{10}{\volt} the CB current
+rises by \SI{3.2}{\micro\ampere} against \SI{1.3}{\micro\ampere} for the
+NPN, and the CE current at $|I_B| = \SI{60}{\micro\ampere}$ rises by
+\SI{2.7}{\milli\ampere} over the same span. These slopes give
+$R_{\mathrm{out,CB}} = \SI{1.580}{\mega\ohm}$ and
+$R_{\mathrm{out,CE}} = R_{\mathrm{out,CC}} = \SI{1.871}{\kilo\ohm}$,
+about 2.4 times and 4.1 times lower than the NPN values, so the lower
+Early voltage of the PNP model is reflected directly in the output
+slopes.
+The current gains are also closer to the datasheet value for the PNP,
+with $\beta = 193.7$ and $\gamma = 177.8$.
+
+\begin{table}[H]
+	\centering
+	\caption{Theoretical and simulated parameters of the NPN transistor
+		(2N3904)}
+	\label{tab:npn}
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|l|c|c|c|}
+		\hline
+		\textbf{Quantity} & \textbf{Theoretical} & \textbf{Simulated} & \textbf{\% Error} \\
+		\hline
+		$\alpha = I_C/I_E$ & 0.9950 & 0.9944 & $0.06$ \\
+		\hline
+		$\beta = I_C/I_B$ & 200.0 & 172.4 & $13.82$ \\
+		\hline
+		$\gamma = I_E/I_B$ & 201.0 & 168.9 & $15.95$ \\
+		\hline
+		$R_{\mathrm{in,CB}}$ & \SI{6.602}{\ohm} & \SI{7.008}{\ohm} & $-6.15$ \\
+		\hline
+		$R_{\mathrm{in,CE}}$ & \SI{524.1}{\ohm} & \SI{602.0}{\ohm} & $-14.88$ \\
+		\hline
+		$R_{\mathrm{in,CC}}$ & \SI{524.1}{\ohm} & \SI{602.0}{\ohm} & $-14.88$ \\
+		\hline
+		$R_{\mathrm{out,CB}}$ & \SI{4.526}{\mega\ohm} & \SI{3.764}{\mega\ohm} & $16.84$ \\
+		\hline
+		$R_{\mathrm{out,CE}}$ & \SI{7.798}{\kilo\ohm} & \SI{7.728}{\kilo\ohm} & $0.89$ \\
+		\hline
+		$R_{\mathrm{out,CC}}$ & \SI{7.754}{\kilo\ohm} & \SI{7.728}{\kilo\ohm} & $0.34$ \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Theoretical and simulated parameters of the PNP transistor
+		(2N3906)}
+	\label{tab:pnp}
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|l|c|c|c|}
+		\hline
+		\textbf{Quantity} & \textbf{Theoretical} & \textbf{Simulated} & \textbf{\% Error} \\
+		\hline
+		$\alpha = I_C/I_E$ & 0.9950 & 0.9954 & $-0.04$ \\
+		\hline
+		$\beta = I_C/I_B$ & 200.0 & 193.7 & $3.15$ \\
+		\hline
+		$\gamma = I_E/I_B$ & 201.0 & 177.8 & $11.55$ \\
+		\hline
+		$R_{\mathrm{in,CB}}$ & \SI{6.602}{\ohm} & \SI{6.806}{\ohm} & $-3.09$ \\
+		\hline
+		$R_{\mathrm{in,CE}}$ & \SI{524.1}{\ohm} & \SI{533.5}{\ohm} & $-1.79$ \\
+		\hline
+		$R_{\mathrm{in,CC}}$ & \SI{524.1}{\ohm} & \SI{533.5}{\ohm} & $-1.79$ \\
+		\hline
+		$R_{\mathrm{out,CB}}$ & \SI{1.832}{\mega\ohm} & \SI{1.580}{\mega\ohm} & $13.75$ \\
+		\hline
+		$R_{\mathrm{out,CE}}$ & \SI{1.928}{\kilo\ohm} & \SI{1.871}{\kilo\ohm} & $2.93$ \\
+		\hline
+		$R_{\mathrm{out,CC}}$ & \SI{1.927}{\kilo\ohm} & \SI{1.871}{\kilo\ohm} & $2.89$ \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\caption{Comparison of the three configurations for both transistors}
+	\label{tab:compare}
+	\renewcommand{\arraystretch}{1.25}
+	\begin{tabular}{|l|c|c|c|}
+		\hline
+		\textbf{Configuration} & \textbf{Current gain} & \textbf{Input resistance} & \textbf{Output resistance} \\
+		\hline
+		CB (NPN) & $\alpha = 0.9944$ & \SI{7.008}{\ohm} & \SI{3.764}{\mega\ohm} \\
+		\hline
+		CE (NPN) & $\beta = 172.4$ & \SI{602.0}{\ohm} & \SI{7.728}{\kilo\ohm} \\
+		\hline
+		CC (NPN) & $\gamma = 168.9$ & \SI{602.0}{\ohm} & \SI{7.728}{\kilo\ohm} \\
+		\hline
+		CB (PNP) & $\alpha = 0.9954$ & \SI{6.806}{\ohm} & \SI{1.580}{\mega\ohm} \\
+		\hline
+		CE (PNP) & $\beta = 193.7$ & \SI{533.5}{\ohm} & \SI{1.871}{\kilo\ohm} \\
+		\hline
+		CC (PNP) & $\gamma = 177.8$ & \SI{533.5}{\ohm} & \SI{1.871}{\kilo\ohm} \\
+		\hline
+	\end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Discussion}
+% =====================================================================
+The simulated families reproduce the expected behavior of the three
+configurations. The CB connection gives a current gain just below unity,
+the smallest input resistance (\SI{7.008}{\ohm}) and the largest output
+resistance (\SI{3.764}{\mega\ohm}); the CE connection gives the largest
+current gain and an input resistance about ninety times larger, with an
+output resistance three orders of magnitude smaller; the CC connection
+repeats the CE input characteristic exactly and delivers the emitter
+current as its output, so its current gain is $\beta+1$ in principle and
+its output resistance equals the CE value. Table~\ref{tab:compare} shows
+these trends consistently for both polarities, and they are the reason
+why a CB stage is used as a current buffer and a CC stage as a voltage
+buffer, while the CE stage supplies the gain.
+
+The percentage errors are smallest for the CB gain and for the CE and CC
+output resistances, which agree with theory to within \SI{1}{\percent},
+and largest for the NPN gain and the CB output resistance. The gain
+error is not a simulation defect: the theoretical $\beta = 200$ is the
+datasheet-typical value at \SI{10}{\milli\ampere}, whereas the 2N3904
+model card sets $I_{SE} = I_S$ with an ideality factor of 1.259, so its
+base current contains a large recombination component and its own gain
+at \SI{10}{\milli\ampere} is only about 170. The measured \SI{13.8}{\percent}
+deviation therefore compares the model with the datasheet, not with
+itself; the same effect explains why the NPN input resistance is about
+\SI{15}{\percent} above the ideal exponential value, because the
+non-ideal base current makes $\Delta V_{BE}$ larger than
+$V_T\ln(I_2/I_1)$. The PNP model has $I_{SE} = 0$, so its base current
+is nearly ideal and its input-resistance error falls to
+\SI{1.8}{\percent}. The CB output resistance is the least reliable
+entry in both tables because its theoretical value is the difference of
+two almost equal values of $\alpha$, only $2.8\times10^{-4}$ apart;
+the simplified $\alpha(V)$ expression cannot reproduce the full
+Gummel-Poon output conductance, and a small change in the slope moves
+$R_{\mathrm{out,CB}}$ by a large percentage even though the measured
+value is still of the order of megohms as predicted.
+
+The Early voltage controls the output slope directly: the PNP model has
+$V_A = \SI{18.7}{\volt}$ against \SI{74.03}{\volt} for the NPN, and the
+measured PNP output resistances are lower by close to the corresponding
+ratio (\SI{1.87}{\kilo\ohm} against
+\SI{7.73}{\kilo\ohm} in CE and CC). The knee voltages of the input
+characteristics, about \SI{0.5}{\volt} for both devices, and the
+saturation knees of the output families, near \SI{0}{\volt} in CB and
+\SI{0.2}{\volt} in CE and CC, match the junction-bias picture of
+Section 7.2. The main limitation of the experiment is that all the
+resistances are chord slopes of DC characteristics, so they include the
+series base and collector resistances and the high-level injection of
+the model; a small-signal AC analysis at the same operating point would
+separate these effects and would give values closer to the ideal
+$r_e$, $r_\pi$ and $r_o$ formulas.
+
+% =====================================================================
+\section{Reference}
+% =====================================================================
+\renewcommand{\refname}{} % suppress the duplicate "References" heading
+\begin{thebibliography}{9}
+	\bibitem{ref:sedra} A. S. Sedra and K. C. Smith,
+	\textit{Microelectronic Circuits}, 7th ed. New York, NY, USA:
+	Oxford University Press, 2015.
+	\bibitem{ref:theraja} B. L. Theraja and A. K. Theraja,
+	\textit{A Textbook of Electrical Technology}, vol.~IV:
+	\textit{Electronic Devices and Circuits}, multicolour ed. New Delhi,
+	India: S. Chand \& Company, 2006.
+	\bibitem{ref:2n3904} ON Semiconductor, ``2N3904 NPN general-purpose
+	amplifier,'' datasheet, 2014. [Online]. Available:
+	https://www.onsemi.com/pub/Collateral/2N3904-D.PDF. [Accessed:
+	Nov.~20, 2026].
+	\bibitem{ref:2n3906} ON Semiconductor, ``2N3906 PNP general-purpose
+	amplifier,'' datasheet, 2014. [Online]. Available:
+	https://www.onsemi.com/pub/Collateral/2N3906-D.PDF. [Accessed:
+	Nov.~20, 2026].
+\end{thebibliography}
+
+\end{document}
