@@ -264,10 +264,25 @@ def fmt_value(value, unit):
     return number + _PREFIX.get((prefix or "").lower(), "") + unit
 
 
+def _eng(number):
+    """0.001 -> '1m', 2e-05 -> '20u' (plain SPICE numbers only, for current sources)."""
+    x = float(number)
+    if x == 0 or abs(x) >= 1:
+        return number
+    for scale, pre in ((1e-3, "m"), (1e-6, "u"), (1e-9, "n")):
+        if abs(x) >= scale * 0.9999:
+            return f"{x / scale:.6g}{pre}"
+    return number
+
+
 def fmt_source(spec, unit):
     spec = spec.strip()
     spec = re.sub(r"^(?i:dc)\s+", "", spec)
     first = spec.split()[0] if spec else ""
+    if unit == "A" and re.fullmatch(NUM, first, re.IGNORECASE):
+        first_new = _eng(first)
+        spec = first_new + spec[len(first):]
+        first = first_new
     if VALUE_RE.match(first):
         spec = fmt_value(first, unit) + spec[len(first):]
     return spec if len(spec) <= 26 else spec[:25] + "…"
@@ -620,6 +635,9 @@ class Builder:
         if self._rows_layout(two, devs):
             return self.d
 
+        if self._bjt_layout(two, devs):
+            return self.d
+
         folds = self._fold_bias_chains(circ.components, two)
         if folds:
             folded = {id(c) for _, chain in folds for c, _ in chain}
@@ -959,6 +977,64 @@ class Builder:
         else:
             for x in legs:
                 self.ground((x, yg))
+
+    # -- single-transistor layout ------------------------------------------
+    def _bjt_layout(self, two, devs):
+        """Draw one BJT whose terminals are each driven by a source to ground (the
+        usual CB / CE / CC characteristic set-ups), the way a textbook draws them:
+        transistor in the middle, base branch on the left, the pin below the
+        transistor straight down, the pin above it up-and-over to the right, every
+        source at the same height and all branches returning to one ground bus.
+        Returns False (nothing drawn) for any circuit that is not of this form."""
+        if len(devs) != 1 or devs[0].kind != "Q":
+            return False
+        q = devs[0]
+        make, pins, caption = self._device_spec(q)
+        pin_node = {a: _norm(n) for a, n in pins}
+
+        part_on = {}                                 # pin node -> its source to ground
+        for c in two:
+            a, b = _norm(c.nodes[0]), _norm(c.nodes[1])
+            if (a == "0") == (b == "0"):
+                return False
+            n = b if a == "0" else a
+            if n in part_on:
+                return False
+            part_on[n] = c
+        live = [n for n in pin_node.values() if n != "0"]
+        if len(set(live)) != len(live) or set(part_on) != set(live):
+            return False
+
+        e = make().at((0, 0)).color(self.t.body)
+        self.d += e
+        pos = {k: (v[0], v[1]) for k, v in e.absanchors.items()}
+        base = pos["base"]
+        c_pin, e_pin = pos["collector"], pos["emitter"]
+        top, bot = ("collector", "emitter") if c_pin[1] > e_pin[1] else ("emitter", "collector")
+        pt_top, pt_bot = pos[top], pos[bot]
+
+        sym = max((self._symbol_len(self._cls(c)) for c in part_on.values()), default=2.0)
+        yg = pt_bot[1] - (sym + 2.0)                 # ground bus
+        yc = (pt_bot[1] + yg) / 2                    # common height of every source
+        x_base, x_bot, x_top = base[0] - 3.0, pt_bot[0], pt_top[0] + 5.2
+        y_over = pt_top[1] + STUB
+
+        def branch(node, x, y_from):
+            if node == "0":
+                self.line((x, y_from), (x, yg))
+            else:
+                self._draw_part(part_on[node], (x, y_from), (x, yg), node, centre=(x, yc))
+
+        self.polyline([base, (x_base, base[1])])
+        branch(pin_node["base"], x_base, base[1])
+        branch(pin_node[bot], x_bot, pt_bot[1])
+        self.polyline([pt_top, (pt_top[0], y_over), (x_top, y_over)])
+        branch(pin_node[top], x_top, y_over)
+        self._ground_bus([x_base, x_bot, x_top], yg)
+
+        self.d += elm.Label().at((pt_top[0] + 1.2, base[1])).label(
+            caption, fontsize=self.t.fontsize - 1, color=self.t.text, halign="left")
+        return True
 
     # -- parallel-rows ("bridge") layout -----------------------------------
     def _rows_layout(self, two, devs):
