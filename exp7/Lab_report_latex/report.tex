@@ -281,14 +281,14 @@ beyond \eqref{eq:pd}; at \SI{20}{\volt} the collector current may not
 exceed $\SI{625}{\milli\watt}/\SI{20}{\volt} = \SI{31.3}{\milli\ampere}$.
 A trial run showed that $V_{BE} = \SI{0.75}{\volt}$ gives $I_C =
 \SI{24.5}{\milli\ampere}$ ($\SI{490}{\milli\watt}$) for the 2N3904, but
-that the 2N3906 reaches \SI{58}{\milli\ampere} (\SI{1.16}{\watt}) at
+that the 2N3906 reaches \SI{53.7}{\milli\ampere} (\SI{1.07}{\watt}) at
 \SI{0.80}{\volt}. The PNP sweep was therefore stopped at
-\SI{0.78}{\volt}, where $I_C = \SI{30.7}{\milli\ampere}$ and $P_D =
-\SI{613}{\milli\watt}$. For the CB input family the sweep ends at
+\SI{0.78}{\volt}, where $I_C = \SI{29.2}{\milli\ampere}$ and $P_D =
+\SI{583}{\milli\watt}$. For the CB input family the sweep ends at
 \SI{0.72}{\volt} (NPN) and \SI{0.76}{\volt} (PNP), where the emitter
-current is \SI{8.4}{\milli\ampere} and \SI{11.6}{\milli\ampere} and the
+current is \SI{8.4}{\milli\ampere} and \SI{11.3}{\milli\ampere} and the
 dissipation at $|V_{CB}| = \SI{10}{\volt}$ is only about \SI{83}{\milli\watt}
-and \SI{116}{\milli\watt}.
+and \SI{112}{\milli\watt}.
 
 \textbf{Step sizes.} The input sweeps use \SI{5}{\milli\volt} steps,
 about one fifth of $V_T$, so that the exponential knee is resolved. The
@@ -307,17 +307,17 @@ resulting design values are collected in Table~\ref{tab:design}.
 		\hline
 		\textbf{Family} & \textbf{Swept source} & \textbf{Fixed parameter} & \textbf{Max.\ $P_D$ in mW (NPN/PNP)} \\
 		\hline
-		CB input & $V_{EE}$: \num{0} to \SI{-0.72}{\volt}, \SI{5}{\milli\volt} & $V_{CB} = 5, 10$ V & \num{83}/\num{116} \\
+		CB input & $V_{EE}$: \num{0} to \SI{-0.72}{\volt}, \SI{5}{\milli\volt} & $V_{CB} = 5, 10$ V & \num{83}/\num{112} \\
 		\hline
 		CB output & $V_{CB}$: \num{-0.75} to \SI{10}{\volt}, \SI{50}{\milli\volt} & $I_E = 0, 1,\ldots,5$ mA & \num{50}/\num{50} \\
 		\hline
-		CE input & $V_{BB}$: \num{0} to \SI{0.75}{\volt} (PNP \SI{0.78}{\volt}), \SI{5}{\milli\volt} & $V_{CE} = 5, 20$ V & \num{490}/\num{613} \\
+		CE input & $V_{BB}$: \num{0} to \SI{0.75}{\volt} (PNP \SI{0.78}{\volt}), \SI{5}{\milli\volt} & $V_{CE} = 5, 20$ V & \num{490}/\num{583} \\
 		\hline
-		CE output & $V_{CE}$: \num{0} to \SI{10}{\volt}, \SI{50}{\milli\volt} & $I_B = 0, 20,\ldots,80$ \si{\micro\ampere} & \num{143}/\num{194} \\
+		CE output & $V_{CE}$: \num{0} to \SI{10}{\volt}, \SI{50}{\milli\volt} & $I_B = 0, 20,\ldots,80$ \si{\micro\ampere} & \num{143}/\num{186} \\
 		\hline
-		CC input & $V_{BB}$: $V_{BE} = 0.30$ to \SI{0.75}{\volt} (PNP \SI{0.78}{\volt}), \SI{5}{\milli\volt} & $V_{CE} = 1, 2, 5, 10, 20$ V & \num{490}/\num{613} \\
+		CC input & $V_{BB}$: $V_{BE} = 0.30$ to \SI{0.75}{\volt} (PNP \SI{0.78}{\volt}), \SI{5}{\milli\volt} & $V_{CE} = 1, 2, 5, 10, 20$ V & \num{490}/\num{583} \\
 		\hline
-		CC output & $V_E$: \num{0} to \SI{5}{\volt}, \SI{25}{\milli\volt} & $I_B = 0, 20,\ldots,80$ \si{\micro\ampere}, $V_{CC} = 5$ V & \num{68}/\num{80} \\
+		CC output & $V_E$: \num{0} to \SI{5}{\volt}, \SI{25}{\milli\volt} & $I_B = 0, 20,\ldots,80$ \si{\micro\ampere}, $V_{CC} = 5$ V & \num{68}/\num{77} \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -427,65 +427,67 @@ resulting design values are collected in Table~\ref{tab:design}.
 The twelve measurement circuits are drawn in Figures~\ref{fig:sch-cb-npn}
 to~\ref{fig:sch-cc-pnp} as PSpice schematics. Each circuit contains the
 transistor and the sources that bias its three terminals: a voltage
-source or a current source on every terminal that is not grounded. In
-every drawing the base is on the left of the transistor, and all the
-source branches return to one ground rail. The base is grounded in
-the CB circuits, the emitter is grounded in the CE circuits and the
-collector is grounded in the CC circuits, which makes the common terminal
-of each configuration visible at a glance. The NPN symbol has its
-collector at the top and its emitter at the bottom, while the PNP symbol
-is drawn with the emitter at the top and the collector at the bottom, so
-the PNP circuits are the mirror images of the NPN circuits with the
-battery polarities and the current directions reversed. The collector,
-base and emitter currents are read from the device itself
-(\texttt{@q1[ic]}, \texttt{@q1[ib]} and \texttt{@q1[ie]}). The swept
-source is shown with its nominal DC value; during the run the DC sweep
-replaces this value.
+source or a current source on every terminal that is not grounded. The
+drawings follow the usual textbook arrangement of the three
+configurations \cite{ref:theraja}: the terminal that is common to the
+input and the output is at the bottom and runs straight down to the
+ground rail, and every other terminal reaches the same rail through its
+own source. In the CB circuits the transistor is drawn on its side with the
+emitter on the left, the collector on the right and the grounded base
+below. In the CE circuits the base is on the left, the collector is on
+top and the grounded emitter is below. In the CC circuits the base is on
+the left, the emitter is on top and the grounded collector is below. The
+PNP circuits use the same arrangement with the PNP symbol, so they are the
+mirror images of the NPN circuits with the battery polarities and the
+current directions reversed. The collector, base and emitter currents are
+read from the device itself (\texttt{@q1[ic]}, \texttt{@q1[ib]} and
+\texttt{@q1[ie]}). The swept source is shown with its nominal DC value;
+during the run the DC sweep replaces this value.
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[height=5.2cm]{../schematics/cb_input_npn.png}\hfill
-	\includegraphics[height=5.2cm]{../schematics/cb_output_npn.png}
+	\includegraphics[scale=0.5]{../schematics/cb_input_npn.png}\hfill
+	\includegraphics[scale=0.5]{../schematics/cb_output_npn.png}
 	\caption{Common-base circuits for the NPN transistor: (a) input-characteristic circuit, $V_{CB} = \SI{5}{\volt}$, $V_{EE}$ swept; (b) output-characteristic circuit, $I_{EE}$ set to \SI{1}{\milli\ampere}, $V_{CB}$ swept.}
 	\label{fig:sch-cb-npn}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[height=5.2cm]{../schematics/ce_input_npn.png}\hfill
-	\includegraphics[height=5.2cm]{../schematics/ce_output_npn.png}
+	\includegraphics[scale=0.5]{../schematics/ce_input_npn.png}\hfill
+	\includegraphics[scale=0.5]{../schematics/ce_output_npn.png}
 	\caption{Common-emitter circuits for the NPN transistor: (a) input-characteristic circuit, $V_{CE} = \SI{5}{\volt}$, $V_{BB}$ swept; (b) output-characteristic circuit, $I_B = \SI{20}{\micro\ampere}$, $V_{CE}$ swept.}
 	\label{fig:sch-ce-npn}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[height=5.2cm]{../schematics/cc_input_npn.png}\hfill
-	\includegraphics[height=5.2cm]{../schematics/cc_output_npn.png}
+	\includegraphics[scale=0.5]{../schematics/cc_input_npn.png}\hfill
+	\includegraphics[scale=0.5]{../schematics/cc_output_npn.png}
 	\caption{Common-collector circuits for the NPN transistor: (a) input-characteristic circuit, $V_{CE} = \SI{1}{\volt}$ (the emitter source $V_{CE}$ is \SI{-1}{\volt} because the collector is the ground reference), $V_{BB}$ swept; (b) output-characteristic circuit, $I_B = \SI{20}{\micro\ampere}$, $V_E$ swept with $V_{CC} = \SI{5}{\volt}$.}
 	\label{fig:sch-cc-npn}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[height=5.2cm]{../schematics/cb_input_pnp.png}\hfill
-	\includegraphics[height=5.2cm]{../schematics/cb_output_pnp.png}
-	\caption{Common-base circuits for the PNP transistor: (a) input-characteristic circuit, $|V_{CB}| = \SI{5}{\volt}$, $V_{EE}$ swept; (b) output-characteristic circuit, $|I_{EE}| = \SI{1}{\milli\ampere}$, $V_{CB}$ swept. The transistor symbol, the source polarities and the current directions are reversed with respect to Figure~\ref{fig:sch-cb-npn}.}
+	\includegraphics[scale=0.5]{../schematics/cb_input_pnp.png}\hfill
+	\includegraphics[scale=0.5]{../schematics/cb_output_pnp.png}
+	\caption{Common-base circuits for the PNP transistor: (a) input-characteristic circuit, $|V_{CB}| = \SI{5}{\volt}$, $V_{EE}$ swept; (b) output-characteristic circuit, $|I_{EE}| = \SI{1}{\milli\ampere}$, $V_{CB}$ swept. The source polarities and the current directions are reversed with respect to Figure~\ref{fig:sch-cb-npn}.}
 	\label{fig:sch-cb-pnp}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[height=5.2cm]{../schematics/ce_input_pnp.png}\hfill
-	\includegraphics[height=5.2cm]{../schematics/ce_output_pnp.png}
+	\includegraphics[scale=0.5]{../schematics/ce_input_pnp.png}\hfill
+	\includegraphics[scale=0.5]{../schematics/ce_output_pnp.png}
 	\caption{Common-emitter circuits for the PNP transistor: (a) input-characteristic circuit, $|V_{CE}| = \SI{5}{\volt}$, $V_{BB}$ swept; (b) output-characteristic circuit, $|I_B| = \SI{20}{\micro\ampere}$ drawn out of the base, $V_{CE}$ swept.}
 	\label{fig:sch-ce-pnp}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[height=5.2cm]{../schematics/cc_input_pnp.png}\hfill
-	\includegraphics[height=5.2cm]{../schematics/cc_output_pnp.png}
+	\includegraphics[scale=0.5]{../schematics/cc_input_pnp.png}\hfill
+	\includegraphics[scale=0.5]{../schematics/cc_output_pnp.png}
 	\caption{Common-collector circuits for the PNP transistor: (a) input-characteristic circuit, $|V_{CE}| = \SI{1}{\volt}$, $V_{BB}$ swept; (b) output-characteristic circuit, $|I_B| = \SI{20}{\micro\ampere}$ drawn out of the base, $V_E$ swept with $|V_{CC}| = \SI{5}{\volt}$.}
 	\label{fig:sch-cc-pnp}
 \end{figure}
@@ -570,9 +572,9 @@ IB b 0 2e-05
 Q1 c b 0 Q2N3906
 VCE c 0 0
 .MODEL Q2N3906 PNP(IS=1.41F XTI=3 EG=1.11 VAF=18.7 BF=180.7 NE=1.5
-+ ISE=0 IKF=.12 XTB=1.5 BR=4 NC=2 ISC=0 IKR=0 RC=2.5
++ ISE=0 IKF=80m XTB=1.5 BR=4.977 NC=2 ISC=0 IKR=0 RC=2.5
 + CJC=9.728P MJC=.5776 VJC=.75 FC=.5 CJE=8.063P MJE=.3677 VJE=.75
-+ TR=33.42N TF=179.3P ITF=.4 VTF=4 XTF=2 RB=8.9)
++ TR=33.42N TF=179.3P ITF=.4 VTF=4 XTF=6 RB=10)
 .SAVE all @q1[ic] @q1[ib] @q1[ie]
 .DC VCE 0 -10 -0.05
 .PROBE
@@ -676,10 +678,10 @@ $\alpha_2 = 0.99675$, so that
 	= \SI{1.832}{\mega\ohm},
 \end{equation}
 \begin{equation}
-	R_{\mathrm{out,CE}} = \frac{18.7+7.5}{13.59\times10^{-3}}
-	= \SI{1.928}{\kilo\ohm}, \qquad
-	R_{\mathrm{out,CC}} = \frac{18.7+4}{11.78\times10^{-3}}
-	= \SI{1.927}{\kilo\ohm} .
+	R_{\mathrm{out,CE}} = \frac{18.7+7.5}{13.14\times10^{-3}}
+	= \SI{1.994}{\kilo\ohm}, \qquad
+	R_{\mathrm{out,CC}} = \frac{18.7+4}{11.39\times10^{-3}}
+	= \SI{1.993}{\kilo\ohm} .
 \end{equation}
 The theoretical gains, input resistances and output resistances of both
 polarities are collected in Tables~\ref{tab:npn} and~\ref{tab:pnp}
@@ -700,31 +702,31 @@ currents and voltages read from the curves with the cursor
 		\hline
 		\textbf{Reading} & \textbf{NPN (2N3904)} & \textbf{PNP (2N3906)} \\
 		\hline
-		CB: $I_C$ at $V_{CB} = 5$ V, $I_E = 4$ mA & \SI{3975.627}{\micro\ampere} & \SI{3982.149}{\micro\ampere} \\
+		CB: $I_C$ at $V_{CB} = 5$ V, $I_E = 4$ mA & \SI{3975.627}{\micro\ampere} & \SI{3981.922}{\micro\ampere} \\
 		\hline
-		CB: $I_C$ at $V_{CB} = 5$ V, $I_E = 5$ mA & \SI{4970.026}{\micro\ampere} & \SI{4977.542}{\micro\ampere} \\
+		CB: $I_C$ at $V_{CB} = 5$ V, $I_E = 5$ mA & \SI{4970.026}{\micro\ampere} & \SI{4977.188}{\micro\ampere} \\
 		\hline
-		CB: $I_C$ at $V_{CB} = 10$ V, $I_E = 4$ mA & \SI{3976.956}{\micro\ampere} & \SI{3985.314}{\micro\ampere} \\
+		CB: $I_C$ at $V_{CB} = 10$ V, $I_E = 4$ mA & \SI{3976.956}{\micro\ampere} & \SI{3985.159}{\micro\ampere} \\
 		\hline
-		CB: $V_{EB}$ at $I_E = 3$ mA ($V_{CB}=5$ V) & \SI{693.053}{\milli\volt} & \SI{728.494}{\milli\volt} \\
+		CB: $V_{EB}$ at $I_E = 3$ mA ($V_{CB}=5$ V) & \SI{693.053}{\milli\volt} & \SI{728.770}{\milli\volt} \\
 		\hline
-		CB: $V_{EB}$ at $I_E = 5$ mA ($V_{CB}=5$ V) & \SI{707.069}{\milli\volt} & \SI{742.107}{\milli\volt} \\
+		CB: $V_{EB}$ at $I_E = 5$ mA ($V_{CB}=5$ V) & \SI{707.069}{\milli\volt} & \SI{742.542}{\milli\volt} \\
 		\hline
-		CE: $I_C$ at $V_{CE} = 5$ V, $I_B = 40$ \si{\micro\ampere} & \SI{6.6852}{\milli\ampere} & \SI{8.3823}{\milli\ampere} \\
+		CE: $I_C$ at $V_{CE} = 5$ V, $I_B = 40$ \si{\micro\ampere} & \SI{6.6852}{\milli\ampere} & \SI{8.1781}{\milli\ampere} \\
 		\hline
-		CE: $I_C$ at $V_{CE} = 5$ V, $I_B = 60$ \si{\micro\ampere} & \SI{10.1323}{\milli\ampere} & \SI{12.2561}{\milli\ampere} \\
+		CE: $I_C$ at $V_{CE} = 5$ V, $I_B = 60$ \si{\micro\ampere} & \SI{10.1323}{\milli\ampere} & \SI{11.8465}{\milli\ampere} \\
 		\hline
-		CE: $I_C$ at $V_{CE} = 10$ V, $I_B = 60$ \si{\micro\ampere} & \SI{10.7793}{\milli\ampere} & \SI{14.9283}{\milli\ampere} \\
+		CE: $I_C$ at $V_{CE} = 10$ V, $I_B = 60$ \si{\micro\ampere} & \SI{10.7793}{\milli\ampere} & \SI{14.4294}{\milli\ampere} \\
 		\hline
-		CE: $V_{BE}$ at $I_B = 40$ \si{\micro\ampere} ($V_{CE}=5$ V) & \SI{715.718}{\milli\volt} & \SI{757.187}{\milli\volt} \\
+		CE: $V_{BE}$ at $I_B = 40$ \si{\micro\ampere} ($V_{CE}=5$ V) & \SI{715.718}{\milli\volt} & \SI{757.231}{\milli\volt} \\
 		\hline
-		CE: $V_{BE}$ at $I_B = 60$ \si{\micro\ampere} ($V_{CE}=5$ V) & \SI{727.759}{\milli\volt} & \SI{767.856}{\milli\volt} \\
+		CE: $V_{BE}$ at $I_B = 60$ \si{\micro\ampere} ($V_{CE}=5$ V) & \SI{727.759}{\milli\volt} & \SI{767.923}{\milli\volt} \\
 		\hline
-		CC: $I_E$ at $V_{CE} = 5$ V, $I_B = 40$ \si{\micro\ampere} & \SI{6.7252}{\milli\ampere} & \SI{8.4223}{\milli\ampere} \\
+		CC: $I_E$ at $V_{CE} = 5$ V, $I_B = 40$ \si{\micro\ampere} & \SI{6.7252}{\milli\ampere} & \SI{8.2181}{\milli\ampere} \\
 		\hline
-		CC: $I_E$ at $V_{CE} = 5$ V, $I_B = 60$ \si{\micro\ampere} & \SI{10.1923}{\milli\ampere} & \SI{12.3161}{\milli\ampere} \\
+		CC: $I_E$ at $V_{CE} = 5$ V, $I_B = 60$ \si{\micro\ampere} & \SI{10.1923}{\milli\ampere} & \SI{11.9065}{\milli\ampere} \\
 		\hline
-		CC: $I_E$ at $V_{CE} = 3$ V, $I_B = 60$ \si{\micro\ampere} & \SI{9.9335}{\milli\ampere} & \SI{11.2472}{\milli\ampere} \\
+		CC: $I_E$ at $V_{CE} = 3$ V, $I_B = 60$ \si{\micro\ampere} & \SI{9.9335}{\milli\ampere} & \SI{10.8733}{\milli\ampere} \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -760,25 +762,25 @@ V_{BE}$. The output resistances are
 \end{gather*}
 For the PNP device, with the magnitudes of the currents and voltages,
 \begin{gather*}
-	\alpha = \frac{4.9775-3.9821}{5-4} = 0.9954, \\
-	\beta = \frac{12.2561-8.3823}{20\times10^{-3}} = 193.7, \\
-	\gamma = \frac{12.3161-8.4223}{20\times10^{-3}} = 194.7 ,
+	\alpha = \frac{4.9772-3.9819}{5-4} = 0.9953, \\
+	\beta = \frac{11.8465-8.1781}{20\times10^{-3}} = 183.4, \\
+	\gamma = \frac{11.9065-8.2181}{20\times10^{-3}} = 184.4 ,
 \end{gather*}
 \begin{gather*}
-	R_{\mathrm{in,CB}} = \frac{742.107-728.494}{2}
-	= \SI{6.806}{\ohm}, \\
-	R_{\mathrm{in,CE}} = R_{\mathrm{in,CC}} = \frac{767.856-757.187}{20\times10^{-3}}
-	= \SI{533.5}{\ohm},
+	R_{\mathrm{in,CB}} = \frac{742.542-728.770}{2}
+	= \SI{6.886}{\ohm}, \\
+	R_{\mathrm{in,CE}} = R_{\mathrm{in,CC}} = \frac{767.923-757.231}{20\times10^{-3}}
+	= \SI{534.6}{\ohm},
 \end{gather*}
 \begin{gather*}
-	R_{\mathrm{out,CB}} = \frac{10-5}{(3985.314-3982.149)\times10^{-6}}
-	= \SI{1.580}{\mega\ohm}, \\
-	R_{\mathrm{out,CE}} = \frac{10-5}{(14.9283-12.2561)\times10^{-3}}
-	= \SI{1.871}{\kilo\ohm},
+	R_{\mathrm{out,CB}} = \frac{10-5}{(3985.159-3981.922)\times10^{-6}}
+	= \SI{1.545}{\mega\ohm}, \\
+	R_{\mathrm{out,CE}} = \frac{10-5}{(14.4294-11.8465)\times10^{-3}}
+	= \SI{1.936}{\kilo\ohm},
 \end{gather*}
 \begin{gather*}
-	R_{\mathrm{out,CC}} = \frac{5-3}{(12.3161-11.2472)\times10^{-3}}
-	= \SI{1.871}{\kilo\ohm} .
+	R_{\mathrm{out,CC}} = \frac{5-3}{(11.9065-10.8733)\times10^{-3}}
+	= \SI{1.936}{\kilo\ohm} .
 \end{gather*}
 
 % =====================================================================
@@ -894,7 +896,7 @@ its output current is larger by the base current.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{cb_input_pnp.png}
-	\caption{PSpice output: input characteristic of the PNP transistor in CB configuration for $|V_{CB}| = 5$ and \SI{10}{\volt}. The curve is the mirror image of Figure~\ref{fig:cb-in-npn} and reaches \SI{9.6}{\milli\ampere} at \SI{0.76}{\volt} for $|V_{CB}| = \SI{5}{\volt}$.}
+	\caption{PSpice output: input characteristic of the PNP transistor in CB configuration for $|V_{CB}| = 5$ and \SI{10}{\volt}. The curve is the mirror image of Figure~\ref{fig:cb-in-npn} and reaches \SI{9.3}{\milli\ampere} at \SI{0.76}{\volt} for $|V_{CB}| = \SI{5}{\volt}$.}
 	\label{fig:cb-in-pnp}
 \end{figure}
 
@@ -915,7 +917,7 @@ its output current is larger by the base current.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{ce_output_pnp.png}
-	\caption{PSpice output: output characteristic of the PNP transistor in CE configuration for $|I_B| = 0$ to \SI{80}{\micro\ampere}. The spacing is about \SI{3.9}{\milli\ampere} per \SI{20}{\micro\ampere}, somewhat wider than the NPN spacing, and the traces rise more visibly with $|V_{CE}|$.}
+	\caption{PSpice output: output characteristic of the PNP transistor in CE configuration for $|I_B| = 0$ to \SI{80}{\micro\ampere}. The spacing is about \SI{3.7}{\milli\ampere} per \SI{20}{\micro\ampere}, somewhat wider than the NPN spacing, and the traces rise more visibly with $|V_{CE}|$.}
 	\label{fig:ce-out-pnp}
 \end{figure}
 
@@ -929,26 +931,26 @@ its output current is larger by the base current.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{cc_output_pnp.png}
-	\caption{PSpice output: output characteristic of the PNP transistor in CC configuration for $|I_B| = 0$ to \SI{80}{\micro\ampere}. The emitter current reaches \SI{12.32}{\milli\ampere} at $|V_{CE}| = \SI{5}{\volt}$ for $|I_B| = \SI{60}{\micro\ampere}$.}
+	\caption{PSpice output: output characteristic of the PNP transistor in CC configuration for $|I_B| = 0$ to \SI{80}{\micro\ampere}. The emitter current reaches \SI{11.91}{\milli\ampere} at $|V_{CE}| = \SI{5}{\volt}$ for $|I_B| = \SI{60}{\micro\ampere}$.}
 	\label{fig:cc-out-pnp}
 \end{figure}
 
 The PNP families in Figures~\ref{fig:cb-in-pnp} to~\ref{fig:cc-out-pnp}
 repeat every feature of the NPN families with the polarities reversed.
 The CB input curve is at \SI{1}{\micro\ampere} at \SI{0.52}{\volt} and
-reaches \SI{9.6}{\milli\ampere} at \SI{0.76}{\volt}, close to the NPN
+reaches \SI{9.3}{\milli\ampere} at \SI{0.76}{\volt}, close to the NPN
 knee, because the emitter-base junction is the same kind of junction in
 both devices. The larger Early effect of the PNP model is unmistakable
 in the output families: between \SI{5}{\volt} and \SI{10}{\volt} the CB
 current rises by \SI{3.2}{\micro\ampere} against \SI{1.3}{\micro\ampere}
 for the NPN, and the CE current at $|I_B| = \SI{60}{\micro\ampere}$ rises
-by \SI{2.7}{\milli\ampere} over the same span. These slopes give
-$R_{\mathrm{out,CB}} = \SI{1.580}{\mega\ohm}$ and
-$R_{\mathrm{out,CE}} = R_{\mathrm{out,CC}} = \SI{1.871}{\kilo\ohm}$,
-about 2.4 times and 4.1 times lower than the NPN values, so the lower
+by \SI{2.6}{\milli\ampere} over the same span. These slopes give
+$R_{\mathrm{out,CB}} = \SI{1.545}{\mega\ohm}$ and
+$R_{\mathrm{out,CE}} = R_{\mathrm{out,CC}} = \SI{1.936}{\kilo\ohm}$,
+about 2.4 times and 4.0 times lower than the NPN values, so the lower
 Early voltage of the PNP model is reflected directly in the output
 slopes. The current gains are also closer to the datasheet value for the
-PNP, with $\beta = 193.7$ and $\gamma = 194.7$.
+PNP, with $\beta = 183.4$ and $\gamma = 184.4$.
 
 \subsection{Operating regions}
 The regions were identified from the output families as described in
@@ -1033,23 +1035,23 @@ above its turn-on voltage.
 		\hline
 		\textbf{Quantity} & \textbf{Theoretical} & \textbf{Simulated} & \textbf{\% Error} \\
 		\hline
-		$\alpha = \Delta I_C/\Delta I_E$ & 0.9950 & 0.9954 & $-0.04$ \\
+		$\alpha = \Delta I_C/\Delta I_E$ & 0.9950 & 0.9953 & $-0.02$ \\
 		\hline
-		$\beta = \Delta I_C/\Delta I_B$ & 200.0 & 193.7 & $3.15$ \\
+		$\beta = \Delta I_C/\Delta I_B$ & 200.0 & 183.4 & $8.29$ \\
 		\hline
-		$\gamma = \Delta I_E/\Delta I_B$ & 201.0 & 194.7 & $3.14$ \\
+		$\gamma = \Delta I_E/\Delta I_B$ & 201.0 & 184.4 & $8.25$ \\
 		\hline
-		$R_{\mathrm{in,CB}}$ & \SI{6.602}{\ohm} & \SI{6.806}{\ohm} & $-3.09$ \\
+		$R_{\mathrm{in,CB}}$ & \SI{6.602}{\ohm} & \SI{6.886}{\ohm} & $-4.29$ \\
 		\hline
-		$R_{\mathrm{in,CE}}$ & \SI{524.1}{\ohm} & \SI{533.5}{\ohm} & $-1.79$ \\
+		$R_{\mathrm{in,CE}}$ & \SI{524.1}{\ohm} & \SI{534.6}{\ohm} & $-2.02$ \\
 		\hline
-		$R_{\mathrm{in,CC}}$ & \SI{524.1}{\ohm} & \SI{533.5}{\ohm} & $-1.79$ \\
+		$R_{\mathrm{in,CC}}$ & \SI{524.1}{\ohm} & \SI{534.6}{\ohm} & $-2.02$ \\
 		\hline
-		$R_{\mathrm{out,CB}}$ & \SI{1.832}{\mega\ohm} & \SI{1.580}{\mega\ohm} & $13.75$ \\
+		$R_{\mathrm{out,CB}}$ & \SI{1.832}{\mega\ohm} & \SI{1.545}{\mega\ohm} & $15.66$ \\
 		\hline
-		$R_{\mathrm{out,CE}}$ & \SI{1.928}{\kilo\ohm} & \SI{1.871}{\kilo\ohm} & $2.93$ \\
+		$R_{\mathrm{out,CE}}$ & \SI{1.994}{\kilo\ohm} & \SI{1.936}{\kilo\ohm} & $2.93$ \\
 		\hline
-		$R_{\mathrm{out,CC}}$ & \SI{1.927}{\kilo\ohm} & \SI{1.871}{\kilo\ohm} & $2.89$ \\
+		$R_{\mathrm{out,CC}}$ & \SI{1.993}{\kilo\ohm} & \SI{1.936}{\kilo\ohm} & $2.87$ \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -1069,11 +1071,11 @@ above its turn-on voltage.
 		\hline
 		CC (NPN) & $\gamma = 173.4$ & \SI{602.0}{\ohm} & \SI{7.728}{\kilo\ohm} \\
 		\hline
-		CB (PNP) & $\alpha = 0.9954$ & \SI{6.806}{\ohm} & \SI{1.580}{\mega\ohm} \\
+		CB (PNP) & $\alpha = 0.9953$ & \SI{6.886}{\ohm} & \SI{1.545}{\mega\ohm} \\
 		\hline
-		CE (PNP) & $\beta = 193.7$ & \SI{533.5}{\ohm} & \SI{1.871}{\kilo\ohm} \\
+		CE (PNP) & $\beta = 183.4$ & \SI{534.6}{\ohm} & \SI{1.936}{\kilo\ohm} \\
 		\hline
-		CC (PNP) & $\gamma = 194.7$ & \SI{533.5}{\ohm} & \SI{1.871}{\kilo\ohm} \\
+		CC (PNP) & $\gamma = 184.4$ & \SI{534.6}{\ohm} & \SI{1.936}{\kilo\ohm} \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -1113,7 +1115,7 @@ input resistance is about \SI{15}{\percent} above the ideal exponential
 value, because the non-ideal base current makes $\Delta V_{BE}$ larger
 than $V_T\ln(I_2/I_1)$. The PNP model has $I_{SE} = 0$, so its base
 current is nearly ideal and its input-resistance error falls to
-\SI{1.8}{\percent}. The CB output resistance is the least reliable
+\SI{2.0}{\percent}. The CB output resistance is the least reliable
 entry in both tables because its theoretical value is the difference of
 two almost equal values of $\alpha$, only $2.8\times10^{-4}$ apart for
 the NPN; a small change in the slope therefore moves it by a large percentage
@@ -1122,7 +1124,7 @@ although the measured value is still of the order of megohms, as predicted.
 The Early voltage controls the output slope directly: the PNP model has
 $V_A = \SI{18.7}{\volt}$ against \SI{74.03}{\volt} for the NPN, and the
 measured PNP output resistances are lower by close to the corresponding
-ratio (\SI{1.87}{\kilo\ohm} against \SI{7.73}{\kilo\ohm} in CE and CC).
+ratio (\SI{1.94}{\kilo\ohm} against \SI{7.73}{\kilo\ohm} in CE and CC).
 The CC input characteristic is plotted against the base-emitter voltage
 because the task-sheet resistance $\Delta V_{BC}/\Delta I_B$ equals
 $\Delta V_{BE}/\Delta I_B$ at constant $V_{CE}$; plotted against $V_{BC}$

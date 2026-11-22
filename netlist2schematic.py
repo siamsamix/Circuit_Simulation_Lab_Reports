@@ -981,10 +981,18 @@ class Builder:
     # -- single-transistor layout ------------------------------------------
     def _bjt_layout(self, two, devs):
         """Draw one BJT whose terminals are each driven by a source to ground (the
-        usual CB / CE / CC characteristic set-ups), the way a textbook draws them:
-        transistor in the middle, base branch on the left, the pin below the
-        transistor straight down, the pin above it up-and-over to the right, every
-        source at the same height and all branches returning to one ground bus.
+        usual CB / CE / CC characteristic set-ups) the way a textbook draws them.
+        The terminal that is common to input and output (the grounded one) sits at
+        the bottom and goes straight down to the ground bus:
+
+          CB  base common      transistor on its side, emitter left, collector
+                               right, base down;
+          CE  emitter common   base left, collector on top, emitter down;
+          CC  collector common base left, emitter on top, collector down.
+
+        Every other terminal reaches the ground bus through its own source, all
+        sources at the same height. If no terminal is grounded (CC output with a
+        collector supply) the collector is taken as the common terminal.
         Returns False (nothing drawn) for any circuit that is not of this form."""
         if len(devs) != 1 or devs[0].kind != "Q":
             return False
@@ -1005,35 +1013,91 @@ class Builder:
         if len(set(live)) != len(live) or set(part_on) != set(live):
             return False
 
-        e = make().at((0, 0)).color(self.t.body)
+        grounded = [a for a, n in pin_node.items() if n == "0"]
+        common = grounded[0] if len(grounded) == 1 else "collector"
+        side_pins = [a for a in ("collector", "emitter") if a != common]
+
+        cls = type(make())                           # make() adds .right(), which blocks .theta()
+
+        def build(theta, flip, reverse):
+            el = cls(circle=True).at((0, 0)).theta(theta)
+            if flip:
+                el = el.flip()
+            if reverse:
+                el = el.reverse()
+            return el
+
+        def anchors(theta, flip, reverse):
+            el = build(theta, flip, reverse)
+            tmp = schemdraw.Drawing(show=False)
+            tmp += el
+            return {k: (v[0], v[1]) for k, v in el.absanchors.items()
+                    if k in ("collector", "base", "emitter")}
+
+        def fits(pos):
+            if common == "base":                     # CB: base down, emitter left, collector right
+                return (pos["base"][1] < min(pos["collector"][1], pos["emitter"][1]) - 0.2
+                        and pos["emitter"][0] < pos["collector"][0] - 0.2)
+            other = [a for a in pos if a not in ("base", common)][0]   # CE: collector / CC: emitter on top
+            wanted_top = "collector" if common == "emitter" else "emitter"
+            return (pos["base"][0] < min(pos[common][0], pos[other][0]) - 0.2
+                    and pos[common][1] < pos[other][1] - 0.2 and other == wanted_top)
+
+        chosen = None
+        for theta in (0, 90, 270, 180):
+            for flip in (False, True):
+                for reverse in (False, True):
+                    if fits(anchors(theta, flip, reverse)):
+                        chosen = (theta, flip, reverse)
+                        break
+                if chosen:
+                    break
+            if chosen:
+                break
+        if chosen is None:
+            return False
+
+        e = build(*chosen).color(self.t.body)
         self.d += e
-        pos = {k: (v[0], v[1]) for k, v in e.absanchors.items()}
-        base = pos["base"]
-        c_pin, e_pin = pos["collector"], pos["emitter"]
-        top, bot = ("collector", "emitter") if c_pin[1] > e_pin[1] else ("emitter", "collector")
-        pt_top, pt_bot = pos[top], pos[bot]
+        pos = {k: (v[0], v[1]) for k, v in e.absanchors.items()
+               if k in ("collector", "base", "emitter")}
 
         sym = max((self._symbol_len(self._cls(c)) for c in part_on.values()), default=2.0)
-        yg = pt_bot[1] - (sym + 2.0)                 # ground bus
-        yc = (pt_bot[1] + yg) / 2                    # common height of every source
-        x_base, x_bot, x_top = base[0] - 3.0, pt_bot[0], pt_top[0] + 5.2
-        y_over = pt_top[1] + STUB
 
-        def branch(node, x, y_from):
+        def branch(node, x, y_from, yg, yc):
             if node == "0":
                 self.line((x, y_from), (x, yg))
             else:
                 self._draw_part(part_on[node], (x, y_from), (x, yg), node, centre=(x, yc))
 
-        self.polyline([base, (x_base, base[1])])
-        branch(pin_node["base"], x_base, base[1])
-        branch(pin_node[bot], x_bot, pt_bot[1])
-        self.polyline([pt_top, (pt_top[0], y_over), (x_top, y_over)])
-        branch(pin_node[top], x_top, y_over)
-        self._ground_bus([x_base, x_bot, x_top], yg)
-
-        self.d += elm.Label().at((pt_top[0] + 1.2, base[1])).label(
-            caption, fontsize=self.t.fontsize - 1, color=self.t.text, halign="left")
+        if common == "base":
+            left, right = pos["emitter"], pos["collector"]
+            yg = left[1] - (sym + 2.0)
+            yc = (left[1] + yg) / 2
+            x_l, x_r = left[0] - 2.2, right[0] + 2.2
+            self.polyline([left, (x_l, left[1])])
+            branch(pin_node["emitter"], x_l, left[1], yg, yc)
+            self.polyline([right, (x_r, right[1])])
+            branch(pin_node["collector"], x_r, right[1], yg, yc)
+            self.line(pos["base"], (pos["base"][0], yg))
+            self._ground_bus([x_l, pos["base"][0], x_r], yg)
+            self.d += elm.Label().at((pos["base"][0], max(left[1], right[1]) + 1.5)).label(
+                caption, fontsize=self.t.fontsize - 1, color=self.t.text)
+        else:
+            top = side_pins[0]
+            pt_top, pt_bot, base = pos[top], pos[common], pos["base"]
+            yg = pt_bot[1] - (sym + 2.0)
+            yc = (pt_bot[1] + yg) / 2
+            x_base, x_top = base[0] - 3.0, pt_top[0] + 5.2
+            y_over = pt_top[1] + STUB
+            self.polyline([base, (x_base, base[1])])
+            branch(pin_node["base"], x_base, base[1], yg, yc)
+            branch(pin_node[common], pt_bot[0], pt_bot[1], yg, yc)
+            self.polyline([pt_top, (pt_top[0], y_over), (x_top, y_over)])
+            branch(pin_node[top], x_top, y_over, yg, yc)
+            self._ground_bus([x_base, pt_bot[0], x_top], yg)
+            self.d += elm.Label().at((pt_top[0] + 1.2, base[1])).label(
+                caption, fontsize=self.t.fontsize - 1, color=self.t.text, halign="left")
         return True
 
     # -- parallel-rows ("bridge") layout -----------------------------------
