@@ -415,6 +415,55 @@ class _BatterySource(elm.Element2Term):
             self.segments.append(Segment([(x, half), (x, -half)]))
 
 
+class _CaptureBjt(elm.Element):
+    """BJT drawn like the schematic-capture tool: no circle, a tall base bar, short
+    slanted collector / emitter strokes ending in straight vertical pin stubs, and an
+    open (two-barb) arrowhead on the emitter.  Pins sit on a 0.5-unit grid:
+    base (0, 0), collector / emitter (1, +-1) for an NPN (an NPN's collector is up,
+    a PNP's emitter is up).  `lead_color` recolours the three pin stubs."""
+    pnp = False
+    _element_defaults = {"lblloc": "rgt"}
+
+    def __init__(self, *, lead_color=None, **kwargs):
+        super().__init__(**kwargs)
+        self.elmparams["ilabel"] = "right"
+        bar, half, x0, x1 = 0.5, 0.5, 0.5, 1.0         # bar x / half height, diagonal x range
+        y0, y1, pin = 0.3, 0.5, 1.0                    # diagonal y range (abs), pin stub end
+        self.segments.append(Segment([(0, 0), (bar, 0)], color=lead_color))          # base lead
+        self.segments.append(Segment([(bar, half), (bar, -half)]))                   # base bar
+        for sgn in (1, -1):                                                          # the two strokes
+            self.segments.append(Segment([(x0, sgn * y0), (x1, sgn * y1)]))
+            self.segments.append(Segment([(x1, sgn * y1), (x1, sgn * pin)], color=lead_color))
+        # emitter arrow: NPN -> on the lower stroke pointing out, PNP -> on the upper
+        # stroke pointing in (towards the base bar).
+        sgn = 1 if self.pnp else -1
+        a, b = (x0, sgn * y0), (x1, sgn * y1)
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        n = math.hypot(dx, dy)
+        ux, uy = dx / n, dy / n
+        if self.pnp:
+            tip, back = (a[0] + 0.12 * ux, a[1] + 0.12 * uy), (ux, uy)   # barbs trail towards b
+        else:
+            tip, back = b, (-ux, -uy)                                   # barbs trail towards a
+        for ang in (math.radians(25), -math.radians(25)):
+            c, sn = math.cos(ang), math.sin(ang)
+            bx, by = back[0] * c - back[1] * sn, back[0] * sn + back[1] * c
+            self.segments.append(Segment([tip, (tip[0] + 0.22 * bx, tip[1] + 0.22 * by)]))
+        top, bot = (1.0, pin), (1.0, -pin)
+        self.anchors["base"] = (0, 0)
+        self.anchors["collector"] = bot if self.pnp else top
+        self.anchors["emitter"] = top if self.pnp else bot
+        self.anchors["center"] = (1.0, 0)
+
+
+class _CaptureBjtNpn(_CaptureBjt):
+    pnp = False
+
+
+class _CaptureBjtPnp(_CaptureBjt):
+    pnp = True
+
+
 def _simple_two_terminal_class(c):
     return {
         "R": elm.Resistor, "C": elm.Capacitor, "L": elm.Inductor2,
@@ -979,20 +1028,67 @@ class Builder:
                 self.ground((x, yg))
 
     # -- single-transistor layout ------------------------------------------
+    def _trace_chains(self, two, pin_node):
+        """For every transistor pin, follow the series string of 2-terminal parts that
+        leads from the pin to ground.  Returns {pin: (parts, nodes)} where parts[k] sits
+        between nodes[k] (pin side) and nodes[k+1] (ground side), or None when the
+        circuit is anything other than "each pin has its own series string to ground"."""
+        touch = defaultdict(list)
+        for c in two:
+            for n in {_norm(c.nodes[0]), _norm(c.nodes[1])}:
+                touch[n].append(c)
+        live = [n for n in pin_node.values() if n != "0"]
+        used, chains = set(), {}
+        for pin, n in pin_node.items():
+            parts, nodes, cur = [], [n], n
+            while cur != "0":
+                cand = [c for c in touch[cur] if id(c) not in used]
+                if len(touch[cur]) != (1 if cur == n else 2) or len(cand) != 1:
+                    return None
+                if cur != n and cur in live:
+                    return None
+                c = cand[0]
+                used.add(id(c))
+                a, b = _norm(c.nodes[0]), _norm(c.nodes[1])
+                cur = b if a == cur else a
+                parts.append(c)
+                nodes.append(cur)
+            chains[pin] = (parts, nodes)
+        return chains if len(used) == len(two) else None
+
+    def _route(self, parts, nodes, pts, seg_of):
+        """Draw the polyline `pts` (pin -> ground) as wire, with parts[k] placed on
+        segment seg_of[k].  Several parts on one segment share it equally."""
+        for i in range(len(pts) - 1):
+            a, b = pts[i], pts[i + 1]
+            ks = [k for k, s in enumerate(seg_of) if s == i]
+            if not ks:
+                self.line(a, b)
+                continue
+            for j, k in enumerate(ks):
+                f0, f1 = j / len(ks), (j + 1) / len(ks)
+                p1 = (a[0] + (b[0] - a[0]) * f0, a[1] + (b[1] - a[1]) * f0)
+                p2 = (a[0] + (b[0] - a[0]) * f1, a[1] + (b[1] - a[1]) * f1)
+                self._draw_part(parts[k], p1, p2, nodes[k])
+
     def _bjt_layout(self, two, devs):
-        """Draw one BJT whose terminals are each driven by a source to ground (the
-        usual CB / CE / CC characteristic set-ups) the way a textbook draws them.
-        The terminal that is common to input and output (the grounded one) sits at
-        the bottom and goes straight down to the ground bus:
+        """Draw one BJT in the textbook CB / CE / CC bias arrangements.  The terminal
+        that is common to input and output (the grounded one) goes straight down to a
+        bottom wire; each other terminal reaches that wire through its own series string
+        of parts (resistor, DC source, ...):
 
-          CB  base common      transistor on its side, emitter left, collector
-                               right, base down;
-          CE  emitter common   base left, collector on top, emitter down;
-          CC  collector common base left, emitter on top, collector down.
+          CB  base common      transistor on its side, emitter left, collector right,
+                               base down.  Each side: first part (RE / RC) on the wire
+                               leaving the pin, second part (VEE / VCC) on the bottom wire.
+          CE  emitter common   base left, collector on top, emitter down.  Base: RB on the
+                               base wire, VBB vertical down the left-hand side.  Collector:
+                               RC on the wire leaving the collector, VCC vertical down the
+                               right-hand side.
+          CC  collector common base left, emitter on top, collector down.  Base: RB on the
+                               base wire, VBB vertical on the left-hand side.  Emitter: RE
+                               and VCC stacked vertically down the right-hand side.
 
-        Every other terminal reaches the ground bus through its own source, all
-        sources at the same height. If no terminal is grounded (CC output with a
-        collector supply) the collector is taken as the common terminal.
+        If no pin is grounded the collector is taken as the common terminal.
         Returns False (nothing drawn) for any circuit that is not of this form."""
         if len(devs) != 1 or devs[0].kind != "Q":
             return False
@@ -1000,27 +1096,21 @@ class Builder:
         make, pins, caption = self._device_spec(q)
         pin_node = {a: _norm(n) for a, n in pins}
 
-        part_on = {}                                 # pin node -> its source to ground
-        for c in two:
-            a, b = _norm(c.nodes[0]), _norm(c.nodes[1])
-            if (a == "0") == (b == "0"):
-                return False
-            n = b if a == "0" else a
-            if n in part_on:
-                return False
-            part_on[n] = c
         live = [n for n in pin_node.values() if n != "0"]
-        if len(set(live)) != len(live) or set(part_on) != set(live):
-            return False
-
         grounded = [a for a, n in pin_node.items() if n == "0"]
-        common = grounded[0] if len(grounded) == 1 else "collector"
+        if not live or len(set(live)) != len(live) or len(grounded) > 1:
+            return False
+        chains = self._trace_chains(two, pin_node)
+        if chains is None:
+            return False
+        common = grounded[0] if grounded else "collector"
         side_pins = [a for a in ("collector", "emitter") if a != common]
 
         cls = type(make())                           # make() adds .right(), which blocks .theta()
+        lead = self.t.pin if self.t.pin and self.t.pin != self.t.body else None
 
         def build(theta, flip, reverse):
-            el = cls(circle=True).at((0, 0)).theta(theta)
+            el = cls(lead_color=lead).at((0, 0)).theta(theta)
             if flip:
                 el = el.flip()
             if reverse:
@@ -1062,42 +1152,72 @@ class Builder:
         pos = {k: (v[0], v[1]) for k, v in e.absanchors.items()
                if k in ("collector", "base", "emitter")}
 
-        sym = max((self._symbol_len(self._cls(c)) for c in part_on.values()), default=2.0)
+        slot = max((self._symbol_len(self._cls(c)) for c in two), default=2.0) + 1.2
 
-        def branch(node, x, y_from, yg, yc):
-            if node == "0":
-                self.line((x, y_from), (x, yg))
-            else:
-                self._draw_part(part_on[node], (x, y_from), (x, yg), node, centre=(x, yc))
+        def drop(n):                                 # wire needed for n parts stacked vertically
+            return n * slot + 1.0 if n else 2.0
 
         if common == "base":
-            left, right = pos["emitter"], pos["collector"]
-            yg = left[1] - (sym + 2.0)
-            yc = (left[1] + yg) / 2
-            x_l, x_r = left[0] - 2.2, right[0] + 2.2
-            self.polyline([left, (x_l, left[1])])
-            branch(pin_node["emitter"], x_l, left[1], yg, yc)
-            self.polyline([right, (x_r, right[1])])
-            branch(pin_node["collector"], x_r, right[1], yg, yc)
-            self.line(pos["base"], (pos["base"][0], yg))
-            self._ground_bus([x_l, pos["base"][0], x_r], yg)
-            self.d += elm.Label().at((pos["base"][0], max(left[1], right[1]) + 1.5)).label(
+            xb = pos["base"][0]
+            plan, need = [], [pos["base"][1] - 2.0]
+            for pin, sgn in (("emitter", -1), ("collector", +1)):
+                parts, nodes = chains[pin]
+                n, p = len(parts), pos[pin]
+                if n >= 2:      # first part on the pin wire, the rest on the bottom wire
+                    dist = max(slot + 0.6, (n - 1) * slot + 0.6 - abs(p[0] - xb))
+                    need.append(p[1] - 2.0)
+                else:           # single part: vertical on the side
+                    dist = 2.2
+                    need.append(p[1] - drop(n))
+                plan.append((pin, sgn, p, p[0] + sgn * dist, parts, nodes))
+            yg = min(need)
+            for pin, sgn, p, xs_, parts, nodes in plan:
+                n = len(parts)
+                pts = [p, (xs_, p[1]), (xs_, yg), (xb, yg)]
+                seg = [1] if n == 1 else [0] + [2] * (n - 1)
+                self._route(parts, nodes, pts, seg)
+            self.line(pos["base"], (xb, yg))
+            x_common, x_lo, x_hi = xb, None, None
+            self.d += elm.Label().at((xb, max(pos["emitter"][1], pos["collector"][1]) + 1.5)).label(
                 caption, fontsize=self.t.fontsize - 1, color=self.t.text)
         else:
             top = side_pins[0]
             pt_top, pt_bot, base = pos[top], pos[common], pos["base"]
-            yg = pt_bot[1] - (sym + 2.0)
-            yc = (pt_bot[1] + yg) / 2
-            x_base, x_top = base[0] - 3.0, pt_top[0] + 5.2
+            xc = pt_bot[0]
+            tparts, tnodes = chains[top]
+            bparts, bnodes = chains[common]
+            sparts, snodes = chains["base"]
+            nb = len(sparts)
+            x_top = pt_top[0] + 5.2
             y_over = pt_top[1] + STUB
-            self.polyline([base, (x_base, base[1])])
-            branch(pin_node["base"], x_base, base[1], yg, yc)
-            branch(pin_node[common], pt_bot[0], pt_bot[1], yg, yc)
-            self.polyline([pt_top, (pt_top[0], y_over), (x_top, y_over)])
-            branch(pin_node[top], x_top, y_over, yg, yc)
-            self._ground_bus([x_base, pt_bot[0], x_top], yg)
+
+            # base branch: x of its vertical run, and how its parts are spread
+            if nb >= 2:                                  # CE / CC: RB on base wire, rest down the side
+                x_base = base[0] - (slot + 0.6)
+                seg, vert = [0] + [1] * (nb - 1), nb - 1
+            else:                                        # single part down the side
+                x_base = base[0] - 3.0
+                seg, vert = [1] * nb, nb
+            # CE: the first collector part (RC) sits on the wire running right from the
+            # collector, the rest (VCC) goes down the right-hand side, as in a capture
+            # drawing.  CC: every emitter part is stacked down the right-hand side.
+            ce = common == "emitter" and len(tparts) >= 2
+            tseg = [1] + [2] * (len(tparts) - 1) if ce else [2] * len(tparts)
+            tvert = len(tparts) - 1 if ce else len(tparts)
+            yg = min(pt_bot[1] - drop(len(bparts)),
+                     y_over - drop(tvert),
+                     base[1] - drop(vert))
+
+            self._route(sparts, snodes, [base, (x_base, base[1]), (x_base, yg), (xc, yg)], seg)
+            self._route(bparts, bnodes, [pt_bot, (xc, yg)], [0] * len(bparts))
+            self._route(tparts, tnodes, [pt_top, (pt_top[0], y_over), (x_top, y_over),
+                                         (x_top, yg), (xc, yg)], tseg)
+            x_common = xc
             self.d += elm.Label().at((pt_top[0] + 1.2, base[1])).label(
                 caption, fontsize=self.t.fontsize - 1, color=self.t.text, halign="left")
+
+        self._dot((x_common, yg))                    # common junction: the shared ground
+        self.ground((x_common, yg))
         return True
 
     # -- parallel-rows ("bridge") layout -----------------------------------
@@ -1245,9 +1365,10 @@ class Builder:
         mtype = models.get(c.model.lower(), "")
         if c.kind == "Q":
             pnp = "PNP" in mtype or (not mtype and "pnp" in c.model.lower())
-            cls = elm.BjtPnp if pnp else elm.BjtNpn
+            cls = _CaptureBjtPnp if pnp else _CaptureBjtNpn
             pins = [("collector", c.nodes[0]), ("base", c.nodes[1]), ("emitter", c.nodes[2])]
-            return (lambda: cls(circle=True).right()), pins, f"{c.name}\n{c.model}"
+            lead = self.t.pin if self.t.pin and self.t.pin != self.t.body else None
+            return (lambda: cls(lead_color=lead).right()), pins, f"{c.name}\n{c.model}"
         if c.kind == "M":
             pmos = "PMOS" in mtype or (not mtype and re.search(r"pmos|pch|pfet", c.model, re.I))
             cls = elm.PFet if pmos else elm.NFet

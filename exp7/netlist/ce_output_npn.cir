@@ -1,13 +1,16 @@
 * Common-emitter output characteristic (NPN 2N3904)
-* I_B = 20 uA
-IB 0 b 2e-05
+* inner sweep: VCE (collector supply)   outer sweep: VBB = 0, 2, ... 8 V
+* (I_B = (VBB - V_BE)/RB, i.e. roughly 0, 14, 33, 53, 73 uA)
+VBB nbs 0 0
+RB nbs b 100k
 Q1 c b 0 Q2N3904
-VCE c 0 0
+RC ncs c 10
+VCC ncs 0 0
 .MODEL Q2N3904 NPN(IS=6.734F XTI=3 EG=1.11 VAF=74.03 BF=416.4 NE=1.259
 + ISE=6.734F IKF=.06678 XTB=1.5 BR=.7371 NC=2 ISC=0 IKR=0 RC=1
 + CJC=3.638P MJC=.3085 VJC=.75 FC=.5 CJE=4.493P MJE=.2593 VJE=.75
 + TR=239.5N TF=301.2P ITF=.4 VTF=4 XTF=2 RB=10)
 .SAVE all @q1[ic] @q1[ib] @q1[ie]
-.DC VCE 0 10 0.05
+.DC VCC 0 10.4 0.01 VBB 0 8 2
 .PROBE
 .END

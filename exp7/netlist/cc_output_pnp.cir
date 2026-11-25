@@ -1,14 +1,19 @@
-* Common-collector output characteristic (PNP 2N3906)
-* I_B = 20 uA
-IB b 0 2e-05
-Q1 c b e Q2N3906
-VC c 0 -5
-VE e 0 0
+* Common-collector output characteristic (PNP 2N3906), textbook wiring
+* collector = common (ground) node, no collector resistor.
+* VBB (-) -> RB -> base, VBB (+) on the collector rail (base at -VBB).
+* emitter supply VEE = +VCE feeds the emitter through RE.
+* inner sweep: VEE (-0.2 -> 5.2 V = VCE)
+* outer sweep: VBB = -6, 14, 34, 54, 74 V (I_B ~ 0, 14, 34, 54, 74 uA)
+VEE nes 0 0
+RE nes e 1
+Q1 0 b e Q2N3906
+VBB 0 nbs 0
+RB nbs b 1Meg
 .MODEL Q2N3906 PNP(IS=1.41F XTI=3 EG=1.11 VAF=18.7 BF=180.7 NE=1.5
 + ISE=0 IKF=80m XTB=1.5 BR=4.977 NC=2 ISC=0 IKR=0 RC=2.5
 + CJC=9.728P MJC=.5776 VJC=.75 FC=.5 CJE=8.063P MJE=.3677 VJE=.75
 + TR=33.42N TF=179.3P ITF=.4 VTF=4 XTF=6 RB=10)
 .SAVE all @q1[ic] @q1[ib] @q1[ie]
-.DC VE 0 -5 -0.025
+.DC VEE -0.2 5.2 0.025 VBB -6 74 20
 .PROBE
 .END

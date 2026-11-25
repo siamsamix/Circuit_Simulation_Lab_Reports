@@ -1,13 +1,17 @@
 * Common-collector input characteristic (PNP 2N3906)
-* collector common, V_CE = 1 V
-VBB b 0 0.5
+* collector at the common (ground) node, emitter supply VEE = 1 ... 4 V
+* (VCE = VEE).  inner sweep: VBB (referred to ground, swept 5 -> -3 V)
+* outer sweep: VEE (emitter supply)
+VEE nes 0 0
+RE nes e 0.1
 Q1 0 b e Q2N3906
-VCE e 0 1
+VBB nbs 0 0
+RB nbs b 22k
 .MODEL Q2N3906 PNP(IS=1.41F XTI=3 EG=1.11 VAF=18.7 BF=180.7 NE=1.5
 + ISE=0 IKF=80m XTB=1.5 BR=4.977 NC=2 ISC=0 IKR=0 RC=2.5
 + CJC=9.728P MJC=.5776 VJC=.75 FC=.5 CJE=8.063P MJE=.3677 VJE=.75
 + TR=33.42N TF=179.3P ITF=.4 VTF=4 XTF=6 RB=10)
 .SAVE all @q1[ic] @q1[ib] @q1[ie]
-.DC VBB 0.22 0.7 0.005
+.DC VBB 5 -3 -0.01 VEE 1 4 1
 .PROBE
 .END

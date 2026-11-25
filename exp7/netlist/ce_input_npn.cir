@@ -1,13 +1,21 @@
 * Common-emitter input characteristic (NPN 2N3904)
-* V_CE = 5 V
-VBB b 0 0
+* inner sweep: VBB (base supply)   outer sweep: VCE = 0.025, 0.05, 0.1, 0.2 V
+* This is an OCTAVE sweep of V_CE (PSpice: .DC LIN VBB 0 2 0.001 OCT VCC 0.025 0.2 1).
+* ngspice has no OCT/DEC option, so the index source VK = 1 ... N is stepped
+* linearly and the behavioural voltage source BVCE turns it into the geometric
+* V_CE values.  (In the Gummel-Poon model I_B does not depend on V_CE once
+* V_CE > ~0.3 V, so the manual's 5 V / 20 V curves would be one and the same line.)
+VBB nbs 0 0
+RB nbs b 10k
 Q1 c b 0 Q2N3904
-VCE c 0 5
+RC ncs c 0.1
+VK k 0 1
+BVCE ncs 0 V = 0.025*2^((v(k)-1)/1)
 .MODEL Q2N3904 NPN(IS=6.734F XTI=3 EG=1.11 VAF=74.03 BF=416.4 NE=1.259
 + ISE=6.734F IKF=.06678 XTB=1.5 BR=.7371 NC=2 ISC=0 IKR=0 RC=1
 + CJC=3.638P MJC=.3085 VJC=.75 FC=.5 CJE=4.493P MJE=.2593 VJE=.75
 + TR=239.5N TF=301.2P ITF=.4 VTF=4 XTF=2 RB=10)
 .SAVE all @q1[ic] @q1[ib] @q1[ie]
-.DC VBB 0 0.75 0.005
+.DC VBB 0 2 0.001 VK 1 4 1
 .PROBE
 .END

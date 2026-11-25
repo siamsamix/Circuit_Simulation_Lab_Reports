@@ -5,7 +5,7 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 netlist_dir="$here/../netlist"
 script="$here/../../netlist2schematic.py"
-py="${PYTHON:-python3}"
+py="../../spice/bin/python3"
 
 shopt -s nullglob
 for f in "$netlist_dir"/*.cir; do

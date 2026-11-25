@@ -1,13 +1,15 @@
 * Common-base output characteristic (PNP 2N3906)
-* I_E = 1 mA
-IEE 0 e 0.001
+* inner sweep: VCB (collector supply)   outer sweep: VEE = 0 ... 5 V
+VCC 0 ncs 0
+RC ncs c 100
 Q1 c 0 e Q2N3906
-VCB c 0 0
+RE nes e 1k
+VEE nes 0 0
 .MODEL Q2N3906 PNP(IS=1.41F XTI=3 EG=1.11 VAF=18.7 BF=180.7 NE=1.5
 + ISE=0 IKF=80m XTB=1.5 BR=4.977 NC=2 ISC=0 IKR=0 RC=2.5
 + CJC=9.728P MJC=.5776 VJC=.75 FC=.5 CJE=8.063P MJE=.3677 VJE=.75
 + TR=33.42N TF=179.3P ITF=.4 VTF=4 XTF=6 RB=10)
 .SAVE all @q1[ic] @q1[ib] @q1[ie]
-.DC VCB 0.75 -10 -0.05
+.DC VCC -2 12 0.02 VEE 0 5 1
 .PROBE
 .END

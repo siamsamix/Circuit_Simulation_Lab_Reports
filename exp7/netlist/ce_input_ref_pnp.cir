@@ -1,0 +1,14 @@
+* CE input characteristic at VCE = 5 V, measurement reference (PNP 2N3906)
+VBB 0 nbs 0
+RB nbs b 10k
+Q1 c b 0 Q2N3906
+RC ncs c 0.1
+VCC 0 ncs 5
+.MODEL Q2N3906 PNP(IS=1.41F XTI=3 EG=1.11 VAF=18.7 BF=180.7 NE=1.5
++ ISE=0 IKF=80m XTB=1.5 BR=4.977 NC=2 ISC=0 IKR=0 RC=2.5
++ CJC=9.728P MJC=.5776 VJC=.75 FC=.5 CJE=8.063P MJE=.3677 VJE=.75
++ TR=33.42N TF=179.3P ITF=.4 VTF=4 XTF=6 RB=10)
+.SAVE all @q1[ic] @q1[ib] @q1[ie]
+.DC VBB 0 2 0.001 VCC 5 5 1
+.PROBE
+.END

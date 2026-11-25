@@ -27,6 +27,12 @@ report figures made by plot_full_bridge.py / simulate_full_bridge.py:
     crests are never flagged, and the marks can be turned off with
     --no-clip-levels.
 
+  * nested DC sweeps (".dc VBB 0 10 1m VCE 0 20 5"): the long ngspice vector is
+    cut into one curve per outer-source value; all curves of a trace share its
+    colour and marker (violet squares for the first trace), appear under ONE
+    legend entry, and are labelled beside the curves with the outer value
+    ("VCE=0V", "5V", "10V", ...); clip-level marks are skipped for these.
+
 Traces are plotted on linear axes. Without -x the first vector of the plot is
 the x axis (time, frequency, or the swept source); without -y every real
 vector is drawn (complex AC vectors have to be requested as mag(...),
@@ -70,6 +76,12 @@ from pspice_theme import (AX_H_PT, AX_RECT, FIG_W_PT, GREEN, MARKER_FIRST_PT,
 # green squares and violet triangles; the rest are Probe-like extras.
 TRACE_STYLES = ((GREEN, "s"), (PURPLE, "v"), ("#ff0000", "D"), ("#0000ff", "o"),
                 ("#00aaaa", "^"), ("#aa5500", "p"))
+
+# Swept (nested .dc) results: every curve of ONE trace shares that trace's colour
+# and marker, as in the Probe family-of-curves figures (violet squares first).
+# The families are told apart by value labels written beside the curves.
+SWEEP_STYLES = (("#5400ff", "s"), (GREEN, "v"), ("#ff0000", "D"),
+                ("#0000ff", "o"), ("#00aaaa", "^"), ("#aa5500", "p"))
 
 # Notes have no fixed spots: place_note_near_trace() searches for the free
 # position closest to the trace each note belongs to.
@@ -637,16 +649,189 @@ def y_ticks(ylo, yhi, unit, target=8):
     positions = [0.0 if abs(p) < step * 1e-9 else p for p in positions]
     return positions, tick_labels(positions, unit)
 # --------------------------------------------------------------------------- #
+# Swept (nested .dc) families: curve splitting, value labels
+# --------------------------------------------------------------------------- #
+def _sweep_values(start, stop, step):
+    """The values SPICE visits for one .dc sweep (both ends included)."""
+    n = int(np.floor((stop - start) / step + 1e-9)) + 1
+    return start + step * np.arange(max(n, 0))
+
+
+def parse_dc_sweeps(cir_file):
+    """[(source, values), (source, values)] of a nested ``.dc`` card, else [].
+
+    Only the plain ``.dc SRC1 a b s SRC2 c d t`` form is understood (first
+    source = inner sweep = x axis, second = outer sweep = the curves).
+    ngspice does not write the outer source into the raw file, so its values
+    have to come from the netlist."""
+    lines = []
+    for raw in Path(cir_file).read_text(errors="replace").splitlines():
+        raw = raw.split(";")[0].rstrip()
+        if raw.startswith("+") and lines:
+            lines[-1] += " " + raw[1:]
+        elif raw.strip() and not raw.lstrip().startswith("*"):
+            lines.append(raw)
+    for line in lines:
+        tok = line.split()
+        if tok and tok[0].lower() == ".dc":
+            args = tok[1:]
+            if len(args) != 8:                  # not a two-source sweep
+                return []
+            try:
+                return [(args[i], _sweep_values(*(spice_float(a)
+                                                  for a in args[i + 1:i + 4])))
+                        for i in (0, 4)]
+            except (ValueError, ZeroDivisionError):
+                return []
+    return []
+
+
+def si_text(value, unit=""):
+    """5 -> '5V', 0.0001 -> '100uV', 2500 -> '2.5kV' (SPICE prefixes)."""
+    value = round(float(value), 9) + 0.0
+    if value == 0:
+        return "0" + unit
+    for scale, pre in ((1e9, "G"), (1e6, "meg"), (1e3, "k"), (1, ""),
+                       (1e-3, "m"), (1e-6, "u"), (1e-9, "n"), (1e-12, "p")):
+        if abs(value) >= scale * (1 - 1e-9):
+            return f"{value / scale:.6g}{pre}{unit}"
+    return f"{value:g}{unit}"
+
+
+def split_sweeps(x, dc):
+    """Split the long nested-sweep vectors into one slice per outer value.
+
+    Returns (slices, labels): ``labels`` are 'VCE=0V', '5V', '10V', ... (the
+    source name only on the first, as in the reference figures) or None when
+    the outer values cannot be matched to the curves."""
+    (_, inner), (src, outer) = dc
+    n = len(x)
+    if len(inner) * len(outer) == n:
+        m = len(inner)
+        slices = [slice(i * m, (i + 1) * m) for i in range(len(outer))]
+    else:                                       # fall back: cut at x reversals
+        d = np.diff(np.asarray(x, dtype=float))
+        nz = d[d != 0]
+        sign = np.sign(nz[0]) if nz.size else 1.0
+        cuts = np.flatnonzero(d * sign < 0) + 1
+        edges = [0, *cuts.tolist(), n]
+        slices = [slice(a, b) for a, b in zip(edges[:-1], edges[1:])]
+        print(f"Warning: {n} points do not fit {len(inner)} x {len(outer)} "
+              f"sweep steps; split at x reversals instead")
+    if len(slices) != len(outer):
+        print(f"Warning: found {len(slices)} curves but {len(outer)} values of "
+              f"{src}; sweep labels omitted")
+        return slices, None
+    unit = {"v": "V", "i": "A"}.get(src[:1].lower(), "")
+    labels = [(f"{src.upper()}=" if k == 0 else "") + si_text(v, unit)
+              for k, v in enumerate(outer)]
+    return slices, labels
+
+
+def _densify_px(p, step):
+    """Resample a polyline (N x 2, pixels) every ``step`` pixels."""
+    if len(p) < 2:
+        return p
+    s = np.r_[0.0, np.cumsum(np.hypot(*np.diff(p, axis=0).T))]
+    if s[-1] <= step:
+        return p
+    t = np.arange(0.0, s[-1] + step, step)
+    return np.column_stack([np.interp(t, s, p[:, 0]), np.interp(t, s, p[:, 1])])
+
+
+def place_sweep_labels(fig, ax, obstacles, items, gap_pt=3.5):
+    """Write a short text beside the end of every swept curve.
+
+    ``obstacles``  [(x, y), ...]  data-coordinate polylines of EVERY curve on
+                   the axes; no label may touch one of them.
+    ``items``      [(x, y, text, colour), ...]  the curve to label (its last
+                   sample is the anchor) and the label text.
+    Each label goes to the free spot closest to its own curve end (preferring
+    just above it), always inside the frame and clear of all curves and of
+    the labels already placed.  Returns the label boxes (x0, y0, x1, y1) in
+    data coordinates so that other annotations can dodge them."""
+    fig.canvas.draw()                           # transforms are final now
+    renderer = fig.canvas.get_renderer()
+    gap = gap_pt * fig.dpi / 72.0
+    frame_px = ax.get_window_extent(renderer)
+    lo = np.array([frame_px.x0, frame_px.y0]) + 2.0
+    hi = np.array([frame_px.x1, frame_px.y1]) - 2.0
+    to_px, to_data = ax.transData.transform, ax.transData.inverted().transform
+
+    obst = np.vstack([_densify_px(to_px(np.column_stack([ox, oy])), 2.0)
+                      for ox, oy in obstacles])
+    placed, rects = [], []                      # pixel boxes / data boxes
+    for cx, cy, text, colour in items:
+        anchor = to_px([[float(cx[-1]), float(cy[-1])]])[0]
+        t = ax.text(0, 0, text, color=colour, ha="left", va="bottom",
+                    zorder=8, clip_on=False)
+        bb = t.get_window_extent(renderer)
+        w, h = bb.width, bb.height
+        # candidate lower-left corners around the "just above the end" spot
+        step = max(2.0, h / 4.0)
+        dxs = np.arange(-2.5 * w, 1.6 * w + 1e-9, step)   # up to just right of the end
+        dys = np.arange(-2.0 * h, 3.0 * h + 1e-9, step)
+        pref = anchor + np.array([-w / 2.0, gap])
+        cand = pref + np.array([(dx, dy) for dy in dys for dx in dxs])
+        centre = cand + np.array([w / 2.0, h / 2.0])
+        # distance from each candidate box to the anchor; mild bias to "above"
+        ddx = np.maximum(np.maximum(cand[:, 0] - anchor[0],
+                                    anchor[0] - (cand[:, 0] + w)), 0.0)
+        ddy = np.maximum(np.maximum(cand[:, 1] - anchor[1],
+                                    anchor[1] - (cand[:, 1] + h)), 0.0)
+        cost = (np.hypot(ddx, ddy) + 0.15 * np.hypot(*(cand - pref).T)
+                + np.where(centre[:, 1] < anchor[1], 0.5 * h, 0.0))
+        inside = ((cand >= lo).all(axis=1)
+                  & ((cand + [w, h]) <= hi).all(axis=1))
+        near = obst[(obst[:, 0] > cand[:, 0].min() - gap)
+                    & (obst[:, 0] < cand[:, 0].max() + w + gap)
+                    & (obst[:, 1] > cand[:, 1].min() - gap)
+                    & (obst[:, 1] < cand[:, 1].max() + h + gap)]
+
+        def hits(c):
+            x0, y0 = c
+            n = int(((near[:, 0] >= x0 - gap) & (near[:, 0] <= x0 + w + gap)
+                     & (near[:, 1] >= y0 - gap) & (near[:, 1] <= y0 + h + gap)
+                     ).sum())
+            n += 1000 * sum(not (x0 + w + gap < p[0] or p[2] < x0 - gap
+                                 or y0 + h + gap < p[1] or p[3] < y0 - gap)
+                            for p in placed)
+            return n
+
+        best = None
+        for i in np.argsort(cost):
+            if inside[i] and hits(cand[i]) == 0:
+                best = i
+                break
+        if best is None:                        # nothing clear: least bad spot
+            ok = np.flatnonzero(inside) if inside.any() else np.arange(len(cand))
+            best = ok[int(np.argmin([hits(cand[i]) + 0.01 * cost[i] for i in ok]))]
+            print(f"  warning: no clear spot for sweep label {text!r}; overlapping")
+        x0, y0 = cand[best]
+        t.set_position(tuple(to_data([[x0, y0]])[0]))
+        placed.append((x0, y0, x0 + w, y0 + h))
+        (dx0, dy0), (dx1, dy1) = to_data([[x0, y0], [x0 + w, y0 + h]])
+        rects.append((dx0, dy0, dx1, dy1))
+    return rects
+
+
+# --------------------------------------------------------------------------- #
 # Figure assembly (same page layout as plot_full_bridge.make_figure)
 # --------------------------------------------------------------------------- #
 def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
                x_label=None, y_label=None, linestyles=None, clip_levels=True,
-               clamp_levels=()):
+               clamp_levels=(), sweeps=None, sweep_labels=None):
     """Draw every (name, y) trace of `traces` against x on one Probe page.
 
     `notes` is a list aligned with `traces`; each element is either a note
     string (drawn as a framed serif note in the trace colour) or None (no
-    note for that trace)."""
+    note for that trace).
+
+    `sweeps` (optional) is a list of slices cutting the vectors into the
+    curves of a nested .dc sweep.  Every curve of one trace is then drawn in
+    that trace's single colour/marker (one legend entry per trace) and
+    `sweep_labels` (one string per slice, or None) are written next to the
+    curves, e.g. 'VCE=0V', '5V', '10V'."""
     x = np.real(np.asarray(x)).astype(float)
     keep = np.isfinite(x)
     if xlim[0] is not None:
@@ -654,7 +839,13 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
     if xlim[1] is not None:
         keep &= x <= xlim[1]
 
-    curves = []                                 # (name, x, y) of the finite points
+    swept = bool(sweeps) and len(sweeps) > 1
+    palette = SWEEP_STYLES if swept else TRACE_STYLES
+    if swept and (clip_levels or clamp_levels):
+        print("Sweep family: clip/clamp level marks switched off")
+        clip_levels, clamp_levels = False, ()
+    curves = []                      # (name, x, y) of all finite points per trace
+    segs_per_trace = []              # per trace: [(x, y, label or None), ...]
     for name, y in traces:
         y = np.asarray(y)
         if np.iscomplexobj(y):
@@ -662,11 +853,18 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
             y = np.real(y)
         y = y.astype(float)
         n = min(len(x), len(y))
-        ok = keep[:n] & np.isfinite(y[:n])
-        if ok.sum() < 2:
+        segs = []
+        for j, sl in enumerate(sweeps if swept else [slice(None)]):
+            ok = keep[:n][sl] & np.isfinite(y[:n][sl])
+            if ok.sum() >= 2:
+                lab = sweep_labels[j] if swept and sweep_labels else None
+                segs.append((x[:n][sl][ok], y[:n][sl][ok], lab))
+        if not segs:
             print(f"Warning: not enough finite points to plot '{name}', skipping")
             continue
-        curves.append((name, x[:n][ok], y[:n][ok]))
+        curves.append((name, np.concatenate([s[0] for s in segs]),
+                       np.concatenate([s[1] for s in segs])))
+        segs_per_trace.append(segs)
     if not curves:
         sys.exit("nothing to plot")
 
@@ -701,13 +899,18 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
     if not linestyles:
         linestyles = ["-"] * count
 
+    slots = sum(len(s) for s in segs_per_trace)     # marker phases to spread
+    first_slot = np.cumsum([0] + [len(s) for s in segs_per_trace])
     for k in reversed(range(count)):
-        color, marker = TRACE_STYLES[k % len(TRACE_STYLES)]
-        _, cx, cy = curves[k]
-        n_before = len(ax.lines)
-        draw_trace(ax, cx, cy, frame, color, marker, max(4 - k, 1),
-                   MARKER_FIRST_PT + k * MARKER_SPACING_PT / count)
-        _apply_trace_linestyle(ax.lines[n_before:], linestyles[k % len(linestyles)])
+        color, marker = palette[k % len(palette)]
+        for j in reversed(range(len(segs_per_trace[k]))):
+            sx, sy, _ = segs_per_trace[k][j]
+            n_before = len(ax.lines)
+            draw_trace(ax, sx, sy, frame, color, marker, max(4 - k, 1),
+                       MARKER_FIRST_PT
+                       + (first_slot[k] + j) * MARKER_SPACING_PT / slots)
+            _apply_trace_linestyle(ax.lines[n_before:],
+                                   linestyles[k % len(linestyles)])
     for name, _, cy in curves:
         print(f"  {probe_name(name)}: {cy.min():.6g}..{cy.max():.6g}{y_unit}")
 
@@ -727,22 +930,38 @@ def make_graph(x, traces, x_var, outpath, dpi, notes=(), xlim=(None, None),
     clamp_rects = draw_clamp_levels(ax, xmin, clamp_curves, frame, prop, fsize) \
         if clamp_curves else []
 
+    # ---- sweep value labels beside the curves ('VCE=0V', '5V', ...) --------
+    sweep_rects = []
+    if swept and sweep_labels:
+        items = [(sx, sy, lab, "black" if count == 1 else palette[k % len(palette)][0])
+                 for k, segs in enumerate(segs_per_trace)
+                 for sx, sy, lab in segs if lab]
+        obstacles = [(sx, sy) for segs in segs_per_trace for sx, sy, _ in segs]
+        for x0, y0, x1, y1 in place_sweep_labels(fig, ax, obstacles, items):
+            (a, b), (c, d) = (tuple(float(v) for v in frame.to_pt(x0, y0)),
+                              tuple(float(v) for v in frame.to_pt(x1, y1)))
+            sweep_rects.append((min(a, c), min(b, d), max(a, c), max(b, d)))
+
     # ---- notes dodged clear of every curve, clip label, clamp label ---------
     if any(notes):
-        dense = [dense_curve(cx, cy, frame) for _, cx, cy in curves]
-        rects = list(clip_rects) + list(clamp_rects)
+        dense = []
+        for segs in segs_per_trace:
+            parts = [dense_curve(sx, sy, frame) for sx, sy, _ in segs]
+            dense.append((np.concatenate([np.asarray(p[0]) for p in parts]),
+                          np.concatenate([np.asarray(p[1]) for p in parts])))
+        rects = list(clip_rects) + list(clamp_rects) + sweep_rects
         for k, note in enumerate(notes[:count]):
             if not note:
                 continue
             rects.append(place_note_near_trace(
                 ax, note, k, curves, dense, frame, rects, prop, fsize,
-                TRACE_STYLES[k % len(TRACE_STYLES)][0]))
+                palette[k % len(palette)][0]))
         if len(notes) > count:
             print(f"Warning: {len(notes)} notes for {count} traces; "
                   f"ignoring the extra ones")
 
-    entries = [(TRACE_STYLES[k % len(TRACE_STYLES)][1],
-                TRACE_STYLES[k % len(TRACE_STYLES)][0], probe_name(c[0]))
+    entries = [(palette[k % len(palette)][1],
+                palette[k % len(palette)][0], probe_name(c[0]))
                for k, c in enumerate(curves)]
     add_legend_footer(fig, entries, x_label, ax=ax)
     y_label = y_label if y_label is not None else Y_TITLES.get(y_unit, "")
@@ -871,6 +1090,12 @@ def main():
                      "the named traces only; each TRACE is a name given to "
                      "-y (e.g. 'v(out)') or its 0-based index in -y order "
                      "(default: no clamp levels)")
+    ap.add_argument("--sweep-labels", action=argparse.BooleanOptionalAction,
+                default=True,
+                help="for a nested '.dc SRC1 ... SRC2 ...' sweep, write the "
+                     "outer source's value beside each curve ('VCE=0V', '5V', "
+                     "...; default: on).  The curves themselves always share "
+                     "one colour and marker per trace.")
     ap.add_argument("--note", action="append", default=None,
                     metavar="TRACE=TEXT",
                     help="framed note attached to one specific trace; TRACE "
@@ -943,12 +1168,23 @@ def main():
     if p.show:      # plot_full_bridge forces the Agg backend; restore the default
         plt.switch_backend(matplotlib.rcParamsOrig["backend"])
 
+    # nested .dc sweep -> one curve per outer-source value, same style each
+    sweeps = sweep_labels = None
+    if "dc" in plot_name.lower():
+        dc = parse_dc_sweeps(cir)
+        if dc:
+            sweeps, sweep_labels = split_sweeps(vectors[x_var], dc)
+            print(f"nested sweep: {dc[1][0]} steps through {len(sweeps)} curves")
+            if not p.sweep_labels:
+                sweep_labels = None
+
     out = Path(p.output) if p.output else Path(p.fig_dir) / f"{cir.stem}.svg"
     out.parent.mkdir(parents=True, exist_ok=True)
     linestyles = parse_linestyles(p.linestyle, len(traces))
     fig = make_graph(vectors[x_var], traces, x_var, out, p.dpi, notes, xlim,
                      p.x_label, p.y_label, linestyles, p.clip_levels,
-                     resolve_traces(p.clamp_levels, traces, "--clamp-levels"))
+                     resolve_traces(p.clamp_levels, traces, "--clamp-levels"),
+                     sweeps, sweep_labels)
     print(f"  saved graph {out}")
     if p.show:
         plt.show()

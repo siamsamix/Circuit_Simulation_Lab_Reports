@@ -1,13 +1,16 @@
 * Common-base input characteristic (NPN 2N3904)
-* V_CB = 5 V
-VEE e 0 0
+* inner sweep: VEE (emitter supply)   outer sweep: VCB = 5, 25, 45 V
+* (the Early effect shifts the curves left by a few mV per 20 V of V_CB)
+VEE 0 nes DC 0
+RE nes e 1k
 Q1 c 0 e Q2N3904
-VCB c 0 5
+RC ncs c 0.1
+VCC ncs 0 DC 5
 .MODEL Q2N3904 NPN(IS=6.734F XTI=3 EG=1.11 VAF=74.03 BF=416.4 NE=1.259
 + ISE=6.734F IKF=.06678 XTB=1.5 BR=.7371 NC=2 ISC=0 IKR=0 RC=1
 + CJC=3.638P MJC=.3085 VJC=.75 FC=.5 CJE=4.493P MJE=.2593 VJE=.75
 + TR=239.5N TF=301.2P ITF=.4 VTF=4 XTF=2 RB=10)
 .SAVE all @q1[ic] @q1[ib] @q1[ie]
-.DC VEE 0 -0.72 -0.005
+.DC VEE 0 5.3 0.001 VCC 5 45 20
 .PROBE
 .END

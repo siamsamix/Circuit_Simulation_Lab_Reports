@@ -1,13 +1,18 @@
 * Common-emitter input characteristic (PNP 2N3906)
-* V_CE = 5 V
-VBB b 0 0
+* inner sweep: VBB (base supply)   outer sweep: VCE = -0.025, -0.05, -0.1, -0.2 V
+* octave sweep of V_CE, emulated with the index source VK and the behavioural
+* source BVCE exactly as in the NPN netlist.
+VBB 0 nbs 0
+RB nbs b 10k
 Q1 c b 0 Q2N3906
-VCE c 0 -5
+RC ncs c 0.1
+VK k 0 1
+BVCE 0 ncs V = 0.025*2^((v(k)-1)/1)
 .MODEL Q2N3906 PNP(IS=1.41F XTI=3 EG=1.11 VAF=18.7 BF=180.7 NE=1.5
 + ISE=0 IKF=80m XTB=1.5 BR=4.977 NC=2 ISC=0 IKR=0 RC=2.5
 + CJC=9.728P MJC=.5776 VJC=.75 FC=.5 CJE=8.063P MJE=.3677 VJE=.75
 + TR=33.42N TF=179.3P ITF=.4 VTF=4 XTF=6 RB=10)
 .SAVE all @q1[ic] @q1[ib] @q1[ie]
-.DC VBB 0 -0.78 -0.005
+.DC VBB 0 2 0.001 VK 1 4 1
 .PROBE
 .END
