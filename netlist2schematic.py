@@ -58,6 +58,9 @@ Automatic schematic placement is a hard problem, so this uses a simple, predicta
     a Wheatstone bridge) use a second, "parallel rows" layout instead: each chain is a
     horizontal row between two vertical columns, and the source sits on the far left,
     wired round the outside to its nodes.
+  * BJTs are drawn in one fixed handedness: collector left, base bottom, emitter right
+    (C -> B -> E counter-clockwise), NPN and PNP differing only in the emitter arrow.
+    Layouts may rotate the symbol by multiples of 90 degrees but never mirror it.
   * Transistors / op-amps / subcircuits are placed in a row above the rail and wired
     to their nodes with orthogonal wires. Wires that cross without a dot are NOT
     connected, exactly as in a hand-drawn schematic.
@@ -416,44 +419,52 @@ class _BatterySource(elm.Element2Term):
 
 
 class _CaptureBjt(elm.Element):
-    """BJT drawn like the schematic-capture tool: no circle, a tall base bar, short
-    slanted collector / emitter strokes ending in straight vertical pin stubs, and an
-    open (two-barb) arrowhead on the emitter.  Pins sit on a 0.5-unit grid:
-    base (0, 0), collector / emitter (1, +-1) for an NPN (an NPN's collector is up,
-    a PNP's emitter is up).  `lead_color` recolours the three pin stubs."""
+    """BJT drawn like the schematic-capture tool: no circle, a wide base bar, short
+    slanted collector / emitter strokes ending in horizontal pin stubs, and an open
+    (two-barb) arrowhead on the emitter stroke.
+
+    Home orientation (rotate it, never mirror it):
+
+            C ----\\      /---- E          collector left, emitter right,
+                   \\____/                 base at the bottom.  Reading the pins
+                   ------                  C -> B -> E goes counter-clockwise.
+                     |
+                     B
+
+    NPN and PNP have identical pin positions; only the arrow differs (NPN: pointing
+    away from the base, PNP: pointing towards it).  Pins sit on a 0.5-unit grid, with
+    the base pin at the origin:  base (0, 0), collector (-1, 1), emitter (1, 1).
+    `lead_color` recolours the three pin stubs."""
     pnp = False
     _element_defaults = {"lblloc": "rgt"}
 
     def __init__(self, *, lead_color=None, **kwargs):
         super().__init__(**kwargs)
         self.elmparams["ilabel"] = "right"
-        bar, half, x0, x1 = 0.5, 0.5, 0.5, 1.0         # bar x / half height, diagonal x range
-        y0, y1, pin = 0.3, 0.5, 1.0                    # diagonal y range (abs), pin stub end
-        self.segments.append(Segment([(0, 0), (bar, 0)], color=lead_color))          # base lead
-        self.segments.append(Segment([(bar, half), (bar, -half)]))                   # base bar
-        for sgn in (1, -1):                                                          # the two strokes
-            self.segments.append(Segment([(x0, sgn * y0), (x1, sgn * y1)]))
-            self.segments.append(Segment([(x1, sgn * y1), (x1, sgn * pin)], color=lead_color))
-        # emitter arrow: NPN -> on the lower stroke pointing out, PNP -> on the upper
-        # stroke pointing in (towards the base bar).
-        sgn = 1 if self.pnp else -1
-        a, b = (x0, sgn * y0), (x1, sgn * y1)
-        dx, dy = b[0] - a[0], b[1] - a[1]
-        n = math.hypot(dx, dy)
-        ux, uy = dx / n, dy / n
-        if self.pnp:
-            tip, back = (a[0] + 0.12 * ux, a[1] + 0.12 * uy), (ux, uy)   # barbs trail towards b
-        else:
-            tip, back = b, (-ux, -uy)                                   # barbs trail towards a
-        for ang in (math.radians(25), -math.radians(25)):
+        bar_y, half = 0.5, 0.5           # height / half-width of the base bar
+        x0, x1, pin_x, pin_y = 0.25, 0.5, 1.0, 1.0   # stroke runs (x0, bar_y) -> (x1, pin_y)
+        self.segments.append(Segment([(0, 0), (0, bar_y)], color=lead_color))        # base lead
+        self.segments.append(Segment([(-half, bar_y), (half, bar_y)]))               # base bar
+        for sgn in (-1, 1):                                                          # C and E strokes
+            self.segments.append(Segment([(sgn * x0, bar_y), (sgn * x1, pin_y)]))
+            self.segments.append(Segment([(sgn * x1, pin_y), (sgn * pin_x, pin_y)], color=lead_color))
+        # emitter arrow on the right-hand stroke.  Tip sits 0.11 in from the end it
+        # points at; barbs are 0.345 long, +-18.5 degrees off the stroke.
+        a, b = (x0, bar_y), (x1, pin_y)                 # base end, pin end of the stroke
+        n = math.hypot(b[0] - a[0], b[1] - a[1])
+        ux, uy = (b[0] - a[0]) / n, (b[1] - a[1]) / n
+        if self.pnp:                                    # points at the base bar
+            tip, back = (a[0] + 0.11 * ux, a[1] + 0.11 * uy), (ux, uy)
+        else:                                           # points away from the base bar
+            tip, back = (b[0] - 0.11 * ux, b[1] - 0.11 * uy), (-ux, -uy)
+        for ang in (math.radians(18.5), -math.radians(18.5)):
             c, sn = math.cos(ang), math.sin(ang)
             bx, by = back[0] * c - back[1] * sn, back[0] * sn + back[1] * c
-            self.segments.append(Segment([tip, (tip[0] + 0.22 * bx, tip[1] + 0.22 * by)]))
-        top, bot = (1.0, pin), (1.0, -pin)
+            self.segments.append(Segment([tip, (tip[0] + 0.345 * bx, tip[1] + 0.345 * by)]))
         self.anchors["base"] = (0, 0)
-        self.anchors["collector"] = bot if self.pnp else top
-        self.anchors["emitter"] = top if self.pnp else bot
-        self.anchors["center"] = (1.0, 0)
+        self.anchors["collector"] = (-pin_x, pin_y)
+        self.anchors["emitter"] = (pin_x, pin_y)
+        self.anchors["center"] = (0, bar_y)
 
 
 class _CaptureBjtNpn(_CaptureBjt):
@@ -1075,18 +1086,23 @@ class Builder:
         """Draw one BJT in the textbook CB / CE / CC bias arrangements.  The terminal
         that is common to input and output (the grounded one) goes straight down to a
         bottom wire; each other terminal reaches that wire through its own series string
-        of parts (resistor, DC source, ...):
+        of parts (resistor, DC source, ...).
 
-          CB  base common      transistor on its side, emitter left, collector right,
-                               base down.  Each side: first part (RE / RC) on the wire
-                               leaving the pin, second part (VEE / VCC) on the bottom wire.
-          CE  emitter common   base left, collector on top, emitter down.  Base: RB on the
-                               base wire, VBB vertical down the left-hand side.  Collector:
-                               RC on the wire leaving the collector, VCC vertical down the
-                               right-hand side.
-          CC  collector common base left, emitter on top, collector down.  Base: RB on the
-                               base wire, VBB vertical on the left-hand side.  Emitter: RE
-                               and VCC stacked vertically down the right-hand side.
+        The transistor symbol is only ever ROTATED (in 90-degree steps), never mirrored,
+        so C -> B -> E always runs counter-clockwise, as in the reference symbol (collector
+        left, base bottom, emitter right).  That fixes which way round each arrangement is:
+
+          CB  base common      reference orientation: collector left, emitter right, base
+                               down.  Each side: first part (RC / RE) on the wire leaving
+                               the pin, second part (VCC / VEE) on the bottom wire.
+          CE  emitter common   rotated 90 deg clockwise: base left, collector on top,
+                               emitter down.  Base: RB on the base wire, VBB vertical down
+                               the left-hand side.  Collector: RC on the wire leaving the
+                               collector, VCC vertical down the right-hand side.
+          CC  collector common rotated 90 deg counter-clockwise: base RIGHT, emitter on top,
+                               collector down.  Base: RB on the base wire, VBB vertical on
+                               the right-hand side.  Emitter: RE and VCC stacked vertically
+                               down the left-hand side.
 
         If no pin is grounded the collector is taken as the common terminal.
         Returns False (nothing drawn) for any circuit that is not of this form."""
@@ -1109,45 +1125,32 @@ class Builder:
         cls = type(make())                           # make() adds .right(), which blocks .theta()
         lead = self.t.pin if self.t.pin and self.t.pin != self.t.body else None
 
-        def build(theta, flip, reverse):
-            el = cls(lead_color=lead).at((0, 0)).theta(theta)
-            if flip:
-                el = el.flip()
-            if reverse:
-                el = el.reverse()
-            return el
+        def build(theta):
+            # Rotation only.  Never .flip() / .reverse(): that would mirror the symbol.
+            return cls(lead_color=lead).at((0, 0)).theta(theta)
 
-        def anchors(theta, flip, reverse):
-            el = build(theta, flip, reverse)
+        def anchors(theta):
+            el = build(theta)
             tmp = schemdraw.Drawing(show=False)
             tmp += el
             return {k: (v[0], v[1]) for k, v in el.absanchors.items()
                     if k in ("collector", "base", "emitter")}
 
         def fits(pos):
-            if common == "base":                     # CB: base down, emitter left, collector right
-                return (pos["base"][1] < min(pos["collector"][1], pos["emitter"][1]) - 0.2
-                        and pos["emitter"][0] < pos["collector"][0] - 0.2)
-            other = [a for a in pos if a not in ("base", common)][0]   # CE: collector / CC: emitter on top
+            if common == "base":                     # CB: base down, the two other pins side by side
+                return pos["base"][1] < min(pos["collector"][1], pos["emitter"][1]) - 0.2
+            # CE / CC: the common pin straight below the other one, base off to one side
+            other = [a for a in pos if a not in ("base", common)][0]
             wanted_top = "collector" if common == "emitter" else "emitter"
-            return (pos["base"][0] < min(pos[common][0], pos[other][0]) - 0.2
+            return (abs(pos["base"][0] - pos[common][0]) > 0.2
+                    and abs(pos[other][0] - pos[common][0]) < 0.2
                     and pos[common][1] < pos[other][1] - 0.2 and other == wanted_top)
 
-        chosen = None
-        for theta in (0, 90, 270, 180):
-            for flip in (False, True):
-                for reverse in (False, True):
-                    if fits(anchors(theta, flip, reverse)):
-                        chosen = (theta, flip, reverse)
-                        break
-                if chosen:
-                    break
-            if chosen:
-                break
+        chosen = next((th for th in (0, 90, 180, 270) if fits(anchors(th))), None)
         if chosen is None:
             return False
 
-        e = build(*chosen).color(self.t.body)
+        e = build(chosen).color(self.t.body)
         self.d += e
         pos = {k: (v[0], v[1]) for k, v in e.absanchors.items()
                if k in ("collector", "base", "emitter")}
@@ -1160,9 +1163,10 @@ class Builder:
         if common == "base":
             xb = pos["base"][0]
             plan, need = [], [pos["base"][1] - 2.0]
-            for pin, sgn in (("emitter", -1), ("collector", +1)):
+            for pin in ("collector", "emitter"):
                 parts, nodes = chains[pin]
                 n, p = len(parts), pos[pin]
+                sgn = -1 if p[0] < xb else +1        # collector goes out to the left, emitter to the right
                 if n >= 2:      # first part on the pin wire, the rest on the bottom wire
                     dist = max(slot + 0.6, (n - 1) * slot + 0.6 - abs(p[0] - xb))
                     need.append(p[1] - 2.0)
@@ -1188,19 +1192,20 @@ class Builder:
             bparts, bnodes = chains[common]
             sparts, snodes = chains["base"]
             nb = len(sparts)
-            x_top = pt_top[0] + 5.2
+            sg = 1 if base[0] < xc else -1               # +1: base on the left, -1: base on the right
+            x_top = pt_top[0] + sg * 5.2                 # the top pin's run is on the side opposite the base
             y_over = pt_top[1] + STUB
 
             # base branch: x of its vertical run, and how its parts are spread
             if nb >= 2:                                  # CE / CC: RB on base wire, rest down the side
-                x_base = base[0] - (slot + 0.6)
+                x_base = base[0] - sg * (slot + 0.6)
                 seg, vert = [0] + [1] * (nb - 1), nb - 1
             else:                                        # single part down the side
-                x_base = base[0] - 3.0
+                x_base = base[0] - sg * 3.0
                 seg, vert = [1] * nb, nb
-            # CE: the first collector part (RC) sits on the wire running right from the
-            # collector, the rest (VCC) goes down the right-hand side, as in a capture
-            # drawing.  CC: every emitter part is stacked down the right-hand side.
+            # CE: the first collector part (RC) sits on the wire running out from the
+            # collector, the rest (VCC) goes down the far side, as in a capture
+            # drawing.  CC: every emitter part is stacked down the far side.
             ce = common == "emitter" and len(tparts) >= 2
             tseg = [1] + [2] * (len(tparts) - 1) if ce else [2] * len(tparts)
             tvert = len(tparts) - 1 if ce else len(tparts)
@@ -1213,8 +1218,9 @@ class Builder:
             self._route(tparts, tnodes, [pt_top, (pt_top[0], y_over), (x_top, y_over),
                                          (x_top, yg), (xc, yg)], tseg)
             x_common = xc
-            self.d += elm.Label().at((pt_top[0] + 1.2, base[1])).label(
-                caption, fontsize=self.t.fontsize - 1, color=self.t.text, halign="left")
+            self.d += elm.Label().at((pt_top[0] + sg * 1.2, base[1])).label(
+                caption, fontsize=self.t.fontsize - 1, color=self.t.text,
+                halign="left" if sg > 0 else "right")
 
         self._dot((x_common, yg))                    # common junction: the shared ground
         self.ground((x_common, yg))

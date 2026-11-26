@@ -2,7 +2,7 @@
 * collector at the common (ground) node, emitter supply VEE = -1 ... -4 V
 * (VCE = |VEE|).  inner sweep: VBB (referred to ground, so x = VBC)
 * outer sweep: VEE (emitter supply)
-VEE nes 0 0
+VEE 0 nes 0
 RE nes e 0.1
 Q1 0 b e Q2N3904
 VBB nbs 0 0
@@ -12,6 +12,6 @@ RB nbs b 22k
 + CJC=3.638P MJC=.3085 VJC=.75 FC=.5 CJE=4.493P MJE=.2593 VJE=.75
 + TR=239.5N TF=301.2P ITF=.4 VTF=4 XTF=2 RB=10)
 .SAVE all @q1[ic] @q1[ib] @q1[ie]
-.DC VBB -5 3 0.01 VEE -1 -4 -1
+.DC VBB -5 3 0.01 VEE 1 4 1
 .PROBE
 .END

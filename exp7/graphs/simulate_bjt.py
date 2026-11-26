@@ -59,15 +59,18 @@ import tempfile
 from pathlib import Path
 
 import numpy as np
+from matplotlib import font_manager
+from matplotlib.font_manager import FontProperties
 from matplotlib.lines import Line2D
 
-from plot_full_bridge import draw_trace
-from pspice_theme import (FIG_W_PT, MARKER_FIRST_PT,
-                          MARKER_SPACING_PT, add_y_label, choose_font,
-                          label_widths_pt, major_ticks, new_page,
-                          spice_format, style_axes)
-from simulate_and_plot import (nice_step, parse_raw_file, place_sweep_labels,
-                               run_ngspice)
+from plot_full_bridge import add_note_at, draw_trace, note_fontsize
+from pspice_theme import (AX_H_PT, AX_RECT, FIG_W_PT, MARKER_FIRST_PT,
+                          MARKER_SPACING_PT, NOTE_SERIF, add_y_label,
+                          choose_font, dense_curve, label_widths_pt,
+                          major_ticks, new_page, rect_is_free, spice_format,
+                          style_axes, text_width)
+from simulate_and_plot import (nice_step, parse_raw_file, place_note_near_trace,
+                               place_sweep_labels, run_ngspice)
 
 HERE = Path(__file__).resolve().parent
 
@@ -182,7 +185,7 @@ VEE 0 nes DC 0
 RE nes e {RE_CB}
 Q1 c 0 e Q2N3904
 RC ncs c {RC_IN}
-VCC ncs 0 DC 5
+VCC ncs 0 DC 0
 {MODEL_NPN}
 {SAVE}
 .DC VEE 0 5.3 0.001 VCC 5 45 20
@@ -242,7 +245,7 @@ VBB {'nbs 0' if npn else '0 nbs'} 0
 RB nbs b {RB_CE_IN}
 Q1 c b 0 {'Q2N3904' if npn else 'Q2N3906'}
 RC ncs c {RC_IN}
-VCC {'ncs 0' if npn else '0 ncs'} 5
+VCC {'ncs 0' if npn else '0 ncs'} 0
 {MODEL_NPN if npn else MODEL_PNP}
 {SAVE}
 .DC VBB 0 2 0.001 VCC 5 5 1
@@ -273,14 +276,14 @@ def cc_input_npn():
 * collector at the common (ground) node, emitter supply VEE = -1 ... -4 V
 * (VCE = |VEE|).  inner sweep: VBB (referred to ground, so x = VBC)
 * outer sweep: VEE (emitter supply)
-VEE nes 0 0
+VEE 0 nes 0
 RE nes e {RE_CC_IN}
 Q1 0 b e Q2N3904
 VBB nbs 0 0
 RB nbs b {RB_CC_IN}
 {MODEL_NPN}
 {SAVE}
-.DC VBB -5 3 0.01 VEE -1 -4 -1
+.DC VBB -5 3 0.01 VEE 1 4 1
 .PROBE
 .END
 """
@@ -294,14 +297,14 @@ def cc_output_npn():
 * inner sweep: VEE (0.2 -> -5.2 V, i.e. VCE = -0.2 ... 5.2 V)
 * outer sweep: VBB = -6, 14, 34, 54, 74 V.  With RB = 1 MOhm the base current
 * (VBB + VCE - VBE)/RB is ~0, 14, 34, 54, 74 uA and drifts only a few uA with VCE.
-VEE nes 0 0
+VEE 0 nes 0
 RE nes e {RE_CC_OUT}
 Q1 0 b e Q2N3904
 VBB nbs 0 0
 RB nbs b {RB_CC_OUT}
 {MODEL_NPN}
 {SAVE}
-.DC VEE 0.2 -5.2 -0.025 VBB -6 74 20
+.DC VEE -0.2 5.2 0.025 VBB -6 74 20
 .PROBE
 .END
 """
@@ -314,7 +317,7 @@ VEE nes 0 DC 0
 RE nes e {RE_CB}
 Q1 c 0 e Q2N3906
 RC ncs c {RC_IN}
-VCC 0 ncs DC 5
+VCC 0 ncs DC 0
 {MODEL_PNP}
 {SAVE}
 .DC VEE 0 5.3 0.001 VCC 5 45 20
@@ -383,11 +386,11 @@ def cc_input_pnp():
 VEE nes 0 0
 RE nes e {RE_CC_IN}
 Q1 0 b e Q2N3906
-VBB nbs 0 0
+VBB 0 nbs 0
 RB nbs b {RB_CC_IN}
 {MODEL_PNP}
 {SAVE}
-.DC VBB 5 -3 -0.01 VEE 1 4 1
+.DC VBB -5 3 0.01 VEE 1 4 1
 .PROBE
 .END
 """
@@ -506,73 +509,73 @@ FAMILIES = [
          outer=lambda v: v["v(ncs)"],
          param="VCB", trace="IE(Q1)",
          xlabel="Emitter-base voltage $V_{EB}$ (V)",
-         ylabel="Emitter current $I_E$", fname="cb_input_npn",
+         ylabel="Emitter current $I_E$", fname="cb_input_npn", resistor="RE",
          xlim=(0.58, 0.72)),
     dict(key="cb_output_npn", build=cb_output_npn,
          outer=lambda v: v["v(nes)"],
          param="VEE", trace="IC(Q1)",
          xlabel="Collector-base voltage $V_{CB}$ (V)",
-         ylabel="Collector current $I_C$", fname="cb_output_npn",
+         ylabel="Collector current $I_C$", fname="cb_output_npn", resistor="RC",
          xlim=(-1, 10.2)),
     dict(key="ce_input_npn", build=ce_input_npn,
          outer=lambda v: v["v(ncs)"],
          param="VCE", trace="IB(Q1)",
          xlabel="Base-emitter voltage $V_{BE}$ (V)",
-         ylabel="Base current $I_B$", fname="ce_input_npn",
+         ylabel="Base current $I_B$", fname="ce_input_npn", resistor="RB",
          xlim=(0.52, 0.78), ylim=(0.0, 100e-6)),
     dict(key="ce_output_npn", build=ce_output_npn,
          outer=lambda v: v["v(nbs)"],
          param="VBB", trace="IC(Q1)",
          xlabel="Collector-emitter voltage $V_{CE}$ (V)",
-         ylabel="Collector current $I_C$", fname="ce_output_npn",
+         ylabel="Collector current $I_C$", fname="ce_output_npn", resistor="RC",
          xlim=(-0.2, 10.2)),
     dict(key="cc_input_npn", build=cc_input_npn,
          outer=lambda v: v["v(nes)"],
          param="VCE", trace="IB(Q1)",
          xlabel="Base-collector voltage $V_{BC}$ (V)",
-         ylabel="Base current $I_B$", fname="cc_input_npn",
+         ylabel="Base current $I_B$", fname="cc_input_npn", resistor="RB",
          xlim=(-4, 0.5), ylim=(0.0, 120e-6), trim=True),
     dict(key="cc_output_npn", build=cc_output_npn,
          outer=lambda v: np.asarray(v["v(nbs)"], dtype=float),
          param="VBB", trace="IE(Q1)", signed=True,
          xlabel="Collector-emitter voltage $V_{CE}$ (V)",
-         ylabel="Emitter current $I_E$", fname="cc_output_npn",
+         ylabel="Emitter current $I_E$", fname="cc_output_npn", resistor="RE",
          xlim=(-0.2, 5.2)),
     dict(key="cb_input_pnp", build=cb_input_pnp,
          outer=lambda v: v["v(ncs)"],
          param="|VCB|", trace="|IE(Q1)|",
          xlabel="Emitter-base voltage $|V_{EB}|$ (V)",
-         ylabel="Emitter current $|I_E|$", fname="cb_input_pnp",
+         ylabel="Emitter current $|I_E|$", fname="cb_input_pnp", resistor="RE",
          xlim=(0.58, 0.80)),
     dict(key="cb_output_pnp", build=cb_output_pnp,
          outer=lambda v: v["v(nes)"],
          param="|VEE|", trace="|IC(Q1)|",
          xlabel="Collector-base voltage $|V_{CB}|$ (V)",
-         ylabel="Collector current $|I_C|$", fname="cb_output_pnp",
+         ylabel="Collector current $|I_C|$", fname="cb_output_pnp", resistor="RC",
          xlim=(-1, 10.2)),
     dict(key="ce_input_pnp", build=ce_input_pnp,
          outer=lambda v: v["v(ncs)"],
          param="|VCE|", trace="|IB(Q1)|",
          xlabel="Base-emitter voltage $|V_{BE}|$ (V)",
-         ylabel="Base current $|I_B|$", fname="ce_input_pnp",
+         ylabel="Base current $|I_B|$", fname="ce_input_pnp", resistor="RB",
          xlim=(0.52, 0.80), ylim=(0.0, 100e-6)),
     dict(key="ce_output_pnp", build=ce_output_pnp,
          outer=lambda v: v["v(nbs)"],
          param="|VBB|", trace="|IC(Q1)|",
          xlabel="Collector-emitter voltage $|V_{CE}|$ (V)",
-         ylabel="Collector current $|I_C|$", fname="ce_output_pnp",
+         ylabel="Collector current $|I_C|$", fname="ce_output_pnp", resistor="RC",
          xlim=(-0.2, 10.2)),
     dict(key="cc_input_pnp", build=cc_input_pnp,
          outer=lambda v: v["v(nes)"],
          param="|VCE|", trace="|IB(Q1)|",
          xlabel="Base-collector voltage $V_{CB}$ (V)",
-         ylabel="Base current $|I_B|$", fname="cc_input_pnp",
+         ylabel="Base current $|I_B|$", fname="cc_input_pnp", resistor="RB",
          xlim=(-4, 0.5), ylim=(0.0, 120e-6), trim=True),
     dict(key="cc_output_pnp", build=cc_output_pnp,
          outer=lambda v: -np.asarray(v["v(nbs)"], dtype=float),    # = +VBB for the pnp
          param="VBB", trace="|IE(Q1)|", signed=True,
          xlabel="Collector-emitter voltage $|V_{CE}|$ (V)",
-         ylabel="Emitter current $|I_E|$", fname="cc_output_pnp",
+         ylabel="Emitter current $|I_E|$", fname="cc_output_pnp", resistor="RE",
          xlim=(-0.2, 5.2)),
 ]
 
@@ -623,8 +626,63 @@ def add_family_footer(fig, entries, axis_label, ax):
     fig.text(0.491, y_lab, axis_label, ha="center", va="center", color="black")
 
 
+def add_current_note(ax, text, curves, label_boxes, frame, above=False):
+    """Framed serif note ("Current through RC") placed right next to the family's
+    curves, clear of every curve and of the stepped-source value labels.
+
+    ``curves`` is [(value, x, y), ...]; ``label_boxes`` are the value-label boxes
+    returned by place_sweep_labels (data coordinates)."""
+    installed = {f.name for f in font_manager.fontManager.ttflist}
+    prop = FontProperties(family=next((f for f in NOTE_SERIF if f in installed), "serif"))
+    fsize = note_fontsize(prop)
+    dense = [dense_curve(x, y, frame) for _, x, y in curves]
+    avoid = []
+    for x0, y0, x1, y1 in label_boxes:
+        (a, b), (c, d) = (tuple(float(v) for v in frame.to_pt(x0, y0)),
+                          tuple(float(v) for v in frame.to_pt(x1, y1)))
+        avoid.append((min(a, c), min(b, d), max(a, c), max(b, d)))
+    if above:
+        # input families: the free spot closest to the curves that lies ABOVE all of
+        # them (the upper-left side of the rising curves)
+        every = (np.concatenate([d[0] for d in dense]), np.concatenate([d[1] for d in dense]))
+        box_w = text_width(text, fsize, prop) + 2 * 0.0140 * AX_RECT[2] * FIG_W_PT
+        box_h = 0.0925 * AX_H_PT
+        gap = 4.0
+        gxs = np.linspace(0.0, frame.w, 800)
+        env = np.full_like(gxs, -np.inf)                 # upper envelope of the family
+        for dx, dy in dense:
+            o = np.argsort(dx)
+            env = np.maximum(env, np.interp(gxs, dx[o], dy[o], left=-np.inf, right=-np.inf))
+        ok = np.isfinite(env)
+        ex, ey = gxs[ok], env[ok]
+        xs = np.arange(box_w / 2, frame.w - box_w / 2 + 1e-9, 3.0)
+        ys = np.arange(box_h / 2, frame.h - box_h / 2 + 1e-9, 3.0)
+        gx, gy = (a.ravel() for a in np.meshgrid(xs, ys))
+        top_at = np.interp(gx, ex, ey) if ex.size else np.full(gx.shape, -np.inf)
+        # reference point: where the top curve is about half way up its own range, so
+        # the note sits beside the body of the curves, not down on the flat foot
+        j = int(np.argmin(np.abs(ey - 0.55 * ey.max()))) if ex.size else 0
+        rx, ry = (ex[j], ey[j]) if ex.size else (frame.w / 2, frame.h / 2)
+        ddx = np.maximum(np.maximum(gx - box_w / 2 - rx, rx - gx - box_w / 2), 0.0)
+        ddy = np.maximum(np.maximum(gy - box_h / 2 - ry, ry - gy - box_h / 2), 0.0)
+        cost = np.hypot(ddx, ddy)
+        cost = cost + 0.02 * np.hypot(gx - frame.w / 2, gy - frame.h / 2)
+        for i in np.argsort(cost):
+            if gy[i] > top_at[i] and rect_is_free(
+                    (gx[i] - box_w / 2, gy[i] - box_h / 2, gx[i] + box_w / 2, gy[i] + box_h / 2),
+                    every, avoid, gap, frame):
+                add_note_at(ax, text, frame, every, avoid,
+                            (gx[i] / frame.w, gy[i] / frame.h), fsize, prop,
+                            CURVE_COLOR, force=True)
+                return
+    named = [(text, x, y) for _, x, y in curves]
+    # attach the note to the middle curve of the family so it sits among the curves
+    place_note_near_trace(ax, text, len(curves) // 2, named, dense, frame, avoid,
+                          prop, fsize, CURVE_COLOR)
+
+
 def plot_family(curves, param, trace, xlabel, ylabel, outpath, xlim=None, dpi=300,
-                ylim=None, trim=False):
+                ylim=None, trim=False, note=None, note_above=False):
     """Draw one characteristic family on a PSpice/Probe-style page.
 
     ``curves`` is [(stepped source value, x, y), ...].  All curves share one
@@ -681,7 +739,11 @@ def plot_family(curves, param, trace, xlabel, ylabel, outpath, xlim=None, dpi=30
     # source value beside each curve, in a free spot next to the curve's end
     items = [(x, y, (f"{param}=" if k == 0 else "") + f"{val:g}V", "black")
              for k, (val, x, y) in enumerate(curves)]
-    place_sweep_labels(fig, ax, [(x, y) for _, x, y in curves], items)
+    label_boxes = place_sweep_labels(fig, ax, [(x, y) for _, x, y in curves], items)
+
+    # "Current through RC" etc. beside the curves
+    if note:
+        add_current_note(ax, note, curves, label_boxes, frame, note_above)
 
     # one legend entry for the whole family
     add_family_footer(fig, [(CURVE_MARKER, CURVE_COLOR, trace)], xlabel, ax)
@@ -900,7 +962,10 @@ def main():
                         fam["xlabel"], fam["ylabel"],
                         outdir / f"{fam['fname']}.png",
                         xlim=fam["xlim"], dpi=args.dpi,
-                        ylim=fam.get("ylim"), trim=fam.get("trim", False))
+                        ylim=fam.get("ylim"), trim=fam.get("trim", False),
+                        note=f"Current through {fam['resistor']}",
+                        # input families: note on the upper side of the curves
+                        note_above=key.split("_")[1] == "input")
             print(f"    -> {fam['fname']}.png")
 
     # V_CE = 5 V reference curves of the CE input characteristic (measurements only)

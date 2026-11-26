@@ -5,7 +5,7 @@
 * inner sweep: VEE (0.2 -> -5.2 V, i.e. VCE = -0.2 ... 5.2 V)
 * outer sweep: VBB = -6, 14, 34, 54, 74 V.  With RB = 1 MOhm the base current
 * (VBB + VCE - VBE)/RB is ~0, 14, 34, 54, 74 uA and drifts only a few uA with VCE.
-VEE nes 0 0
+VEE 0 nes 0
 RE nes e 1
 Q1 0 b e Q2N3904
 VBB nbs 0 0
@@ -15,6 +15,6 @@ RB nbs b 1Meg
 + CJC=3.638P MJC=.3085 VJC=.75 FC=.5 CJE=4.493P MJE=.2593 VJE=.75
 + TR=239.5N TF=301.2P ITF=.4 VTF=4 XTF=2 RB=10)
 .SAVE all @q1[ic] @q1[ib] @q1[ie]
-.DC VEE 0.2 -5.2 -0.025 VBB -6 74 20
+.DC VEE -0.2 5.2 0.025 VBB -6 74 20
 .PROBE
 .END
