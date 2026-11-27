@@ -1,0 +1,77 @@
+
+**** 11/27/26 17:04:43 *********** Evaluation PSpice (Nov 1999) **************
+
+ * Common-collector output characteristic (NPN 2N3904), textbook wiring
+
+
+ ****     CIRCUIT DESCRIPTION
+
+
+******************************************************************************
+
+
+
+* collector = common (ground) node, no collector resistor.
+* VBB (+) -> RB -> base, VBB (-) on the collector rail.
+* emitter supply VEE = -VCE feeds the emitter through RE.
+* inner sweep: VEE (0.2 -> -5.2 V, i.e. VCE = -0.2 ... 5.2 V)
+* outer sweep: VBB = -6, 14, 34, 54, 74 V.  With RB = 1 MOhm the base current
+* (VBB + VCE - VBE)/RB is ~0, 14, 34, 54, 74 uA and drifts only a few uA with VCE.
+VEE 0 nes 0
+RE nes e 1
+Q1 0 b e Q2N3904
+VBB nbs 0 0
+RB nbs b 1Meg
+.MODEL Q2N3904 NPN(IS=6.734F XTI=3 EG=1.11 VAF=74.03 BF=416.4 NE=1.259
++ ISE=6.734F IKF=.06678 XTB=1.5 BR=.7371 NC=2 ISC=0 IKR=0 RC=1
++ CJC=3.638P MJC=.3085 VJC=.75 FC=.5 CJE=4.493P MJE=.2593 VJE=.75
++ TR=239.5N TF=301.2P ITF=.4 VTF=4 XTF=2 RB=10)    
+.DC VEE -0.2 5.2 0.025 VBB -6 74 20
+.PROBE
+.END
+
+**** 11/27/26 17:04:43 *********** Evaluation PSpice (Nov 1999) **************
+
+ * Common-collector output characteristic (NPN 2N3904), textbook wiring
+
+
+ ****     BJT MODEL PARAMETERS
+
+
+******************************************************************************
+
+
+
+
+               Q2N3904         
+               NPN             
+          IS    6.734000E-15 
+          BF  416.4          
+          NF    1            
+         VAF   74.03         
+         IKF     .06678      
+         ISE    6.734000E-15 
+          NE    1.259        
+          BR     .7371       
+          NR    1            
+          RB   10            
+          RC    1            
+         CJE    4.493000E-12 
+         MJE     .2593       
+         CJC    3.638000E-12 
+         MJC     .3085       
+          TF  301.200000E-12 
+         XTF    2            
+         VTF    4            
+         ITF     .4          
+          TR  239.500000E-09 
+         XTB    1.5          
+          CN    2.42         
+           D     .87         
+
+
+
+          JOB CONCLUDED
+
+          TOTAL JOB TIME             .10
+
