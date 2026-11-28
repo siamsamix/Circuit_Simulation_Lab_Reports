@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.10.30)  28 NOV 2026 07:37
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.10.30)  28 NOV 2026 15:37
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1899,13 +1899,19 @@ LaTeX Font Warning: Size substitutions with differences
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
-Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: 926239BD01233427BF6D187416C5D5A3;4218.
+
+Package rerunfilecheck Warning: File `report.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `report.out':
+(rerunfilecheck)             Before: 926239BD01233427BF6D187416C5D5A3;4218
+(rerunfilecheck)             After:  53CB8B0E014AAEAA1B40D76C21A91AC1;4223.
  ) 
 Here is how much of TeX's memory you used:
  42281 strings out of 469515
  968745 string characters out of 5470806
- 1524879 words of memory out of 5000000
+ 1524880 words of memory out of 5000000
  70152 multiletter control sequences out of 15000+600000
  710954 words of font info for 217 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
