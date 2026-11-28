@@ -27,6 +27,8 @@
 \usepackage{graphicx}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
+\usepackage{circuitikz}
+\ctikzset{bipoles/length=0.8cm}
 \usepackage{booktabs}
 \usepackage{caption}
 \usepackage{float}
@@ -77,14 +79,14 @@
 \renewcommand{\thesection}{\expnumber.\arabic{section}}
 
 \begin{document}
-	
+
 	% =====================================================================
 	% FRONT MATTER (pages 1-2): cover page and task sheet
 	% =====================================================================
 	\includepdf[pages={1,2,3}]{../covers.pdf}
 	\includepdf[pages={1}]{../Exp 07.pdf}
 	\setcounter{page}{1}
-	
+
 	% =====================================================================
 	% HEADER BLOCK
 	% =====================================================================
@@ -95,7 +97,7 @@
 			Common-Emitter, and Common-Collector Configurations Using PSpice}
 	\end{center}
 	\vspace{6pt}
-	
+
 	% =====================================================================
 	\section{Objective}
 	% =====================================================================
@@ -106,7 +108,7 @@
 		\item To identify the cutoff, active and saturation regions of each configuration from the simulated curves.
 		\item To determine the current gain, input resistance and output resistance of every configuration from the simulated characteristics.
 	\end{enumerate}
-	
+
 	% =====================================================================
 	\section{Theory}\label{sec:theory}
 	% =====================================================================
@@ -127,7 +129,7 @@
 	characteristics are the mirror images of the NPN curves; they are plotted
 	in this report as magnitudes so that the two devices can be compared
 	directly.
-	
+
 	The terminal that is common to the input and the output defines the
 	configuration. In the common-base (CB) connection the base is grounded,
 	the input is applied between emitter and base and the output is taken
@@ -137,7 +139,134 @@
 	the collector is grounded, the input is applied between base and
 	collector and the output is taken between emitter and collector
 	\cite{ref:theraja}.
+
+	Figures~\ref{fig:theory-cb} to~\ref{fig:theory-cc} show the three
+	connections for the NPN and the complementary PNP transistor. In every
+	circuit the common terminal is marked by a dot and a grey tag, the input
+	source drives the input terminal and the output source drives the output
+	terminal; the arrows give the conventional direction of the terminal
+	currents and the signs give the source polarities. In the NPN circuits the
+	base and collector currents flow into the device and the emitter current
+	flows out of it; the PNP circuits are the mirror images, with every source
+	polarity and current direction reversed.
+	\newpage
 	
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}[t]{0.49\textwidth}\centering
+			\begin{circuitikz}[scale=0.8, transform shape]
+				\useasboundingbox (-4.1,-3.5) rectangle (4.1,0.9);
+				\draw (0,0) node[npn, tr circle, rotate=90, yscale=-1, scale=1.5](Q){};
+				\draw (Q.E) to[short, i_=$I_E$] (-1.6,0) to[R, l_=$R_E$] (-2.9,0) -- (-3.2,0) -- (-3.2,-2.2) to[battery1, invert, l_=$V_{EE}$] (0,-2.2);
+				\draw (Q.C) to[short, i<^=$I_C$] (1.6,0) to[R, l^=$R_C$] (2.9,0) -- (3.2,0) -- (3.2,-2.2) to[battery1, invert, l^=$V_{CC}$] (0,-2.2);
+				\draw (0,-2.2) to[short, i_=$I_B$, *-] (Q.B);
+				\node[font=\scriptsize] at (-2.02,-1.98) {$-$};
+				\node[font=\scriptsize] at (-1.18,-1.98) {$+$};
+				\node[font=\scriptsize] at (1.18,-1.98) {$-$};
+				\node[font=\scriptsize] at (2.02,-1.98) {$+$};
+				\node[below left, inner sep=1.5pt] at (Q.E) {$E$};
+				\node[below right, inner sep=1.5pt] at (Q.C) {$C$};
+				\node[anchor=east, inner sep=2pt] at (-0.02,-1.2) {$B$};
+			\end{circuitikz}\\[2pt]\textbf{(a)} NPN transistor
+		\end{minipage}\hfill
+		\begin{minipage}[t]{0.49\textwidth}\centering
+			\begin{circuitikz}[scale=0.8, transform shape]
+				\useasboundingbox (-4.1,-3.5) rectangle (4.1,0.9);
+				\draw (0,0) node[pnp, tr circle, rotate=90, scale=1.5](Q){};
+				\draw (Q.E) to[short, i<_=$I_E$] (-1.6,0) to[R, l_=$R_E$] (-2.9,0) -- (-3.2,0) -- (-3.2,-2.2) to[battery1, l_=$V_{EE}$] (0,-2.2);
+				\draw (Q.C) to[short, i^=$I_C$] (1.6,0) to[R, l^=$R_C$] (2.9,0) -- (3.2,0) -- (3.2,-2.2) to[battery1, l^=$V_{CC}$] (0,-2.2);
+				\draw (0,-2.2) to[short, i<_=$I_B$, *-] (Q.B);
+				\node[font=\scriptsize] at (-2.02,-1.98) {$+$};
+				\node[font=\scriptsize] at (-1.18,-1.98) {$-$};
+				\node[font=\scriptsize] at (1.18,-1.98) {$+$};
+				\node[font=\scriptsize] at (2.02,-1.98) {$-$};
+				\node[below left, inner sep=1.5pt] at (Q.E) {$E$};
+				\node[below right, inner sep=1.5pt] at (Q.C) {$C$};
+				\node[anchor=east, inner sep=2pt] at (-0.02,-1.2) {$B$};
+			\end{circuitikz}\\[2pt]\textbf{(b)} PNP transistor
+		\end{minipage}
+		\caption{Common-base configuration: (a) NPN and (b) PNP transistor. The base is the common terminal; the input source is $V_{EE}$ (with $R_E$) and the output source is $V_{CC}$ (with $R_C$).}
+		\label{fig:theory-cb}
+	\end{figure}
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}[t]{0.49\textwidth}\centering
+			\begin{circuitikz}[scale=0.8, transform shape]
+				\useasboundingbox (-4.1,-3.6) rectangle (4.1,2.5);
+				\draw (0,0) node[npn, tr circle, scale=1.5](Q){};
+				\coordinate (B) at (Q.B); \coordinate (C) at (Q.C); \coordinate (E) at (Q.E);
+				\draw (B) to[short, i<^=$I_B$] (-1.6,0) to[R, l_=$R_B$] (-2.9,0) -- (-3.2,0) -- (-3.2,-2.3) to[battery1, l_=$V_{BB}$] (0,-2.3);
+				\draw (C) -- (0,1.9) to[short, i<^=$I_C$] (1.6,1.9) -- (3.1,1.9) to[R, l=$R_C$] (3.1,0.7) to[battery1, l=$V_{CC}$] (3.1,-0.6) -- (3.1,-2.3) -- (0,-2.3);
+				\draw (0,-2.3) to[short, i<=$I_E$, *-] (E);
+				\node[font=\scriptsize] at (-2.02,-2.08) {$+$};
+				\node[font=\scriptsize] at (-1.18,-2.08) {$-$};
+				\node[font=\scriptsize] at (2.78,0.43) {$+$};
+				\node[font=\scriptsize] at (2.78,-0.33) {$-$};
+				\node[anchor=west, inner sep=2pt] at (0.02,1.01) {$C$};
+				\node[anchor=west, inner sep=2pt] at (0.02,-1.01) {$E$};
+				\node[above left, inner sep=1pt] at (B) {$B$};
+			\end{circuitikz}\\[2pt]\textbf{(a)} NPN transistor
+		\end{minipage}\hfill
+		\begin{minipage}[t]{0.49\textwidth}\centering
+			\begin{circuitikz}[scale=0.8, transform shape]
+				\useasboundingbox (-4.1,-3.6) rectangle (4.1,2.5);
+				\draw (0,0) node[pnp, tr circle, yscale=-1, scale=1.5](Q){};
+				\coordinate (B) at (-0.72,0); \coordinate (C) at (0,0.66); \coordinate (E) at (0,-0.66);
+				\draw (B) to[short, i^=$I_B$] (-1.6,0) to[R, l_=$R_B$] (-2.9,0) -- (-3.2,0) -- (-3.2,-2.3) to[battery1, invert, l_=$V_{BB}$] (0,-2.3);
+				\draw (C) -- (0,1.9) to[short, i^=$I_C$] (1.6,1.9) -- (3.1,1.9) to[R, l=$R_C$] (3.1,0.7) to[battery1, invert, l=$V_{CC}$] (3.1,-0.6) -- (3.1,-2.3) -- (0,-2.3);
+				\draw (0,-2.3) to[short, i=$I_E$, *-] (E);
+				\node[font=\scriptsize] at (-2.02,-2.08) {$-$};
+				\node[font=\scriptsize] at (-1.18,-2.08) {$+$};
+				\node[font=\scriptsize] at (2.78,0.43) {$-$};
+				\node[font=\scriptsize] at (2.78,-0.33) {$+$};
+				\node[anchor=west, inner sep=2pt] at (0.02,1.01) {$C$};
+				\node[anchor=west, inner sep=2pt] at (0.02,-1.01) {$E$};
+				\node[above left, inner sep=1pt] at (B) {$B$};
+			\end{circuitikz}\\[2pt]\textbf{(b)} PNP transistor
+		\end{minipage}
+		\caption{Common-emitter configuration: (a) NPN and (b) PNP transistor. The emitter is the common terminal; the input source is $V_{BB}$ (with $R_B$) and the output source is $V_{CC}$ (with $R_C$).}
+		\label{fig:theory-ce}
+	\end{figure}
+
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}[t]{0.49\textwidth}\centering
+			\begin{circuitikz}[scale=0.8, transform shape]
+				\useasboundingbox (-4.1,-3.6) rectangle (4.1,2.5);
+				\draw (0,0) node[npn, tr circle, yscale=-1, scale=1.5](Q){};
+				\draw (Q.B) to[short, i<^=$I_B$] (-1.6,0) to[R, l_=$R_B$] (-2.9,0) -- (-3.2,0) to[battery1, l_=$V_{BB}$] (-3.2,-1.5) -- (-3.2,-2.3) -- (3.1,-2.3);
+				\draw (Q.E) to[short, i=$I_E$] (0,1.9) -- (3.1,1.9) to[R, l=$R_E$] (3.1,0.7) to[battery1, invert, l=$V_{EE}$] (3.1,-0.6) -- (3.1,-2.3);
+				\draw (0,-2.3) to[short, i=$I_C$, *-] (Q.C);
+				\node[font=\scriptsize] at (-2.88,-0.37) {$+$};
+				\node[font=\scriptsize] at (-2.88,-1.13) {$-$};
+				\node[font=\scriptsize] at (2.78,0.43) {$-$};
+				\node[font=\scriptsize] at (2.78,-0.33) {$+$};
+				\node[anchor=west, inner sep=2pt] at (0.02,1.01) {$E$};
+				\node[anchor=west, inner sep=2pt] at (0.02,-1.01) {$C$};
+				\node[above left, inner sep=1pt] at (Q.B) {$B$};
+			\end{circuitikz}\\[2pt]\textbf{(a)} NPN transistor
+		\end{minipage}\hfill
+		\begin{minipage}[t]{0.49\textwidth}\centering
+			\begin{circuitikz}[scale=0.8, transform shape]
+				\useasboundingbox (-4.1,-3.6) rectangle (4.1,2.5);
+				\draw (0,0) node[pnp, tr circle, scale=1.5](Q){};
+				\draw (Q.B) to[short, i^=$I_B$] (-1.6,0) to[R, l_=$R_B$] (-2.9,0) -- (-3.2,0) to[battery1, invert, l_=$V_{BB}$] (-3.2,-1.5) -- (-3.2,-2.3) -- (3.1,-2.3);
+				\draw (Q.E) to[short, i<=$I_E$] (0,1.9) -- (3.1,1.9) to[R, l=$R_E$] (3.1,0.7) to[battery1, l=$V_{EE}$] (3.1,-0.6) -- (3.1,-2.3);
+				\draw (0,-2.3) to[short, i<=$I_C$, *-] (Q.C);
+				\node[font=\scriptsize] at (-2.88,-0.37) {$-$};
+				\node[font=\scriptsize] at (-2.88,-1.13) {$+$};
+				\node[font=\scriptsize] at (2.78,0.43) {$+$};
+				\node[font=\scriptsize] at (2.78,-0.33) {$-$};
+				\node[anchor=west, inner sep=2pt] at (0.02,1.01) {$E$};
+				\node[anchor=west, inner sep=2pt] at (0.02,-1.01) {$C$};
+				\node[above left, inner sep=1pt] at (Q.B) {$B$};
+			\end{circuitikz}\\[2pt]\textbf{(b)} PNP transistor
+		\end{minipage}
+		\caption{Common-collector configuration: (a) NPN and (b) PNP transistor. The collector is the common terminal; the input source is $V_{BB}$ (with $R_B$) and the output source is $V_{EE}$ (with $R_E$).}
+		\label{fig:theory-cc}
+	\end{figure}
+
+	\newpage
 	Each configuration has an input characteristic, in which the input
 	current is plotted against the input voltage at a fixed output voltage,
 	and an output characteristic, in which the output current is plotted
@@ -160,7 +289,7 @@
 	\end{equation}
 	Thus $\alpha$ lies just below unity, while $\beta$ and $\gamma$ are large
 	and differ by one.
-	
+
 	The input characteristic is the characteristic of a forward-biased pn
 	junction. Because $I_E$ and $I_B$ are fixed fractions of $I_C$, the input
 	current of every configuration ($I_E$ in CB, $I_B$ in CE and CC) grows
@@ -201,10 +330,14 @@
 		\end{minipage}\hfill
 		\begin{minipage}[t]{0.32\textwidth}\centering\vspace{0pt}
 			\begin{tikzpicture}
-				\begin{axis}[width=\linewidth,height=3.4cm,title={Common-collector (CC)},xlabel={$V_{BC}$ (V)},ylabel={$I_B$ (rel.)},xmin=0.42,xmax=0.78,ymin=0,ymax=1.05,xtick={0.45,0.60,0.75},ytick=\empty,grid=major,major grid style={gray!20},tick label style={font=\tiny},label style={font=\scriptsize},title style={font=\scriptsize\bfseries},legend style={font=\tiny,draw=none,fill=white,fill opacity=0.85,text opacity=1,at={(0.03,0.97)},anchor=north west,inner sep=1pt},legend cell align=left]
-					\addplot[blue,thick,domain=0.42:0.78,samples=80]{exp((x-0.60)/0.04)/exp((0.78-0.572)/0.04)};\addlegendentry{$V_{CE}=1$ V}
-					\addplot[orange!90!black,thick,domain=0.42:0.78,samples=80]{exp((x-0.586)/0.04)/exp((0.78-0.572)/0.04)};\addlegendentry{$V_{CE}=2$ V}
-					\addplot[green!50!black,thick,domain=0.42:0.78,samples=80]{exp((x-0.572)/0.04)/exp((0.78-0.572)/0.04)};\addlegendentry{$V_{CE}=3$ V}
+				\begin{axis}[width=\linewidth,height=3.4cm,title={Common-collector (CC)},xlabel={$V_{BC}$ (V)},ylabel={$I_B$ (rel.)},xmin=-3.6,xmax=0,ymin=0,ymax=1.05,xtick={-3,-2,-1,0},ytick=\empty,grid=major,major grid style={gray!20},tick label style={font=\tiny},label style={font=\scriptsize},title style={font=\scriptsize\bfseries},legend style={font=\tiny,draw=none,fill=white,fill opacity=0.85,text opacity=1,at={(0.03,0.97)},anchor=north west,inner sep=1pt},legend cell align=left]
+					% V_BC = V_BE - V_CE: each curve is the same exponential in V_BE = V_BC + V_CE (softened slope so it stays readable over the 1 V spacing), so a larger V_CE shifts it left by 1 V per step
+					\addplot[blue,thick,domain=-3.6:-0.22,samples=300]{exp((x+1-0.78)/0.15)};
+					\node[anchor=east,font=\tiny,text=blue] at (axis cs:-0.30,0.88) {$1$ V};
+					\addplot[orange!90!black,thick,domain=-3.6:-1.22,samples=300]{exp((x+2-0.78)/0.15)};
+					\node[anchor=east,font=\tiny,text=orange!90!black] at (axis cs:-1.30,0.88) {$2$ V};
+					\addplot[green!50!black,thick,domain=-3.6:-2.22,samples=300]{exp((x+3-0.78)/0.15)};
+					\node[anchor=east,font=\tiny,text=green!50!black] at (axis cs:-2.30,0.88) {$3$ V};
 				\end{axis}
 			\end{tikzpicture}
 		\end{minipage}
@@ -255,10 +388,10 @@
 				\end{axis}
 			\end{tikzpicture}
 		\end{minipage}
-		\caption{Qualitative input (top) and output (bottom) characteristics of an NPN BJT in common-base, common-emitter and common-collector configurations. Input families are shown at fixed output voltages and output families at stepped input currents. Current scales and curve shapes are schematic, not to scale; PNP curves have the same qualitative form when plotted as magnitudes.}
+		\caption{Qualitative input (top) and output (bottom) characteristics of an NPN BJT in common-base, common-emitter and common-collector configurations. Input families are shown at fixed output voltages and output families at stepped input currents; the CC input curves are plotted against $V_{BC} = V_{BE} - V_{CE}$, so they are displaced sideways by the $V_{CE}$ step (curves labelled by their $V_{CE}$). Current scales and curve shapes are schematic, not to scale; PNP curves have the same qualitative form when plotted as magnitudes.}
 		\label{fig:theoretical-characteristics}
 	\end{figure}
-	
+
 	The resistances required by the experiment are small-signal quantities,
 	defined by the task sheet as the slopes of the characteristics at the
 	operating point,
@@ -284,7 +417,7 @@
 	output resistance; with a fixed emitter current the CB connection has an
 	output resistance larger than that of the CE and CC connections by roughly
 	a factor of $\beta$, so it is the largest of the three.
-	
+
 	The three operating regions follow from the bias of the two junctions.
 	In cutoff both junctions are reverse biased and all the currents are
 	negligible; it is the trace for zero input current in every output
@@ -294,8 +427,8 @@
 	part at the left of every output family. Between these extremes lies the
 	active region, where the output curves are flat and nearly equally
 	spaced.
-	
-	
+
+
 	% =====================================================================
 	\section{List of Components}
 	% =====================================================================
@@ -320,7 +453,7 @@
 			\hline
 		\end{tabular}
 	\end{table}
-	
+
 	% =====================================================================
 	\section{Working Procedure}
 	% =====================================================================
@@ -423,9 +556,9 @@
 	working procedure, and the swept source is drawn at its nominal value. The
 	currents are probed as \texttt{IC(Q1)}, \texttt{IB(Q1)} and
 	\texttt{IE(Q1)}.
-	
+
 	\subsection{NPN transistor (2N3904) circuits}
-	
+
 	\begin{figure}[H]
 		\centering
 		\schematicpanel{a}{../schematics/cb_input_npn.png}\hfill
@@ -433,7 +566,7 @@
 		\caption{Common-base circuits for the NPN transistor: (a) input-characteristic circuit, $V_{CC} = \SI{5}{\volt}$, $R_E = \SI{1}{\kilo\ohm}$, $V_{EE}$ swept; (b) output-characteristic circuit, $V_{EE} = \SI{0}{\volt}$ (stepped to \SI{5}{\volt}), $R_C = \SI{100}{\ohm}$, $V_{CC}$ swept.}
 		\label{fig:sch-cb-npn}
 	\end{figure}
-	
+
 	\begin{figure}[H]
 		\centering
 		\schematicpanel{a}{../schematics/ce_input_ref_npn.png}\hfill
@@ -441,7 +574,7 @@
 		\caption{Common-emitter circuits for the NPN transistor: (a) input-characteristic circuit, $V_{CC}$ decade swept from 0.01 to \SI{1}{\volt} for the plotted family (the $V_{CC} = \SI{1}{\volt}$ curve is the reference for the input resistance), $R_B = \SI{10}{\kilo\ohm}$, $V_{BB}$ swept; (b) output-characteristic circuit, $V_{BB} = \SI{0}{\volt}$ (stepped to \SI{8}{\volt}), $R_B = \SI{100}{\kilo\ohm}$, $V_{CC}$ swept.}
 		\label{fig:sch-ce-npn}
 	\end{figure}
-	
+
 	\begin{figure}[H]
 		\centering
 		\schematicpanel{a}{../schematics/cc_input_npn.png}\hfill
@@ -449,9 +582,9 @@
 		\caption{Common-collector circuits for the NPN transistor: (a) input-characteristic circuit, collector grounded, $V_{EE} = \SI{0}{\volt}$ (stepped from \SI{-1}{\volt} to \SI{-4}{\volt}), $R_B = \SI{22}{\kilo\ohm}$, $V_{BB}$ swept; (b) output-characteristic circuit, $V_{BB} = \SI{0}{\volt}$ (stepped to \SI{74}{\volt}), $R_B = \SI{1}{\mega\ohm}$, $R_E = \SI{1}{\ohm}$, $V_{EE}$ swept.}
 		\label{fig:sch-cc-npn}
 	\end{figure}
-	
+
 	\subsection{PNP transistor (2N3906) circuits}
-	
+
 	\begin{figure}[H]
 		\centering
 		\schematicpanel{a}{../schematics/cb_input_pnp.png}\hfill
@@ -459,7 +592,7 @@
 		\caption{Common-base circuits for the PNP transistor: (a) input-characteristic circuit, $|V_{CC}| = \SI{5}{\volt}$, $R_E = \SI{1}{\kilo\ohm}$, $V_{EE}$ swept; (b) output-characteristic circuit, $V_{EE} = \SI{0}{\volt}$ (stepped to \SI{5}{\volt}), $R_C = \SI{100}{\ohm}$, $V_{CC}$ swept. The source polarities and the current directions are reversed with respect to Figure~\ref{fig:sch-cb-npn}.}
 		\label{fig:sch-cb-pnp}
 	\end{figure}
-	
+
 	\begin{figure}[H]
 		\centering
 		\schematicpanel{a}{../schematics/ce_input_ref_pnp.png}\hfill
@@ -467,7 +600,7 @@
 		\caption{Common-emitter circuits for the PNP transistor: (a) input-characteristic circuit, $|V_{CC}|$ decade swept from 0.01 to \SI{1}{\volt} for the plotted family (the $|V_{CC}| = \SI{1}{\volt}$ curve is the reference for the input resistance), $R_B = \SI{10}{\kilo\ohm}$, $V_{BB}$ swept; (b) output-characteristic circuit, $|V_{BB}| = \SI{0}{\volt}$ (stepped to \SI{8}{\volt}), $R_B = \SI{100}{\kilo\ohm}$, $V_{CC}$ swept.}
 		\label{fig:sch-ce-pnp}
 	\end{figure}
-	
+
 	\begin{figure}[H]
 		\centering
 		\schematicpanel{a}{../schematics/cc_input_pnp.png}\hfill
@@ -491,14 +624,14 @@
 		\caption{PSpice output: input characteristic of the NPN transistor in CB configuration for $V_{CC} = 5$, 25 and \SI{45}{\volt} ($V_{CB} \approx V_{CC}$). The current rises exponentially above the knee and reaches \SI{4.3}{\milli\ampere} at \SI{0.703}{\volt}; the \SI{45}{\volt} curve lies about \SI{10}{\milli\volt} to the left of the \SI{5}{\volt} curve.}
 		\label{fig:cb-in-npn}
 	\end{figure}
-	
+
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=\textwidth]{cb_output_npn.png}
 		\caption{PSpice output: output characteristic of the NPN transistor in CB configuration for $V_{EE} = 0$ to \SI{5}{\volt}, i.e. $I_E \approx 0$ to \SI{4.3}{\milli\ampere}. The $V_{EE} = 0$ trace along the axis is the cutoff region, saturation lies at negative $V_{CB}$ with the knee at \SI{-0.63}{\volt}, and each active-region trace sits at $I_C \approx 0.994\,I_E$ with a small positive slope.}
 		\label{fig:cb-out-npn}
 	\end{figure}
-	
+
 	\subsubsection{Common-emitter (CE) configuration}
 	\begin{figure}[H]
 		\centering
@@ -506,14 +639,14 @@
 		\caption{PSpice output: input characteristic of the NPN transistor in CE configuration for $V_{CC} = 0.01$, 0.1 and \SI{1}{\volt} (decade sweep, $V_{CE} \approx V_{CC}$). The curves move to the right as $V_{CC}$ increases because the forward bias of the collector junction falls. The two marked points on the $V_{CE} = \SI{1}{\volt}$ curve, \SI{709.95}{\milli\volt} at \SI{32.90}{\micro\ampere} and \SI{724.02}{\milli\volt} at \SI{52.76}{\micro\ampere}, are used for the input resistance.}
 		\label{fig:ce-in-npn}
 	\end{figure}
-	
+
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=\textwidth]{ce_output_npn.png}
 		\caption{PSpice output: output characteristic of the NPN transistor in CE configuration for $V_{BB} = 0$ to \SI{8}{\volt} ($I_B \approx 0$ to \SI{73}{\micro\ampere}). The knee at \SI{0.21}{\volt} separates the saturation region from the active region, where the traces are spaced by about \SI{3.5}{\milli\ampere} per \SI{20}{\micro\ampere}; the $V_{BB} = 0$ trace is the cutoff region.}
 		\label{fig:ce-out-npn}
 	\end{figure}
-	
+
 	\subsubsection{Common-collector (CC) configuration}
 	\begin{figure}[H]
 		\centering
@@ -521,14 +654,14 @@
 		\caption{PSpice output: input characteristic of the NPN transistor in CC configuration for $V_{EE} = -1$, $-2$, $-3$ and \SI{-4}{\volt} ($V_{CE} = 1$, 2, 3 and \SI{4}{\volt}), plotted against $V_{BC}$. The curves are separated by about \SI{1}{\volt} because $V_{BC} = V_{BE} - V_{CE}$; the \SI{4}{\volt} curve is the leftmost.}
 		\label{fig:cc-in-npn}
 	\end{figure}
-	
+
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=\textwidth]{cc_output_npn.png}
 		\caption{PSpice output: output characteristic of the NPN transistor in CC configuration for $V_{BB} = -6$, 14, 34, 54 and \SI{74}{\volt} ($I_B \approx 0$ to \SI{74}{\micro\ampere}). The knee at \SI{0.22}{\volt} separates saturation from the active region, and the emitter current is the largest terminal current, about one base current above the corresponding CE value.}
 		\label{fig:cc-out-npn}
 	\end{figure}
-	
+
 	\newpage
 	The CB input characteristic of Figure~\ref{fig:cb-in-npn} shows the
 	exponential behavior of a forward-biased junction: the emitter current is below
@@ -545,7 +678,7 @@
 	traces also show that the CB connection delivers almost the whole emitter
 	current to the collector, since $\alpha$ differs from unity by only a few
 	parts per thousand.
-	
+
 	The CE input family of Figure~\ref{fig:ce-in-npn} is taken at the edge of
 	saturation, where $V_{CC}$, and with it $V_{CE}$, takes the values 0.01, 0.1 and
 	\SI{1}{\volt}. At the two lower voltages the collector junction is
@@ -574,7 +707,7 @@
 	Figure~\ref{fig:ce-out-npn}; the remaining difference of about
 	\SI{0.1}{\volt} depends on the trace current and on the \SI{90}{\percent}
 	criterion used to read the knee.
-	
+
 	The CC input family of Figure~\ref{fig:cc-in-npn} is plotted against
 	$V_{BC}$, so the four curves are separated by about \SI{1}{\volt} of
 	$V_{CE}$ because $V_{BC} = V_{BE} - V_{CE}$. At $V_{CE} = \SI{4}{\volt}$
@@ -591,7 +724,7 @@
 	at \SI{5}{\volt}. The CC output characteristic therefore has a slope of
 	the same order as the CE one, while its output current is larger by the
 	base current.
-	
+
 	\subsection{Simulated characteristics of the PNP transistor}
 	\subsubsection{Common-base (CB) configuration}
 	\begin{figure}[H]
@@ -600,14 +733,14 @@
 		\caption{PSpice output: input characteristic of the PNP transistor in CB configuration for $|V_{CC}| = 5$, 25 and \SI{45}{\volt}. The curve is the mirror image of Figure~\ref{fig:cb-in-npn} and the shift between the curves is larger, about \SI{25}{\milli\volt}.}
 		\label{fig:cb-in-pnp}
 	\end{figure}
-	
+
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=\textwidth]{cb_output_pnp.png}
 		\caption{PSpice output: output characteristic of the PNP transistor in CB configuration for $|V_{EE}| = 0$ to \SI{5}{\volt}. The saturation knee is at \SI{-0.71}{\volt} in the plotted coordinate and the active traces rise more steeply than for the NPN.}
 		\label{fig:cb-out-pnp}
 	\end{figure}
-	
+
 	\subsubsection{Common-emitter (CE) configuration}
 	\begin{figure}[H]
 		\centering
@@ -615,14 +748,14 @@
 		\caption{PSpice output: input characteristic of the PNP transistor in CE configuration for $|V_{CC}| = 0.01$, 0.1 and \SI{1}{\volt} (decade sweep, $|V_{CE}| \approx |V_{CC}|$). The curves spread to the right with increasing $|V_{CC}|$ in the same way as for the NPN. The two marked points on the $|V_{CE}| = \SI{1}{\volt}$ curve, \SI{751.89}{\milli\volt} at \SI{32.48}{\micro\ampere} and \SI{764.43}{\milli\volt} at \SI{52.36}{\micro\ampere}, are used for the input resistance.}
 		\label{fig:ce-in-pnp}
 	\end{figure}
-	
+
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=\textwidth]{ce_output_pnp.png}
 		\caption{PSpice output: output characteristic of the PNP transistor in CE configuration for $|V_{BB}| = 0$ to \SI{8}{\volt} ($|I_B| \approx 0$ to \SI{73}{\micro\ampere}). The spacing is about \SI{3.7}{\milli\ampere} per \SI{20}{\micro\ampere}, somewhat wider than the NPN spacing, and the traces rise more visibly with $|V_{CE}|$.}
 		\label{fig:ce-out-pnp}
 	\end{figure}
-	
+
 	\subsubsection{Common-collector (CC) configuration}
 	\begin{figure}[H]
 		\centering
@@ -630,7 +763,7 @@
 		\caption{PSpice output: input characteristic of the PNP transistor in CC configuration for $|V_{EE}| = 1$ to \SI{4}{\volt} ($|V_{CE}| = 1$ to \SI{4}{\volt}), plotted against $V_{CB} = -V_{BC}$ (the axis of the figure); the four curves are separated by about \SI{1}{\volt}.}
 		\label{fig:cc-in-pnp}
 	\end{figure}
-	
+
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=\textwidth]{cc_output_pnp.png}
@@ -638,7 +771,7 @@
 		\label{fig:cc-out-pnp}
 	\end{figure}
 	\newpage
-	
+
 	The PNP families in Figures~\ref{fig:cb-in-pnp} to~\ref{fig:cc-out-pnp}
 	show the same features as the NPN families with the polarities reversed.
 	The CB input curve reaches \SI{4.26}{\milli\ampere} at
@@ -650,7 +783,7 @@
 	current rises by \SI{8.56}{\micro\ampere} against \SI{3.08}{\micro\ampere}
 	for the NPN, and the CE current at $I_B = \SI{52.36}{\micro\ampere}$
 	rises by \SI{2.28}{\milli\ampere} over the same span.
-	
+
 	\subsection{Operating regions}
 	In cutoff both junctions are reverse biased; for zero input current, the
 	collector leakage is about \SI{5}{\pico\ampere} for both devices and is
@@ -672,7 +805,7 @@
 	$V_{CE} = \SI{3}{\volt}$ to \SI{58.27}{\micro\ampere} at \SI{5}{\volt},
 	i.e.\ by \SI{2.00}{\micro\ampere}, which equals
 	$\Delta V_{CE}/R_B$ (Table~\ref{tab:readings}).
-	
+
 	\begin{table}[H]
 		\centering
 		\singlespacing
@@ -781,12 +914,12 @@
 				$I_B$ & \SI{58.23}{\micro\ampere}\\
 				$I_E$ & \SI{11.5897}{\milli\ampere}} \\
 			\hline
-			\multicolumn{2}{|c|}{Figures (NPN\,/\,PNP)} & 8, 9\,/\,14, 15 & 10, 11\,/\,16, 17 & 12, 13\,/\,18, 19 \\
+			\multicolumn{2}{|c|}{Figures (NPN\,/\,PNP)} & 11, 12\,/\,17, 18 & 13, 14\,/\,19, 20 & 15, 16\,/\,21, 22 \\
 			\hline
 		\end{tabular}
 	\end{table}
-	
-	
+
+
 	\subsection{Calculation and comparison of current gains and resistances}\label{sec:calc}
 	Using the increments in Table~\ref{tab:readings}, each gain is the
 	output-current change divided by the input-current change between adjacent
@@ -797,7 +930,7 @@
 	in milliamperes (collector/emitter) or microamperes (base), and voltages in
 	millivolts; the substitutions show the unit conversions to amperes and
 	volts.
-	
+
 	\begin{table}[H]
 		\centering
 		\caption{Calculation of the current gains and resistances from the simulated values of Table~\ref{tab:readings}, for the NPN (2N3904) and PNP (2N3906) transistors}
@@ -847,7 +980,7 @@
 			\end{tabular}
 		}
 	\end{table}
-	
+
 	The measured $\beta$ and $\gamma$ are nearly equal, but $\gamma$ is not
 	one above $\beta$ as \eqref{eq:gainrel} requires at a single operating
 	point. The two gains are read at different base currents (NPN, CE: 32.9 to
@@ -869,7 +1002,7 @@
 	The CC input resistance is smaller than the CE value because the CC
 	traces run at slightly larger base currents, where the exponential chord
 	is smaller; both are of the same order.
-	
+
 	The output resistances use the directly read output-current differences,
 	without correcting for the small input-current drift along a trace. For
 	example, in the NPN CB case $I_C$ changes by
@@ -886,11 +1019,11 @@
 	changes are \SI{8.56}{\micro\ampere} in CB and
 	\SI{1.3347}{\milli\ampere} in CC, giving
 	\SI{0.584}{\mega\ohm} and \SI{1.499}{\kilo\ohm}, respectively.
-	
+
 	The PNP gains ($\beta = 188.0$, $\gamma = 185.5$) exceed the NPN gains;
 	its CB, CE and CC output resistances are about 2.8, 4.0 and 2.3 times
 	lower, respectively, consistent with its steeper output traces.
-	
+
 	% =====================================================================
 	\section{Discussion}
 	% =====================================================================
@@ -927,7 +1060,7 @@
 	$V_{CB} \approx \SI{-0.6}{\volt}$ to \SI{-0.7}{\volt}, and therefore at
 	$V_{CE} = V_{CB} + V_{BE}$ of only a fraction of a volt (\SIrange{0.19}{0.22}{\volt}
 	is read from the CE and CC families).
-	
+
 	The model parameters explain the differences between the two devices. The
 	Q2N3904 model card~\cite{ref:evallib} sets the recombination saturation current $I_{SE}$ equal to the transport saturation current $I_S$ (both \SI{6.734}{\femto\ampere}), with a recombination emission coefficient $N_E = 1.259$, so
 	its base current contains a large recombination component; this lowers its
@@ -940,7 +1073,7 @@
 	microamperes in the collector current and a small change in the slope
 	moves it appreciably; it is nevertheless of the order of megohms for both
 	devices.
-	
+
 	The PNP output resistances are lower than the NPN values
 	(\SI{0.584}{\mega\ohm} against \SI{1.62}{\mega\ohm} in CB,
 	\SI{2.190}{\kilo\ohm} against \SI{8.801}{\kilo\ohm} in CE, and
@@ -963,7 +1096,7 @@
 	collector resistance of \SI{1}{\ohm} for the NPN and \SI{2.5}{\ohm} for the PNP~\cite{ref:evallib}); a small-signal AC
 	analysis at the same operating point would give the pure small-signal
 	resistances.
-	
+
 	%\clearpage
 	% =====================================================================
 	\section{References}
@@ -994,5 +1127,5 @@
 			Capture\textbackslash\allowbreak Library\textbackslash\allowbreak
 			Pspice\textbackslash\allowbreak eval.lib}. [Accessed: Nov.~2026].
 	\end{thebibliography}
-	
+
 \end{document}
