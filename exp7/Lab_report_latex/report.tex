@@ -25,6 +25,8 @@
 
 % ----- Graphics, tables, captions, floats -----
 \usepackage{graphicx}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{booktabs}
 \usepackage{caption}
 \usepackage{float}
@@ -167,7 +169,95 @@
 	turns sharply upward. The output characteristic is almost horizontal in
 	the active region, because there the collector current is fixed by the
 	base-emitter voltage rather than by the collector voltage; the slow upward
-	slope of the traces determines the output resistance.
+	slope of the traces determines the output resistance. This slope is the
+	Early effect: a larger collector voltage widens the collector depletion
+	region and narrows the base slightly, so the collector current creeps
+	upward. It is characterized by the Early voltage $V_A$, which gives
+	$r_o \approx (V_A + V_{CE})/I_C$ for the CE connection~\cite{ref:sedra}.
+	Figure~\ref{fig:theoretical-characteristics} sketches these characteristic
+	families for all three configurations. The curves are qualitative, not
+	device-specific simulation results; the input-voltage and current symbols
+	match the definitions used for the resistance calculations below.
+	\begin{figure}[H]
+		\centering
+		\textbf{Input characteristics}\\[2pt]
+		\begin{minipage}[t]{0.32\textwidth}\centering\vspace{0pt}
+			\begin{tikzpicture}
+				\begin{axis}[width=\linewidth,height=3.4cm,title={Common-base (CB)},xlabel={$V_{EB}$ (V)},ylabel={$I_E$ (rel.)},xmin=0.42,xmax=0.78,ymin=0,ymax=1.05,xtick={0.45,0.60,0.75},ytick=\empty,grid=major,major grid style={gray!20},tick label style={font=\tiny},label style={font=\scriptsize},title style={font=\scriptsize\bfseries},legend style={font=\tiny,draw=none,fill=white,fill opacity=0.85,text opacity=1,at={(0.03,0.97)},anchor=north west,inner sep=1pt},legend cell align=left]
+					\addplot[blue,thick,domain=0.42:0.78,samples=80]{exp((x-0.61)/0.04)/exp((0.78-0.59)/0.04)};\addlegendentry{$V_{CB}=0.5$ V}
+					\addplot[orange!90!black,thick,domain=0.42:0.78,samples=80]{exp((x-0.60)/0.04)/exp((0.78-0.59)/0.04)};\addlegendentry{$V_{CB}=2.5$ V}
+					\addplot[green!50!black,thick,domain=0.42:0.78,samples=80]{exp((x-0.59)/0.04)/exp((0.78-0.59)/0.04)};\addlegendentry{$V_{CB}=5$ V}
+				\end{axis}
+			\end{tikzpicture}
+		\end{minipage}\hfill
+		\begin{minipage}[t]{0.32\textwidth}\centering\vspace{0pt}
+			\begin{tikzpicture}
+				\begin{axis}[width=\linewidth,height=3.4cm,title={Common-emitter (CE)},xlabel={$V_{BE}$ (V)},ylabel={$I_B$ (rel.)},xmin=0.42,xmax=0.78,ymin=0,ymax=1.05,xtick={0.45,0.60,0.75},ytick=\empty,grid=major,major grid style={gray!20},tick label style={font=\tiny},label style={font=\scriptsize},title style={font=\scriptsize\bfseries},legend style={font=\tiny,draw=none,fill=white,fill opacity=0.85,text opacity=1,at={(0.03,0.97)},anchor=north west,inner sep=1pt},legend cell align=left]
+					\addplot[blue,thick,domain=0.42:0.78,samples=80]{exp((x-0.60)/0.04)/exp((0.78-0.60)/0.04)};\addlegendentry{$V_{CE}=0.2$ V}
+					\addplot[orange!90!black,thick,domain=0.42:0.78,samples=80]{exp((x-0.612)/0.04)/exp((0.78-0.60)/0.04)};\addlegendentry{$V_{CE}=1$ V}
+					\addplot[green!50!black,thick,domain=0.42:0.78,samples=80]{exp((x-0.624)/0.04)/exp((0.78-0.60)/0.04)};\addlegendentry{$V_{CE}=5$ V}
+				\end{axis}
+			\end{tikzpicture}
+		\end{minipage}\hfill
+		\begin{minipage}[t]{0.32\textwidth}\centering\vspace{0pt}
+			\begin{tikzpicture}
+				\begin{axis}[width=\linewidth,height=3.4cm,title={Common-collector (CC)},xlabel={$V_{BC}$ (V)},ylabel={$I_B$ (rel.)},xmin=0.42,xmax=0.78,ymin=0,ymax=1.05,xtick={0.45,0.60,0.75},ytick=\empty,grid=major,major grid style={gray!20},tick label style={font=\tiny},label style={font=\scriptsize},title style={font=\scriptsize\bfseries},legend style={font=\tiny,draw=none,fill=white,fill opacity=0.85,text opacity=1,at={(0.03,0.97)},anchor=north west,inner sep=1pt},legend cell align=left]
+					\addplot[blue,thick,domain=0.42:0.78,samples=80]{exp((x-0.60)/0.04)/exp((0.78-0.572)/0.04)};\addlegendentry{$V_{CE}=1$ V}
+					\addplot[orange!90!black,thick,domain=0.42:0.78,samples=80]{exp((x-0.586)/0.04)/exp((0.78-0.572)/0.04)};\addlegendentry{$V_{CE}=2$ V}
+					\addplot[green!50!black,thick,domain=0.42:0.78,samples=80]{exp((x-0.572)/0.04)/exp((0.78-0.572)/0.04)};\addlegendentry{$V_{CE}=3$ V}
+				\end{axis}
+			\end{tikzpicture}
+		\end{minipage}
+		\par\smallskip
+		\textbf{Output characteristics}\\[2pt]
+		\begin{minipage}[t]{0.32\textwidth}\centering\vspace{0pt}
+			\begin{tikzpicture}
+				\begin{axis}[width=\linewidth,height=3.4cm,title={Common-base (CB)},xlabel={$V_{CB}$ (V)},ylabel={$I_C$ (rel.)},xmin=-1,xmax=4,ymin=0,ymax=1,xtick={-1,0,2,4},ytick=\empty,grid=major,major grid style={gray!20},tick label style={font=\tiny},label style={font=\scriptsize},title style={font=\scriptsize\bfseries}]
+					\addplot[black,thin,domain=-1:4,samples=80]{0};
+					\addplot[blue,thick,domain=-1:4,samples=80]{0.22/(1+exp(-(x+0.62)/0.075))*(1+0.012*(x+0.62))};
+					\addplot[orange!90!black,thick,domain=-1:4,samples=80]{0.44/(1+exp(-(x+0.62)/0.075))*(1+0.012*(x+0.62))};
+					\addplot[green!50!black,thick,domain=-1:4,samples=80]{0.66/(1+exp(-(x+0.62)/0.075))*(1+0.012*(x+0.62))};
+					\addplot[purple,thick,domain=-1:4,samples=80]{0.88/(1+exp(-(x+0.62)/0.075))*(1+0.012*(x+0.62))};
+					\node[anchor=north east,font=\tiny] at (rel axis cs:0.97,0.97) {$I_E$ increasing};
+					\node[anchor=west,font=\tiny] at (rel axis cs:0.04,0.88) {saturation};
+					\node[font=\tiny] at (rel axis cs:0.67,0.32) {active region};
+					\node[anchor=east,font=\tiny] at (rel axis cs:0.97,0.08) {cutoff};
+				\end{axis}
+			\end{tikzpicture}
+		\end{minipage}\hfill
+		\begin{minipage}[t]{0.32\textwidth}\centering\vspace{0pt}
+			\begin{tikzpicture}
+				\begin{axis}[width=\linewidth,height=3.4cm,title={Common-emitter (CE)},xlabel={$V_{CE}$ (V)},ylabel={$I_C$ (rel.)},xmin=0,xmax=3,ymin=0,ymax=1,xtick={0,1.5,3},ytick=\empty,grid=major,major grid style={gray!20},tick label style={font=\tiny},label style={font=\scriptsize},title style={font=\scriptsize\bfseries}]
+					\addplot[black,thin,domain=0:3,samples=80]{0};
+					\addplot[blue,thick,domain=0:3,samples=80]{0.22/(1+exp(-(x-0.22)/0.075))*(1+0.012*(x-0.22))};
+					\addplot[orange!90!black,thick,domain=0:3,samples=80]{0.44/(1+exp(-(x-0.22)/0.075))*(1+0.012*(x-0.22))};
+					\addplot[green!50!black,thick,domain=0:3,samples=80]{0.66/(1+exp(-(x-0.22)/0.075))*(1+0.012*(x-0.22))};
+					\addplot[purple,thick,domain=0:3,samples=80]{0.88/(1+exp(-(x-0.22)/0.075))*(1+0.012*(x-0.22))};
+					\node[anchor=north east,font=\tiny] at (rel axis cs:0.97,0.97) {$I_B$ increasing};
+					\node[anchor=west,font=\tiny] at (rel axis cs:0.04,0.88) {saturation};
+					\node[font=\tiny] at (rel axis cs:0.67,0.32) {active region};
+					\node[anchor=east,font=\tiny] at (rel axis cs:0.97,0.08) {cutoff};
+				\end{axis}
+			\end{tikzpicture}
+		\end{minipage}\hfill
+		\begin{minipage}[t]{0.32\textwidth}\centering\vspace{0pt}
+			\begin{tikzpicture}
+				\begin{axis}[width=\linewidth,height=3.4cm,title={Common-collector (CC)},xlabel={$V_{EC}$ (V)},ylabel={$I_E$ (rel.)},xmin=0,xmax=3,ymin=0,ymax=1,xtick={0,1.5,3},ytick=\empty,grid=major,major grid style={gray!20},tick label style={font=\tiny},label style={font=\scriptsize},title style={font=\scriptsize\bfseries}]
+					\addplot[black,thin,domain=0:3,samples=80]{0};
+					\addplot[blue,thick,domain=0:3,samples=80]{0.24/(1+exp(-(x-0.22)/0.075))*(1+0.012*(x-0.22))};
+					\addplot[orange!90!black,thick,domain=0:3,samples=80]{0.48/(1+exp(-(x-0.22)/0.075))*(1+0.012*(x-0.22))};
+					\addplot[green!50!black,thick,domain=0:3,samples=80]{0.72/(1+exp(-(x-0.22)/0.075))*(1+0.012*(x-0.22))};
+					\addplot[purple,thick,domain=0:3,samples=80]{0.96/(1+exp(-(x-0.22)/0.075))*(1+0.012*(x-0.22))};
+					\node[anchor=north east,font=\tiny] at (rel axis cs:0.97,0.97) {$I_B$ increasing};
+					\node[anchor=west,font=\tiny] at (rel axis cs:0.04,0.88) {saturation};
+					\node[font=\tiny] at (rel axis cs:0.67,0.32) {active region};
+					\node[anchor=east,font=\tiny] at (rel axis cs:0.97,0.08) {cutoff};
+				\end{axis}
+			\end{tikzpicture}
+		\end{minipage}
+		\caption{Qualitative input (top) and output (bottom) characteristics of an NPN BJT in common-base, common-emitter and common-collector configurations. Input families are shown at fixed output voltages and output families at stepped input currents. Current scales and curve shapes are schematic, not to scale; PNP curves have the same qualitative form when plotted as magnitudes.}
+		\label{fig:theoretical-characteristics}
+	\end{figure}
 	
 	The resistances required by the experiment are small-signal quantities,
 	defined by the task sheet as the slopes of the characteristics at the
@@ -224,7 +314,7 @@
 			\hline
 			3 & DC voltage source & \SI{0}{\volt} to \SI{74}{\volt}, either polarity ($V_{BB}$, $V_{CC}$, $V_{EE}$) & 3 \\
 			\hline
-			4 & Resistors & $R_B = 10$, 22, 100 \si{\kilo\ohm} and \SI{1}{\mega\ohm}; $R_C = 0.1$, 10, 100 \si{\ohm}; $R_E = 0.1$, 1, \SI{1}{\kilo\ohm} & as required \\
+			4 & Resistors & $R_B = 10$, 22, 100 \si{\kilo\ohm} and \SI{1}{\mega\ohm}; $R_C = 0.1$, 10, 100 \si{\ohm}; $R_E = 0.1$, \SI{1}{\ohm} and \SI{1}{\kilo\ohm} & as required \\
 			\hline
 			5 & Simulation software & PSpice & 1 \\
 			\hline
@@ -242,7 +332,8 @@
 		Sweep with a nested sweep, the inner source for the $x$ axis and
 		the outer source for the curves, at the values given in the steps
 		below. The simulations are run at \SI{27}{\celsius} with the standard
-		Gummel-Poon models of the two devices.
+		models of the two devices (Q2N3904 and Q2N3906 from the
+		PSpice evaluation library~\cite{ref:evallib}).
 		\item For the CB input characteristic ground the base and connect
 		$R_E = \SI{1}{\kilo\ohm}$ between $V_{EE}$ and the emitter and
 		$R_C = \SI{0.1}{\ohm}$ between $V_{CC}$ and the collector. Set
@@ -251,7 +342,7 @@
 		against $V_{EB} = -V_E$.
 		\item Repeat the sweep with $V_{CC} = 25$ and \SI{45}{\volt} and
 		place the three curves on the same graph.
-		\item For the CB output characteristic keep the same wiring, sweep
+		\item For the CB output characteristic keep the same wiring but replace $R_C$ by \SI{100}{\ohm}, sweep
 		$V_{CC}$ from \SI{-2}{\volt} to \SI{12}{\volt} in steps of
 		\SI{20}{\milli\volt} and step $V_{EE}$ from \SI{0}{\volt} to
 		\SI{5}{\volt} in steps of \SI{1}{\volt}. Plot $I_C$ against
@@ -310,44 +401,30 @@
 		the current differences.
 		\item Read the CB and CE output currents at \SI{5}{\volt} and
 		\SI{10}{\volt} and the CC output current at \SI{3}{\volt} and
-		\SI{5}{\volt}. Because the stepped supply lets the input current
-		drift slightly along a trace, refer the change of the output
-		current to constant input current through the measured gains of
-		\eqref{eq:gains}, $\Delta I_C|_{I_E} = \Delta I_C - \alpha\,\Delta I_E$
-		(CB), $\Delta I_C|_{I_B} = \Delta I_C - \beta\,\Delta I_B$ (CE) and
-		$\Delta I_E|_{I_B} = \Delta I_E - \gamma\,\Delta I_B$ (CC), before
-		dividing by the voltage difference.
+		\SI{5}{\volt}. Calculate each output resistance from the directly
+		read output-current difference divided by the voltage difference,
+		without correcting for any input-current drift along the trace.
 		\item Repeat steps 1 to 13 with the 2N3906 (task 8), reversing the
 		polarity of every voltage source and plotting all PNP currents
 		as magnitudes.
 		\item Tabulate the simulated gains and resistances and compare the
 		three configurations for both transistors.
 	\end{enumerate}
-	
+	\newpage
 	% =====================================================================
 	\section{Working Diagram}
 	% =====================================================================
-	The twelve measurement circuits are drawn in Figures~\ref{fig:sch-cb-npn}
-	to~\ref{fig:sch-cc-pnp} as PSpice schematics. Each circuit contains the
-	transistor and a DC voltage source behind a series resistor on every
-	terminal that is not grounded. The
-	drawings follow the usual textbook arrangement of the three
-	configurations \cite{ref:theraja}: the terminal that is common to the
-	input and the output is at the bottom and runs straight down to the
-	ground rail, and every other terminal reaches the same rail through its
-	own source and resistor. In the CB circuits the transistor is drawn with the
-	collector on the left, the emitter on the right and the grounded base
-	below. In the CE circuits the base is on the left, the collector is on
-	top and the grounded emitter is below. In the CC circuits the base is on
-	the right, the emitter is on top (leading to the branch on the left) and
-	the grounded collector is below. The
-	PNP circuits use the same arrangement with the PNP symbol, so they are the
-	mirror images of the NPN circuits with the battery polarities and the
-	current directions reversed. The values printed beside the resistors are
-	the ones used in the working procedure. The collector, base and emitter
-	currents are plotted in Probe as \texttt{IC(Q1)}, \texttt{IB(Q1)} and
-	\texttt{IE(Q1)}. The swept source is shown with its
-	nominal DC value; during the run the DC sweep replaces this value.
+	The twelve measurement circuits are shown in Figures~\ref{fig:sch-cb-npn}
+	to~\ref{fig:sch-cc-pnp} as PSpice schematics, following the standard
+	textbook layout \cite{ref:theraja}: the common terminal is grounded at the
+	bottom, and every other terminal is driven by a DC source in series with a
+	resistor. The PNP circuits mirror the NPN ones with reversed source
+	polarities and current directions. Component values are those of the
+	working procedure, and the swept source is drawn at its nominal value. The
+	currents are probed as \texttt{IC(Q1)}, \texttt{IB(Q1)} and
+	\texttt{IE(Q1)}.
+	
+	\subsection{NPN transistor (2N3904) circuits}
 	
 	\begin{figure}[H]
 		\centering
@@ -373,6 +450,8 @@
 		\label{fig:sch-cc-npn}
 	\end{figure}
 	
+	\subsection{PNP transistor (2N3906) circuits}
+	
 	\begin{figure}[H]
 		\centering
 		\schematicpanel{a}{../schematics/cb_input_pnp.png}\hfill
@@ -396,20 +475,14 @@
 		\caption{Common-collector circuits for the PNP transistor: (a) input-characteristic circuit, collector grounded, $|V_{EE}| = \SI{0}{\volt}$ (stepped from \SI{1}{\volt} to \SI{4}{\volt}), $R_B = \SI{22}{\kilo\ohm}$, $V_{BB}$ swept; (b) output-characteristic circuit, $|V_{BB}| = \SI{0}{\volt}$ (stepped to \SI{74}{\volt}), $R_B = \SI{1}{\mega\ohm}$, $R_E = \SI{1}{\ohm}$, $V_{EE}$ swept.}
 		\label{fig:sch-cc-pnp}
 	\end{figure}
-	
+	\newpage
 	% =====================================================================
 	\section{Result Analysis}
 	% =====================================================================
-	Figures~\ref{fig:cb-in-npn} to~\ref{fig:cc-out-pnp} reproduce the twelve
-	characteristic families obtained from the DC sweeps. The CB input curves
-	lie close together, the CE
-	input family spreads out near saturation, the CC input curves are
-	separated by the collector voltage, and the output families fan out in
-	almost equally spaced traces above a cutoff trace along the axis. The
-	currents and voltages read from these curves with the cursor are listed in
-	Table~\ref{tab:readings}, the current gains and resistances are calculated
-	from them and compared in Section~\ref{sec:calc} (Table~\ref{tab:summary}).
-	
+	The twelve characteristic families are shown in Figures~\ref{fig:cb-in-npn}
+	to~\ref{fig:cc-out-pnp}. Cursor readings are listed in
+	Table~\ref{tab:readings}; the gains and resistances calculated from them
+	are compared in Section~\ref{sec:calc} (Table~\ref{tab:summary}).
 	\subsection{Simulated characteristics of the NPN transistor}
 	\subsubsection{Common-base (CB) configuration}
 	\begin{figure}[H]
@@ -456,6 +529,7 @@
 		\label{fig:cc-out-npn}
 	\end{figure}
 	
+	\newpage
 	The CB input characteristic of Figure~\ref{fig:cb-in-npn} shows the
 	exponential behavior of a forward-biased junction: the emitter current is below
 	\SI{0.1}{\milli\ampere} at \SI{0.58}{\volt}, reaches
@@ -563,6 +637,7 @@
 		\caption{PSpice output: output characteristic of the PNP transistor in CC configuration for $V_{BB} = -6$, 14, 34, 54 and \SI{74}{\volt} (source values with reversed battery polarity; $|I_B| \approx 0$ to \SI{74}{\micro\ampere}). The emitter current reaches \SI{11.59}{\milli\ampere} at $|V_{CE}| = \SI{5}{\volt}$ for the 54 V step.}
 		\label{fig:cc-out-pnp}
 	\end{figure}
+	\newpage
 	
 	The PNP families in Figures~\ref{fig:cb-in-pnp} to~\ref{fig:cc-out-pnp}
 	show the same features as the NPN families with the polarities reversed.
@@ -572,43 +647,38 @@
 	saturation current of the model, which is smaller for the 2N3906 than
 	for the 2N3904. The \SI{45}{\volt} curve is shifted by about
 	\SI{25}{\milli\volt}. The PNP output families rise more steeply: between \SI{5}{\volt} and \SI{10}{\volt} the CB
-	current rises by \SI{8.5}{\micro\ampere} against \SI{3.1}{\micro\ampere}
+	current rises by \SI{8.56}{\micro\ampere} against \SI{3.08}{\micro\ampere}
 	for the NPN, and the CE current at $I_B = \SI{52.36}{\micro\ampere}$
 	rises by \SI{2.28}{\milli\ampere} over the same span.
 	
 	\subsection{Operating regions}
-	The operating regions were identified from the output families as
-	described in step 10 of the procedure. In cutoff both junctions are
-	reverse biased, so the collector current for zero input current is only a
-	leakage of about \SI{5}{\pico\ampere} for both devices, indistinguishable
-	from the axis in the plots. The saturation knee is the lowest output
-	voltage at which the trace has reached \SI{90}{\percent} of its value
-	just inside the active region; to the left of it the collector junction
-	is forward biased. The knees read from the output families are
+	In cutoff both junctions are reverse biased; for zero input current, the
+	collector leakage is about \SI{5}{\pico\ampere} for both devices and is
+	indistinguishable from the axis. The saturation knee is the lowest output
+	voltage at which the trace reaches \SI{90}{\percent} of its value just
+	inside the active region. The knees read from the output families are
 	$V_{CB} = \SI{-0.63}{\volt}$ (NPN) and \SI{-0.71}{\volt} (PNP) in the
 	CB family, $|V_{CE}| = \SI{0.21}{\volt}$ (NPN) and \SI{0.19}{\volt}
 	(PNP) in the CE family, and \SI{0.22}{\volt} (NPN) and
-	\SI{0.19}{\volt} (PNP) in the CC family. The active region is everything
-	to the right of the knee up to the end of the sweep, with the
-	base-emitter junction forward biased.
-	
+	\SI{0.19}{\volt} (PNP) in the CC family. To the right of each knee, the
+	base-emitter junction is forward biased and the transistor is in the
+	active region.
+	\newpage
 	\subsection{Values read from the simulated characteristics}
-	The simulated quantities are obtained from the currents and voltages read
-	from the curves with the cursor (Table~\ref{tab:readings}). The trace is
-	identified by its stepped source value, and the base or emitter current
-	listed in the table is the true simulated current of that trace; because
-	these currents differ slightly between the two transistors they are
-	listed separately for each. In the CC output family the base current
-	of the \SI{54}{\volt} trace changes from \SI{56.27}{\micro\ampere} at
+	Table~\ref{tab:readings} lists cursor readings by stepped-source trace,
+	including each transistor's simulated base or emitter current. In the CC
+	output family, the base current of the \SI{54}{\volt} trace changes from
+	\SI{56.27}{\micro\ampere} at
 	$V_{CE} = \SI{3}{\volt}$ to \SI{58.27}{\micro\ampere} at \SI{5}{\volt},
 	i.e.\ by \SI{2.00}{\micro\ampere}, which equals
 	$\Delta V_{CE}/R_B$ (Table~\ref{tab:readings}).
 	
 	\begin{table}[H]
 		\centering
+		\singlespacing
 		\caption{Values read with the Probe cursor from the simulated characteristics of Figures~\ref{fig:cb-in-npn} to~\ref{fig:cc-out-pnp}, arranged by the quantity they are used for in Table~\ref{tab:summary}}
 		\label{tab:readings}
-		\renewcommand{\arraystretch}{1.3}
+		\renewcommand{\arraystretch}{1.0}
 		\footnotesize
 		\setlength{\tabcolsep}{3pt}
 		\newcommand{\rc}[1]{\begin{tabular}[c]{@{}r@{\,=\,}l@{}}#1\end{tabular}}
@@ -664,20 +734,20 @@
 			& \rc{\tr{34 V step}
 				$I_B$ & \SI{38.24}{\micro\ampere}\\
 				$I_E$ & \SI{7.8827}{\milli\ampere}\\
-				$V_{CB}$\textsuperscript{b} & \SI{-3.2431}{\volt}\\[3pt]
+				$V_{CB}$ & \SI{-3.2431}{\volt}\\[3pt]
 				\tr{54 V step}
 				$I_B$ & \SI{58.23}{\micro\ampere}\\
 				$I_E$ & \SI{11.5897}{\milli\ampere}\\
-				$V_{CB}$\textsuperscript{b} & \SI{-3.2316}{\volt}} \\
+				$V_{CB}$ & \SI{-3.2316}{\volt}} \\
 			\hline
 			\multirow{2}{*}{\shortstack{Output\\resistance}}
 			& NPN
 			& \rc{\tr{$V_{CB}=\SI{5}{\volt}$}
 				$I_E$ & \SI{4.2970}{\milli\ampere}\\
-				$I_C$ & \SI{4.2710}{\milli\ampere}\\[3pt]
+				$I_C$ & \SI{4.27099}{\milli\ampere}\\[3pt]
 				\tr{$V_{CB}=\SI{10}{\volt}$}
 				$I_E$ & \SI{4.2987}{\milli\ampere}\\
-				$I_C$ & \SI{4.2741}{\milli\ampere}}
+				$I_C$ & \SI{4.27407}{\milli\ampere}}
 			& \rc{\tr{$V_{CE}=\SI{5}{\volt}$}
 				$I_B$ & \SI{52.76}{\micro\ampere}\\
 				$I_C$ & \SI{8.8968}{\milli\ampere}\\[3pt]
@@ -694,10 +764,10 @@
 			& PNP
 			& \rc{\tr{$V_{CB}=\SI{5}{\volt}$}
 				$I_E$ & \SI{4.2617}{\milli\ampere}\\
-				$I_C$ & \SI{4.2424}{\milli\ampere}\\[3pt]
+				$I_C$ & \SI{4.24239}{\milli\ampere}\\[3pt]
 				\tr{$V_{CB}=\SI{10}{\volt}$}
 				$I_E$ & \SI{4.2668}{\milli\ampere}\\
-				$I_C$ & \SI{4.2509}{\milli\ampere}}
+				$I_C$ & \SI{4.25095}{\milli\ampere}}
 			& \rc{\tr{$V_{CE}=\SI{5}{\volt}$}
 				$I_B$ & \SI{52.36}{\micro\ampere}\\
 				$I_C$ & \SI{10.4717}{\milli\ampere}\\[3pt]
@@ -711,31 +781,22 @@
 				$I_B$ & \SI{58.23}{\micro\ampere}\\
 				$I_E$ & \SI{11.5897}{\milli\ampere}} \\
 			\hline
-			\multicolumn{2}{|c|}{Figures (NPN\,/\,PNP)} & 7, 8\,/\,13, 14 & 9, 10\,/\,15, 16 & 11, 12\,/\,17, 18 \\
+			\multicolumn{2}{|c|}{Figures (NPN\,/\,PNP)} & 8, 9\,/\,14, 15 & 10, 11\,/\,16, 17 & 12, 13\,/\,18, 19 \\
 			\hline
 		\end{tabular}
 	\end{table}
 	
 	
 	\subsection{Calculation and comparison of current gains and resistances}\label{sec:calc}
-	The gains and resistances of \eqref{eq:gains} and \eqref{eq:resdef} are
-	increments, so they are calculated from the values of
-	Table~\ref{tab:readings}. Each current gain is the increment of the
-	output current divided by the increment of the input current between two
-	neighbouring traces of the output family, each input resistance is the
-	voltage difference divided by the current difference on the input
-	characteristic, and each output resistance is the voltage difference
-	divided by the current difference on the output characteristic at
-	constant input current. Table~\ref{tab:summary} shows the formula, the
-	substitution and the result for each of the three configurations of both transistors,
-	so that they can also be compared side by side. In the substitutions the
-	collector and emitter currents are read in milliamperes, the base currents
-	in microamperes and the input voltages in millivolts; wherever the
-	numerator and the denominator of a ratio are in different units, the
-	factors of $10^{-3}$ and $10^{-6}$ that convert them to volts and
-	amperes are written out, so that every result follows directly from its
-	substitution. The output-resistance substitutions are likewise in volts
-	and amperes.
+	Using the increments in Table~\ref{tab:readings}, each gain is the
+	output-current change divided by the input-current change between adjacent
+	traces; input and output resistances are the corresponding voltage-to-current
+	ratio on each characteristic, with output resistance measured at constant
+	input current. Table~\ref{tab:summary} gives the formulas, substitutions
+	and results for all configurations and both transistors. Currents are read
+	in milliamperes (collector/emitter) or microamperes (base), and voltages in
+	millivolts; the substitutions show the unit conversions to amperes and
+	volts.
 	
 	\begin{table}[H]
 		\centering
@@ -745,44 +806,46 @@
 		\footnotesize
 		\setlength{\tabcolsep}{1pt}
 		\newcommand{\cell}[3]{\begin{tabular}[c]{@{}c@{}}\rule{0pt}{3.6ex}#1\\[8pt]#2\\[4pt]#3\rule[-2ex]{0pt}{1ex}\end{tabular}}
-		\begin{tabular}{|>{\centering\arraybackslash}m{2.4cm}|c|c|c|c|}
-			\hline
-			\textbf{Parameters} & \textbf{BJT Type} & \textbf{Common Base} & \textbf{Common Emitter} & \textbf{Common Collector} \\
-			\hline
-			\multirow{2}{*}{Current gain}
-			& NPN
-			& \cell{$\alpha = \dfrac{\Delta I_C}{\Delta I_E}$}{$= \dfrac{4.2710-3.2838}{4.2970-3.3042}$}{$= 0.9944$}
-			& \cell{$\beta = \dfrac{\Delta I_C}{\Delta I_B}$}{$= \dfrac{(8.8968-5.4403)\times10^{-3}}{(52.7598-32.9005)\times10^{-6}}$}{$= 174.0$}
-			& \cell{$\gamma = \dfrac{\Delta I_E}{\Delta I_B}$}{$= \dfrac{(9.8973-6.4236)\times10^{-3}}{(58.2730-38.2855)\times10^{-6}}$}{$= 173.8$} \\
-			\cline{2-5}
-			& PNP
-			& \cell{$\alpha = \dfrac{\Delta I_C}{\Delta I_E}$}{$= \dfrac{4.2424-3.2542}{4.2617-3.2688}$}{$= 0.9953$}
-			& \cell{$\beta = \dfrac{\Delta I_C}{\Delta I_B}$}{$= \dfrac{(10.4717-6.7351)\times10^{-3}}{(52.3557-32.4811)\times10^{-6}}$}{$= 188.0$}
-			& \cell{$\gamma = \dfrac{\Delta I_E}{\Delta I_B}$}{$= \dfrac{(11.5897-7.8827)\times10^{-3}}{(58.2328-38.2438)\times10^{-6}}$}{$= 185.5$} \\
-			\hline
-			\multirow{2}{*}{\shortstack{Input resistance\\($R_{\mathrm{in}}$)}}
-			& NPN
-			& \cell{$\dfrac{\Delta V_{EB}}{\Delta I_E}$}{$= \dfrac{702.97-695.78}{4.2970-3.3042}$}{$= \SI{7.242}{\ohm}$}
-			& \cell{$\dfrac{\Delta V_{BE}}{\Delta I_B}$}{$= \dfrac{(724.02-709.95)\times10^{-3}}{(52.7598-32.9005)\times10^{-6}}$}{$= \SI{708.5}{\ohm}$}
-			& \cell{$\dfrac{\Delta V_{BC}}{\Delta I_B}$}{$= \dfrac{-3.2720+3.2849}{(58.2730-38.2855)\times10^{-6}}$}{$= \SI{645.4}{\ohm}$} \\
-			\cline{2-5}
-			& PNP
-			& \cell{$\dfrac{\Delta V_{EB}}{\Delta I_E}$}{$= \dfrac{738.30-731.15}{4.2617-3.2688}$}{$= \SI{7.201}{\ohm}$}
-			& \cell{$\dfrac{\Delta V_{BE}}{\Delta I_B}$}{$= \dfrac{(764.43-751.89)\times10^{-3}}{(52.3557-32.4811)\times10^{-6}}$}{$= \SI{631.0}{\ohm}$}
-			& \cell{$\dfrac{\Delta V_{BC}}{\Delta I_B}$}{$= \dfrac{-3.2316+3.2431}{(58.2328-38.2438)\times10^{-6}}$}{$= \SI{575.3}{\ohm}$} \\
-			\hline
-			\multirow{2}{*}{\shortstack{Output resistance\\($R_{\mathrm{out}}$)}}
-			& NPN
-			& \cell{$\dfrac{\Delta V_{CB}}{\Delta I_C-\alpha\,\Delta I_E}$}{$= \dfrac{10-5}{1.43\times10^{-6}}$}{$= \SI{3.497}{\mega\ohm}$}
-			& \cell{$\dfrac{\Delta V_{CE}}{\Delta I_C-\beta\,\Delta I_B}$}{$= \dfrac{10-5}{(9.4649-8.8968)\times10^{-3}}$}{$= \SI{8.801}{\kilo\ohm}$}
-			& \cell{$\dfrac{\Delta V_{EC}}{\Delta I_E-\gamma\,\Delta I_B}$}{$= \dfrac{5-3}{0.2376\times10^{-3}}$}{$= \SI{8.418}{\kilo\ohm}$} \\
-			\cline{2-5}
-			& PNP
-			& \cell{$\dfrac{\Delta V_{CB}}{\Delta I_C-\alpha\,\Delta I_E}$}{$= \dfrac{10-5}{3.46\times10^{-6}}$}{$= \SI{1.445}{\mega\ohm}$}
-			& \cell{$\dfrac{\Delta V_{CE}}{\Delta I_C-\beta\,\Delta I_B}$}{$= \dfrac{10-5}{(12.7545-10.4717)\times10^{-3}}$}{$= \SI{2.190}{\kilo\ohm}$}
-			& \cell{$\dfrac{\Delta V_{EC}}{\Delta I_E-\gamma\,\Delta I_B}$}{$= \dfrac{5-3}{0.964\times10^{-3}}$}{$= \SI{2.075}{\kilo\ohm}$} \\
-			\hline
-		\end{tabular}
+		\resizebox{0.98\textwidth}{!}{%
+			\begin{tabular}{|>{\centering\arraybackslash}m{2.4cm}|c|c|c|c|}
+				\hline
+				\textbf{Parameters} & \textbf{BJT Type} & \textbf{Common Base} & \textbf{Common Emitter} & \textbf{Common Collector} \\
+				\hline
+				\multirow{2}{*}{Current gain}
+				& NPN
+				& \cell{$\alpha = \dfrac{\Delta I_C}{\Delta I_E}$}{$= \dfrac{4.2710-3.2838}{4.2970-3.3042}$}{$= 0.9944$}
+				& \cell{$\beta = \dfrac{\Delta I_C}{\Delta I_B}$}{$= \dfrac{(8.8968-5.4403)\times10^{-3}}{(52.7598-32.9005)\times10^{-6}}$}{$= 174.0$}
+				& \cell{$\gamma = \dfrac{\Delta I_E}{\Delta I_B}$}{$= \dfrac{(9.8973-6.4236)\times10^{-3}}{(58.2730-38.2855)\times10^{-6}}$}{$= 173.8$} \\
+				\cline{2-5}
+				& PNP
+				& \cell{$\alpha = \dfrac{\Delta I_C}{\Delta I_E}$}{$= \dfrac{4.2424-3.2542}{4.2617-3.2688}$}{$= 0.9953$}
+				& \cell{$\beta = \dfrac{\Delta I_C}{\Delta I_B}$}{$= \dfrac{(10.4717-6.7351)\times10^{-3}}{(52.3557-32.4811)\times10^{-6}}$}{$= 188.0$}
+				& \cell{$\gamma = \dfrac{\Delta I_E}{\Delta I_B}$}{$= \dfrac{(11.5897-7.8827)\times10^{-3}}{(58.2328-38.2438)\times10^{-6}}$}{$= 185.5$} \\
+				\hline
+				\multirow{2}{*}{\shortstack{Input resistance\\($R_{\mathrm{in}}$)}}
+				& NPN
+				& \cell{$\dfrac{\Delta V_{EB}}{\Delta I_E}$}{$= \dfrac{702.97-695.78}{4.2970-3.3042}$}{$= \SI{7.242}{\ohm}$}
+				& \cell{$\dfrac{\Delta V_{BE}}{\Delta I_B}$}{$= \dfrac{(724.02-709.95)\times10^{-3}}{(52.7598-32.9005)\times10^{-6}}$}{$= \SI{708.5}{\ohm}$}
+				& \cell{$\dfrac{\Delta V_{BC}}{\Delta I_B}$}{$= \dfrac{-3.2720+3.2849}{(58.2730-38.2855)\times10^{-6}}$}{$= \SI{645.4}{\ohm}$} \\
+				\cline{2-5}
+				& PNP
+				& \cell{$\dfrac{\Delta V_{EB}}{\Delta I_E}$}{$= \dfrac{738.30-731.15}{4.2617-3.2688}$}{$= \SI{7.201}{\ohm}$}
+				& \cell{$\dfrac{\Delta V_{BE}}{\Delta I_B}$}{$= \dfrac{(764.43-751.89)\times10^{-3}}{(52.3557-32.4811)\times10^{-6}}$}{$= \SI{631.0}{\ohm}$}
+				& \cell{$\dfrac{\Delta V_{CB}}{\Delta I_B}$}{$= \dfrac{-3.2316+3.2431}{(58.2328-38.2438)\times10^{-6}}$}{$= \SI{575.3}{\ohm}$} \\
+				\hline
+				\multirow{2}{*}{\shortstack{Output resistance\\($R_{\mathrm{out}}$)}}
+				& NPN
+				& \cell{$\dfrac{\Delta V_{CB}}{\Delta I_C}$}{$= \dfrac{10-5}{(4.27407-4.27099)\times10^{-3}}$}{$= \SI{1.62}{\mega\ohm}$}
+				& \cell{$\dfrac{\Delta V_{CE}}{\Delta I_C}$}{$= \dfrac{10-5}{(9.4649-8.8968)\times10^{-3}}$}{$= \SI{8.801}{\kilo\ohm}$}
+				& \cell{$\dfrac{\Delta V_{EC}}{\Delta I_E}$}{$= \dfrac{5-3}{(9.8973-9.3121)\times10^{-3}}$}{$= \SI{3.418}{\kilo\ohm}$} \\
+				\cline{2-5}
+				& PNP
+				& \cell{$\dfrac{\Delta V_{CB}}{\Delta I_C}$}{$= \dfrac{10-5}{(4.25095-4.24239)\times10^{-3}}$}{$= \SI{0.584}{\mega\ohm}$}
+				& \cell{$\dfrac{\Delta V_{CE}}{\Delta I_C}$}{$= \dfrac{10-5}{(12.7545-10.4717)\times10^{-3}}$}{$= \SI{2.190}{\kilo\ohm}$}
+				& \cell{$\dfrac{\Delta V_{EC}}{\Delta I_E}$}{$= \dfrac{5-3}{(11.5897-10.2550)\times10^{-3}}$}{$= \SI{1.499}{\kilo\ohm}$} \\
+				\hline
+			\end{tabular}
+		}
 	\end{table}
 	
 	The measured $\beta$ and $\gamma$ are nearly equal, but $\gamma$ is not
@@ -791,42 +854,42 @@
 	\SI{52.8}{\micro\ampere}, an increment of \SI{19.86}{\micro\ampere}; CC:
 	38.3 to \SI{58.3}{\micro\ampere}, an increment of
 	\SI{19.99}{\micro\ampere}) and the differential gain of the model varies
-	with the current, so a difference of one cannot be resolved between them.
+	with the current, so they are not expected to differ by exactly one. That \eqref{eq:gainrel}
+	itself holds can be checked from the CC readings. The collector current
+	is not read in the CC family, but \eqref{eq:kcl} gives, for the NPN,
+	$\Delta I_C = \Delta I_E - \Delta I_B = 3.4737 - 0.0200 =
+	\SI{3.4537}{\milli\ampere}$, so at the CC bias points
+	$\beta = \SI{3.4537}{\milli\ampere}/\SI{19.99}{\micro\ampere} = 172.8$ and
+	$\gamma = 173.8 = 1 + 172.8$. The PNP behaves in the same way
+	($\Delta I_C = 3.7070 - 0.0200 = \SI{3.6870}{\milli\ampere}$, giving
+	$\beta = 184.5$ and $\gamma = 185.5 = 1 + 184.5$). The small differences
+	between these values of $\beta$ and the CE values (174.0 and 188.0) are
+	therefore due to the different bias points, not to a failure of
+	\eqref{eq:gainrel}.
 	The CC input resistance is smaller than the CE value because the CC
 	traces run at slightly larger base currents, where the exponential chord
 	is smaller; both are of the same order.
 	
-	Because the stepped supply lets the input current drift slightly along a
-	trace, the change of the output current in the output-resistance
-	substitutions is first referred to constant input current with the
-	measured gains of \eqref{eq:gains}: $\Delta I_C|_{I_E} = \Delta I_C -
-	\alpha\,\Delta I_E$ for CB, $\Delta I_C|_{I_B} = \Delta I_C -
-	\beta\,\Delta I_B$ for CE and $\Delta I_E|_{I_B} = \Delta I_E -
-	\gamma\,\Delta I_B$ for CC. For the NPN device in the CB case the
-	collector current of the highest trace changes by
-	\SI{3.08}{\micro\ampere} between \SI{5}{\volt} and \SI{10}{\volt} while
-	$I_E$ drifts by \SI{1.66}{\micro\ampere} (from 4.2970 to
-	\SI{4.2987}{\milli\ampere} when rounded; Table~\ref{tab:readings}), so that, with
-	$\alpha = 0.9944$, the effective change is
-	$3.08 - 0.9944\times1.66 = \SI{1.43}{\micro\ampere}$. In the CC case
-	$I_E$ of the fourth trace changes by \SI{0.5852}{\milli\ampere} between
-	\SI{3}{\volt} and \SI{5}{\volt} while $I_B$ changes by
-	\SI{2.00}{\micro\ampere} (\SI{56.27}{} to \SI{58.27}{\micro\ampere}, Table~\ref{tab:readings}); with $\gamma = 173.8$ the
-	effective change is
-	$0.5852 - 173.8\times0.00200 = \SI{0.2376}{\milli\ampere}$. The CE family
-	needs no correction because its base current is constant along a trace
-	($\Delta I_B = 0$). For the PNP device the same corrections are used: with
-	$\alpha = 0.9953$ the CB collector-current change of
-	\SI{8.5}{\micro\ampere} (Table~\ref{tab:readings}) reduces to
-	\SI{3.46}{\micro\ampere} at constant $I_E$, and in the CC case
-	$1.3347 - 185.5\times0.00200 = \SI{0.964}{\milli\ampere}$ at constant
-	$I_B$.
+	The output resistances use the directly read output-current differences,
+	without correcting for the small input-current drift along a trace. For
+	example, in the NPN CB case $I_C$ changes by
+	\SI{3.08}{\micro\ampere} between \SI{5}{\volt} and \SI{10}{\volt},
+	while $I_E$ drifts by \SI{1.7}{\micro\ampere}; the resistance is
+	therefore \SI{5}{\volt}/\SI{3.08}{\micro\ampere} =
+	\SI{1.62}{\mega\ohm}; the CB values are quoted to three significant
+	figures because the small collector-current differences are known to only
+	three digits. In the NPN CC case $I_E$ changes by
+	\SI{0.5852}{\milli\ampere} between \SI{3}{\volt} and \SI{5}{\volt},
+	while $I_B$ drifts by \SI{2.00}{\micro\ampere}; using the raw change
+	gives \SI{2}{\volt}/\SI{0.5852}{\milli\ampere} =
+	\SI{3.418}{\kilo\ohm}. For PNP, the corresponding raw output-current
+	changes are \SI{8.56}{\micro\ampere} in CB and
+	\SI{1.3347}{\milli\ampere} in CC, giving
+	\SI{0.584}{\mega\ohm} and \SI{1.499}{\kilo\ohm}, respectively.
 	
-	The table shows that the PNP current gains, $\beta = 188.0$ and
-	$\gamma = 185.5$, are higher than those of the NPN, while its output
-	resistances $R_{\mathrm{out,CB}}$, $R_{\mathrm{out,CE}}$ and
-	$R_{\mathrm{out,CC}}$ are about 2.4, 4.0 and 4.1 times lower than the NPN
-	values, which shows up as visibly steeper output traces.
+	The PNP gains ($\beta = 188.0$, $\gamma = 185.5$) exceed the NPN gains;
+	its CB, CE and CC output resistances are about 2.8, 4.0 and 2.3 times
+	lower, respectively, consistent with its steeper output traces.
 	
 	% =====================================================================
 	\section{Discussion}
@@ -834,19 +897,30 @@
 	The simulated families reproduce the expected behavior of the three
 	configurations. The CB connection gives a current gain just below unity,
 	the smallest input resistance (\SI{7.242}{\ohm}) and the largest output
-	resistance (\SI{3.497}{\mega\ohm}); the CE connection gives a large
+	resistance (\SI{1.62}{\mega\ohm}); the CE connection gives a large
 	current gain and an input resistance about ninety-eight times larger
-	(\SI{708.5}{\ohm}), with an output resistance about four hundred times
+	(\SI{708.5}{\ohm}), with an output resistance about 184 times
 	smaller (\SI{8.801}{\kilo\ohm}); the CC connection repeats the CE input
 	characteristic and delivers the emitter current as its output, with a
-	current gain of \num{173.8} and an output resistance of
-	\SI{8.418}{\kilo\ohm}, of the same order as the CE value.
-	Table~\ref{tab:summary} shows these trends for both polarities, and they
-	explain why a CB stage is used as a current buffer, a CC stage as a
-	voltage buffer and a CE stage for gain. The measured $\gamma$ is nearly equal to
-	$\beta$ but does not exceed it by one,
-	because the two gains are read at different base currents and the
-	differential gain of the model varies with the current. The cutoff,
+	current gain of \num{173.8} and an input resistance of
+	\SI{645.4}{\ohm}, of the same order as the CE value. Its output
+	resistance of \SI{3.418}{\kilo\ohm} is lower than the CE value, but this
+	should not be read as a genuine difference between the configurations: the
+	base current was not constant along the CC traces (it drifts by
+	\SI{2.00}{\micro\ampere} between \SI{3}{\volt} and \SI{5}{\volt}), and
+	the raw change in emitter current used in Table~\ref{tab:summary}
+	includes the effect of this drift. Table~\ref{tab:summary} therefore
+	supports the CB and CE trends clearly, while for CC it shows a gain and
+	an input resistance close to the CE values. The usual roles of the three
+	stages (CB as a current buffer, CE for gain and CC as a voltage buffer)
+	are textbook results~\cite{ref:sedra,ref:theraja}; the voltage-buffer
+	behavior of CC, which appears when a load is connected, is not
+	demonstrated by the fixed-$V_{CE}$ chord slopes of Table~\ref{tab:summary}.
+	The measured $\gamma$ is nearly equal to $\beta$ but does not exceed it
+	by one, because the two gains are read at different base currents and the
+	differential gain of the model varies with the current; Section~\ref{sec:calc}
+	shows that $\gamma$ is exactly one more than $\beta$ evaluated at the CC
+	bias points. The cutoff,
 	active and saturation regions identified above agree with the
 	junction-bias picture of Section~\ref{sec:theory}: the saturation knee
 	lies where the collector junction becomes forward biased, at
@@ -855,11 +929,11 @@
 	is read from the CE and CC families).
 	
 	The model parameters explain the differences between the two devices. The
-	2N3904 model card sets the recombination saturation current $I_{SE}$ equal to the transport saturation current $I_S$, with an ideality factor of 1.259, so
+	Q2N3904 model card~\cite{ref:evallib} sets the recombination saturation current $I_{SE}$ equal to the transport saturation current $I_S$ (both \SI{6.734}{\femto\ampere}), with a recombination emission coefficient $N_E = 1.259$, so
 	its base current contains a large recombination component; this lowers its
 	current gain at \SI{10}{\milli\ampere} to about 170 and makes
 	$\Delta V_{BE}$ larger for a given ratio of base currents, which gives the
-	higher NPN input resistances. The PNP model has $I_{SE} = 0$, so its base
+	higher NPN input resistances. The Q2N3906 model has $I_{SE} = 0$~\cite{ref:evallib}, so its base
 	current is nearly ideal, and it shows higher current gains and lower input
 	resistances than the NPN. The CB output resistance is the most sensitive
 	of the readings, because it follows from a change of only a few
@@ -867,16 +941,26 @@
 	moves it appreciably; it is nevertheless of the order of megohms for both
 	devices.
 	
-	The PNP output resistances are about four times lower than the NPN
-	values (\SI{2.19}{\kilo\ohm} against \SI{8.80}{\kilo\ohm} in CE, and
-	\SI{2.08}{\kilo\ohm} against \SI{8.42}{\kilo\ohm} in CC), which means
-	steeper output traces. The CC
+	The PNP output resistances are lower than the NPN values
+	(\SI{0.584}{\mega\ohm} against \SI{1.62}{\mega\ohm} in CB,
+	\SI{2.190}{\kilo\ohm} against \SI{8.801}{\kilo\ohm} in CE, and
+	\SI{1.499}{\kilo\ohm} against \SI{3.418}{\kilo\ohm} in CC), which means
+	steeper output traces. In the CE family this is the Early effect: the
+	PSpice model cards~\cite{ref:evallib} give an Early voltage $V_{AF}$ of
+	\SI{74.03}{\volt} for the 2N3904 and \SI{18.7}{\volt} for the 2N3906, a ratio of about
+	four, which matches the ratio of the CE output resistances (4.0).
+	With $r_o \approx (V_A + V_{CE})/I_C$ at $V_{CE} = \SI{5}{\volt}$ one
+	obtains $(74 + 5)/\SI{8.897}{\milli\ampere} \approx \SI{8.9}{\kilo\ohm}$
+	for the NPN and $(18.7 + 5)/\SI{10.47}{\milli\ampere} \approx
+	\SI{2.3}{\kilo\ohm}$ for the PNP, within about 1\,\% and 3\,\% of the
+	values read from the traces. The CC
 	input characteristic is plotted against $V_{BC}$ because that is the
 	variable of the task-sheet resistance; at constant $V_{CE}$ it differs
 	from $V_{BE}$ only by the constant $V_{CE}$, so the four curves are
 	shifted sideways by \SI{1}{\volt} each. The main limitation is that all
 	the resistances are chord slopes of DC characteristics, so they include
-	the series base and collector resistances of the model; a small-signal AC
+	the series base and collector resistances of the model (\SI{10}{\ohm} base resistance for both devices and
+	collector resistance of \SI{1}{\ohm} for the NPN and \SI{2.5}{\ohm} for the PNP~\cite{ref:evallib}); a small-signal AC
 	analysis at the same operating point would give the pure small-signal
 	resistances.
 	
@@ -903,6 +987,12 @@
 		Apr.~2014. [Online]. Available:
 		https://www.farnell.com/datasheets/2277422.pdf. [Accessed:
 		Nov.~21, 2026].
+		\bibitem{ref:evallib} Cadence Design Systems, ``PSpice evaluation
+		library \texttt{eval.lib} (models Q2N3904 and Q2N3906),'' OrCAD
+		Demo installation, \texttt{C:\textbackslash\allowbreak Program
+			Files\textbackslash\allowbreak OrCAD\_Demo\textbackslash\allowbreak
+			Capture\textbackslash\allowbreak Library\textbackslash\allowbreak
+			Pspice\textbackslash\allowbreak eval.lib}. [Accessed: Nov.~2026].
 	\end{thebibliography}
 	
 \end{document}

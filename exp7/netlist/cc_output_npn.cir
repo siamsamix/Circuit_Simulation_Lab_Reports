@@ -2,7 +2,7 @@
 * collector = common (ground) node, no collector resistor.
 * VBB (+) -> RB -> base, VBB (-) on the collector rail.
 * emitter supply VEE = -VCE feeds the emitter through RE.
-* inner sweep: VEE (0.2 -> -5.2 V, i.e. VCE = -0.2 ... 5.2 V)
+* inner sweep: VEE (VCE = -0.2 ... 5.2 V)
 * outer sweep: VBB = -6, 14, 34, 54, 74 V.  With RB = 1 MOhm the base current
 * (VBB + VCE - VBE)/RB is ~0, 14, 34, 54, 74 uA and drifts only a few uA with VCE.
 VEE 0 nes 0

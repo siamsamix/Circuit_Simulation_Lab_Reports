@@ -1,1 +1,4 @@
-1. Simulated values are used before showing the graphs. Fix this.
+1. Check for hallucinations.
+2. Update the script so that it marks the knee reading in the graphs.
+3.
+

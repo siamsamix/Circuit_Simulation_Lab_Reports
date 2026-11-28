@@ -1,6 +1,6 @@
 * Common-emitter input characteristic (PNP 2N3906)
-* inner sweep: VBB (base supply)   outer sweep: VCE = -0.025, -0.05, -0.1, -0.2 V
-* octave sweep of V_CE, emulated with the index source VK and the behavioural
+* inner sweep: VBB (base supply)   outer sweep: VCE = -0.01, -0.1, -1 V (CE_IN_SWEEP)
+* decade sweep of V_CE, emulated with the index source VK and the behavioural
 * source BVCE exactly as in the NPN netlist.
 VBB 0 nbs 0
 RB nbs b 10k

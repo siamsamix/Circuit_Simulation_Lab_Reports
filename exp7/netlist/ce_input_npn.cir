@@ -1,6 +1,6 @@
 * Common-emitter input characteristic (NPN 2N3904)
-* inner sweep: VBB (base supply)   outer sweep: VCE = 0.025, 0.05, 0.1, 0.2 V
-* This is an OCTAVE sweep of V_CE (PSpice: .DC LIN VBB 0 2 0.001 OCT VCC 0.025 0.2 1).
+* inner sweep: VBB (base supply)   outer sweep: VCE = 0.01, 0.1, 1 V (CE_IN_SWEEP)
+* This is a DECADE sweep of V_CE (PSpice: .DC LIN VBB 0 2 0.001 DEC VCC 0.01 1 1).
 * ngspice has no OCT/DEC option, so the index source VK = 1 ... N is stepped
 * linearly and the behavioural voltage source BVCE turns it into the geometric
 * V_CE values.  (In the Gummel-Poon model I_B does not depend on V_CE once

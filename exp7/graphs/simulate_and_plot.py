@@ -739,17 +739,28 @@ def _densify_px(p, step):
     return np.column_stack([np.interp(t, s, p[:, 0]), np.interp(t, s, p[:, 1])])
 
 
-def place_sweep_labels(fig, ax, obstacles, items, gap_pt=3.5):
+def place_sweep_labels(fig, ax, obstacles, items, gap_pt=3.5, own=None, leaders=True):
     """Write a short text beside the end of every swept curve.
 
     ``obstacles``  [(x, y), ...]  data-coordinate polylines of EVERY curve on
                    the axes; no label may touch one of them.
     ``items``      [(x, y, text, colour), ...]  the curve to label (its last
                    sample is the anchor) and the label text.
+    ``own``        for each item, the index in ``obstacles`` of its own curve
+                   (default: item k belongs to obstacles[k], which holds for both
+                   callers - the curves come first and in the same order).
+    ``leaders``    draw a thin leader line from a label to its curve when no
+                   unambiguous spot exists.
+
     Each label goes to the free spot closest to its own curve end (preferring
     just above it), always inside the frame and clear of all curves and of
-    the labels already placed.  Returns the label boxes (x0, y0, x1, y1) in
-    data coordinates so that other annotations can dodge them."""
+    the labels already placed.  A spot is only accepted when the label is nearer
+    to its own curve than to any other curve; labels that find no such spot (curves
+    packed closer together than a label is high, e.g. the I_E = 0 and 1 V curves of
+    the CB output family) are placed afterwards in the remaining free space and
+    tied to their curve with a leader line, so no label can be read as belonging to
+    a neighbouring curve.  Returns the label boxes (x0, y0, x1, y1) in data
+    coordinates so that other annotations can dodge them."""
     fig.canvas.draw()                           # transforms are final now
     renderer = fig.canvas.get_renderer()
     gap = gap_pt * fig.dpi / 72.0
@@ -758,10 +769,15 @@ def place_sweep_labels(fig, ax, obstacles, items, gap_pt=3.5):
     hi = np.array([frame_px.x1, frame_px.y1]) - 2.0
     to_px, to_data = ax.transData.transform, ax.transData.inverted().transform
 
-    obst = np.vstack([_densify_px(to_px(np.column_stack([ox, oy])), 2.0)
-                      for ox, oy in obstacles])
-    placed, rects = [], []                      # pixel boxes / data boxes
-    for cx, cy, text, colour in items:
+    dens = [_densify_px(to_px(np.column_stack([ox, oy])), 2.0) for ox, oy in obstacles]
+    obst = np.vstack(dens)
+    if own is None:
+        own = list(range(len(items))) if len(obstacles) >= len(items) else [None] * len(items)
+    curve_ids = sorted({o for o in own if o is not None})
+    placed, rects = [], [None] * len(items)     # pixel boxes / data boxes
+
+    geo = []
+    for k, (cx, cy, text, colour) in enumerate(items):
         anchor = to_px([[float(cx[-1]), float(cy[-1])]])[0]
         t = ax.text(0, 0, text, color=colour, ha="left", va="bottom",
                     zorder=8, clip_on=False)
@@ -787,31 +803,111 @@ def place_sweep_labels(fig, ax, obstacles, items, gap_pt=3.5):
                     & (obst[:, 0] < cand[:, 0].max() + w + gap)
                     & (obst[:, 1] > cand[:, 1].min() - gap)
                     & (obst[:, 1] < cand[:, 1].max() + h + gap)]
+        geo.append(dict(t=t, text=text, colour=colour, w=w, h=h, cand=cand, cost=cost,
+                        inside=inside, near=near, own=own[k], others=None))
 
-        def hits(c):
-            x0, y0 = c
-            n = int(((near[:, 0] >= x0 - gap) & (near[:, 0] <= x0 + w + gap)
-                     & (near[:, 1] >= y0 - gap) & (near[:, 1] <= y0 + h + gap)
-                     ).sum())
-            n += 1000 * sum(not (x0 + w + gap < p[0] or p[2] < x0 - gap
-                                 or y0 + h + gap < p[1] or p[3] < y0 - gap)
-                            for p in placed)
-            return n
+    def hits(g, c):
+        x0, y0 = c
+        w, h, near = g["w"], g["h"], g["near"]
+        n = int(((near[:, 0] >= x0 - gap) & (near[:, 0] <= x0 + w + gap)
+                 & (near[:, 1] >= y0 - gap) & (near[:, 1] <= y0 + h + gap)).sum())
+        n += 1000 * sum(not (x0 + w + gap < p[0] or p[2] < x0 - gap
+                             or y0 + h + gap < p[1] or p[3] < y0 - gap)
+                        for p in placed)
+        return n
 
-        best = None
-        for i in np.argsort(cost):
-            if inside[i] and hits(cand[i]) == 0:
-                best = i
-                break
-        if best is None:                        # nothing clear: least bad spot
-            ok = np.flatnonzero(inside) if inside.any() else np.arange(len(cand))
-            best = ok[int(np.argmin([hits(cand[i]) + 0.01 * cost[i] for i in ok]))]
-            print(f"  warning: no clear spot for sweep label {text!r}; overlapping")
-        x0, y0 = cand[best]
-        t.set_position(tuple(to_data([[x0, y0]])[0]))
-        placed.append((x0, y0, x0 + w, y0 + h))
-        (dx0, dy0), (dx1, dy1) = to_data([[x0, y0], [x0 + w, y0 + h]])
-        rects.append((dx0, dy0, dx1, dy1))
+    def box_gap(g, c, pts):
+        """Pixel distance from the label box at corner ``c`` to the nearest of ``pts``."""
+        dx = np.maximum(np.maximum(c[0] - pts[:, 0], pts[:, 0] - (c[0] + g["w"])), 0.0)
+        dy = np.maximum(np.maximum(c[1] - pts[:, 1], pts[:, 1] - (c[1] + g["h"])), 0.0)
+        return float(np.hypot(dx, dy).min())
+
+    def ambiguous(g, c):
+        """True when another curve lies at least as close to the label as its own."""
+        o = g["own"]
+        if o is None or len(curve_ids) < 2:
+            return False
+        if g["others"] is None:
+            g["others"] = np.vstack([dens[j][::3] for j in curve_ids if j != o])
+        return box_gap(g, c, dens[o][::3]) + 1.0 > box_gap(g, c, g["others"])
+
+    def leader(g, c):
+        """(start on the label box, end on the nearest point of its curve), pixels."""
+        o = g["own"]
+        if o is None:
+            return None
+        pts = dens[o]
+        dx = np.maximum(np.maximum(c[0] - pts[:, 0], pts[:, 0] - (c[0] + g["w"])), 0.0)
+        dy = np.maximum(np.maximum(c[1] - pts[:, 1], pts[:, 1] - (c[1] + g["h"])), 0.0)
+        end = pts[int(np.argmin(np.hypot(dx, dy)))]
+        start = np.array([min(max(end[0], c[0]), c[0] + g["w"]),
+                          min(max(end[1], c[1]), c[1] + g["h"])])
+        return start, end
+
+    def leader_clear(g, c):
+        ld = leader(g, c)
+        if ld is None:
+            return True
+        s, e = ld
+        for f in np.linspace(0.0, 1.0, 25)[1:-1]:
+            px, py = s + f * (e - s)
+            if any(p[0] - gap / 2 <= px <= p[2] + gap / 2
+                   and p[1] - gap / 2 <= py <= p[3] + gap / 2 for p in placed):
+                return False
+        return True
+
+    def search(g, mode):
+        """First free candidate in cost order.  mode: "strict" = also unambiguous,
+        "leader" = a leader line to the curve would cross no other label, "any"."""
+        for i in np.argsort(g["cost"]):
+            c = g["cand"][i]
+            if not g["inside"][i] or hits(g, c) != 0:
+                continue
+            if mode == "strict" and ambiguous(g, c):
+                continue
+            if mode == "leader" and not leader_clear(g, c):
+                continue
+            return int(i)
+        return None
+
+    def commit(k, i, lead):
+        g = geo[k]
+        x0, y0 = g["cand"][i]
+        g["t"].set_position(tuple(to_data([[x0, y0]])[0]))
+        placed.append((x0, y0, x0 + g["w"], y0 + g["h"]))
+        (dx0, dy0), (dx1, dy1) = to_data([[x0, y0], [x0 + g["w"], y0 + g["h"]]])
+        rects[k] = (dx0, dy0, dx1, dy1)
+        ld = leader(g, (x0, y0)) if lead and leaders else None
+        if ld is not None:
+            (sx, sy), (ex, ey) = to_data([ld[0], ld[1]])
+            ax.plot([sx, ex], [sy, ey], color=g["colour"], linewidth=0.9,
+                    solid_capstyle="butt", zorder=7, scalex=False, scaley=False)
+            ax.plot([ex], [ey], linestyle="none", marker="o", markersize=2.8,
+                    markeredgewidth=0, color=g["colour"], zorder=7,
+                    scalex=False, scaley=False)
+            print(f"  sweep label {g['text']!r}: curves too close together, "
+                  f"label tied to its curve with a leader line")
+
+    # pass 1: labels that find an unambiguous spot next to their own curve
+    pending = []
+    for k, g in enumerate(geo):
+        i = search(g, "strict")
+        if i is None:
+            pending.append(k)
+        else:
+            commit(k, i, False)
+    # pass 2: the rest, in the remaining free space, with a leader line
+    for k in pending:
+        g = geo[k]
+        i = search(g, "leader")
+        if i is None:
+            i = search(g, "any")
+        if i is None:                           # nothing clear: least bad spot
+            ok = np.flatnonzero(g["inside"]) if g["inside"].any() else np.arange(len(g["cand"]))
+            i = int(ok[int(np.argmin([hits(g, g["cand"][j]) + 0.01 * g["cost"][j]
+                                      for j in ok]))])
+            print(f"  warning: no clear spot for sweep label {g['text']!r}; overlapping")
+        commit(k, i, True)
     return rects
 
 

@@ -23,17 +23,18 @@ V_BE)/R_B); the measurements use the simulated I_B of each curve.
 Curve families (as in the experiment-7 reference figures)
   CB input   I_E vs V_EB    V_CB = 5, 25, 45 V   (Early effect shifts the curves)
   CB output  I_C vs V_CB    I_E stepped by V_EE: ~0, 0.4, 1.3, 2.3, 3.3, 4.3 mA
-  CE input   I_B vs V_BE    V_CE = 0.025, 0.05, 0.1, 0.2 V (octave sweep, see below)
+  CE input   I_B vs V_BE    V_CE = 0.01, 0.1, 1 V (decade sweep, see below)
   CE output  I_C vs V_CE    I_B stepped by V_BB: 0, 14, 33, 53, 73 uA
-  CC input   I_B vs V_BC    V_CE = 1, 2, 3, 4 V
+  CC input   I_B vs V_BC    V_CE = 1, 2, 3, 4, 5 V
   CC output  I_E vs V_CE    I_B ~ 0, 14, 34, 54, 74 uA (V_BB = -6 ... 74 V, R_B = 1 MOhm)
 
 Note on the CE input family: in the Gummel-Poon model the base current does not
 depend on V_CE once V_CE is above ~0.3 V, so the manual's V_CE = 5 V and 20 V
 curves would be one and the same line.  The curves are therefore taken at the
-edge of saturation with an OCTAVE sweep of V_CE (0.025, 0.05, 0.1, 0.2 V), which
-spaces them almost evenly.  The CE input resistance is measured on a separate,
-not plotted V_CE = 5 V run (ce_input_ref_*.cir).
+edge of saturation with a DECADE sweep of V_CE (CE_IN_SWEEP: 0.01, 0.1, 1 V), which
+spaces them almost evenly.  The CE input resistance is measured on the highest-V_CE
+curve of that plotted family; the separate, not plotted V_CE = 5 V run
+(ce_input_ref_*.cir) only supplies the turn-on voltage.
 
 Decade / octave sweeps: PSpice's ".DC OCT/DEC" has no ngspice counterpart, so
 geometric_sweep() emulates it (stepped index source + behavioural voltage source).
@@ -53,8 +54,8 @@ Calculation points
   Every graph shows the TWO points that the resistance calculation of that graph
   uses (PSpice cursor style, see mark_points / draw_cursor_*):
     input graphs   the two points on the reference input curve between which
-                   R_in = dV / dI is formed (V_CB = 5 V for CB, V_CE = 0.2 V for CE,
-                   V_CE = 4 V for CC);
+                   R_in = dV / dI is formed (V_CB = 5 V for CB, the highest-V_CE curve,
+                   1 V, for CE, V_CE = 5 V for CC = the V_CE of the output-graph points);
     output graphs  the two points on the curve used for R_out = dV / dI
                    (V_CB / V_CE = 5 V and 10 V, or V_CE = 3 V and 5 V for CC).
   Each point has a horizontal line to the y axis and a vertical line to the x
@@ -71,13 +72,30 @@ Calculation points
   (x,y) and the input current of that curve at that x (I_E for CB, I_B for
   CE and CC), e.g. "IE=3.30422m".  --no-gain-points drops the gain pair again.
 
+Operating regions (output graphs)
+  Every output graph also shows where the operating regions lie: a vertical dashed
+  line at the saturation knee separates SATURATION (to the left) from ACTIVE (to the
+  right), each region is bracketed along the top of the graph, and CUTOFF is written
+  just above the lowest curve (I_E = 0 for CB, I_B = 0 for CE / CC).  The knee is the
+  one found in measure_polarity (regions["sat_cb" / "sat_ce" / "sat_cc"], also in
+  results.json).  --no-regions drops the region markers again.
+  The knee itself is read out too: a ring is drawn where the knee line meets the curve it
+  was found on (CB: highest-I_E curve, CE / CC: 4th curve) and a red-framed box
+  "Knee (90%) / (V, I)" gives its coordinates (regions["sat_*_ic" / "sat_cc_ie"] in results.json).
+  Definition (KNEE_FRAC, KNEE_REF): the knee is the lowest voltage at which the plotted
+  current reaches 90 % of its value at a reference voltage inside the active region.  The
+  sentence to quote in the report is stored in results.json ("knee_definition") and printed.
+
 Output resistance
   The change of the output current is referred to constant input current with
   the measured gains of the task sheet: dIc|Ie = dIc - alpha*dIe (CB),
   dIc|Ib = dIc - beta*dIb (CE), dIe|Ib = dIe - gamma*dIb (CC).
 
 Usage : python simulate_bjt.py [--dpi 300] [--netlists ../netlist] [--out .]
-                               [--no-gain-points] [--no-cursors]
+                               [--no-gain-points] [--no-cursors] [--no-regions]
+                               [--show-negative]
+  --show-negative  the six output graphs also show the reverse (negative-current) part
+                   (wider V sweeps, y axis ~12 % below zero); files get a _neg suffix.
 """
 
 import argparse
@@ -89,14 +107,16 @@ from pathlib import Path
 import numpy as np
 from matplotlib import font_manager
 from matplotlib.font_manager import FontProperties
+from matplotlib.collections import LineCollection
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
+import matplotlib.patheffects as pe
 
 from plot_full_bridge import add_note_at, draw_trace, note_fontsize
 from pspice_theme import (AX_H_PT, AX_RECT, FIG_W_PT, MARKER_FIRST_PT,
                           MARKER_SPACING_PT, NOTE_EDGE, NOTE_SERIF, add_y_label,
                           choose_font, dense_curve, label_widths_pt,
-                          major_ticks, new_page, rect_is_free, spice_format,
+                          major_ticks, minor_between, new_page, rect_is_free, spice_format,
                           style_axes, text_width)
 from simulate_and_plot import (nice_step, parse_raw_file, place_note_near_trace,
                                place_sweep_labels, run_ngspice)
@@ -120,6 +140,12 @@ MODEL_PNP = (
 )
 
 SAVE = ".SAVE all @q1[ic] @q1[ib] @q1[ie]"
+
+# --show-negative: output graphs also show the reverse (negative-current) part.
+# main() sets these three before anything is simulated; defaults = original graphs.
+SHOW_NEG = False
+CE_OUT_VMIN = "0"       # start of the CE output V_CE sweep (-2 with --show-negative)
+CC_OUT_VMIN = "-0.2"    # start of the CC output V_CE sweep (-1.5 with --show-negative)
 
 # Series resistors between the voltage sources and the transistor terminals.
 #   R_B : base lead       (100 kOhm in the CE output families -> V_BB steps of 2 V
@@ -158,11 +184,33 @@ CURSOR_LINE_COST = 1.5     # ... and per pt of cursor line it would hide
 CURSOR_HALO_PT = 5.0       # output graphs: keep read-outs this far from the drawn curves
                            # (covers the 3 pt trace and the 8 pt markers, not just the centre line)
 
+# Operating-region markers of the output graphs: dashed knee line + brackets + labels.
+REGION_COLOR = "#b3261e"
+REGION_LW = 1.4
+REGION_TICK_PT = 4.0       # half-height of the bracket end bars
+REGION_HALO = [pe.withStroke(linewidth=3.0, foreground="white")]   # keeps names legible over grid lines
+CUTOFF_RAISE_PT = 9.0      # "Cutoff" is written this far above the I = 0 curve (clears its markers)
+
+# PSpice/Probe grid: solid black major lines plus dotted minor lines on the y axis
+# (Y_MINOR_SUBDIV dotted lines per major interval).  Set SOFT_GRID = True to recolour
+# both light grey so the curves and the black calculation cursors stand out more.
+SOFT_GRID = False
+GRID_COLOR, GRID_LW = "#c9c9c9", 0.8
+Y_MINOR_SUBDIV = 10
+
 # Reference current gain for the theoretical values: the middle of the datasheet
 # h_FE range of the 2N3904 / 2N3906 at I_C = 10 mA (100 ... 300).
 HFE_TYP = 200.0
 VAF = {"npn": 74.03, "pnp": 18.7}
 VT = 0.02585                       # thermal voltage at 27 degC (V)
+
+# Saturation knee of the output graphs: the lowest voltage at which the plotted current has
+# reached KNEE_FRAC of its value at the reference voltage KNEE_REF (inside the active region).
+KNEE_FRAC = 0.9
+KNEE_REF = dict(cb=0.5, ce=1.0, cc=1.0)           # V_CB (CB) / V_CE (CE, CC) in volts
+KNEE_TEXT = (f"saturation knee = lowest voltage at which the plotted output current reaches "
+             f"{KNEE_FRAC:.0%} of its value at V_CB = {KNEE_REF['cb']:g} V (CB, highest-I_E curve), "
+             f"V_CE = {KNEE_REF['ce']:g} V (CE, 4th curve) or V_CE = {KNEE_REF['cc']:g} V (CC, 4th curve)")
 
 # --------------------------------------------------------------------------- #
 # Decade / octave DC sweeps.
@@ -255,8 +303,8 @@ VEE 0 nes 0
 def ce_input_npn():
     expr, n = ce_in_sweep("npn")
     return f"""* Common-emitter input characteristic (NPN 2N3904)
-* inner sweep: VBB (base supply)   outer sweep: VCE = 0.025, 0.05, 0.1, 0.2 V
-* This is an OCTAVE sweep of V_CE (PSpice: .DC LIN VBB 0 2 0.001 OCT VCC 0.025 0.2 1).
+* inner sweep: VBB (base supply)   outer sweep: VCE = 0.01, 0.1, 1 V (CE_IN_SWEEP)
+* This is a DECADE sweep of V_CE (PSpice: .DC LIN VBB 0 2 0.001 DEC VCC 0.01 1 1).
 * ngspice has no OCT/DEC option, so the index source VK = 1 ... N is stepped
 * linearly and the behavioural voltage source BVCE turns it into the geometric
 * V_CE values.  (In the Gummel-Poon model I_B does not depend on V_CE once
@@ -278,8 +326,7 @@ BVCE ncs 0 V = {expr}
 def ce_input_ref(pol):
     """Single CE input curve at V_CE = 5 V (active region), NOT plotted.
 
-    The plotted CE input family stops at 0.2 V (the curves above that would merge),
-    so the input resistance is measured on this separate V_CE = 5 V run instead."""
+    Only used for the turn-on voltage (vbe_on_ce); R_in is measured on the plotted family."""
     npn = pol == "npn"
     return f"""* CE input characteristic at VCE = 5 V, measurement reference ({'NPN 2N3904' if npn else 'PNP 2N3906'})
 VBB {'nbs 0' if npn else '0 nbs'} 0
@@ -306,7 +353,7 @@ RC ncs c {RC_CE}
 VCC ncs 0 0
 {MODEL_NPN}
 {SAVE}
-.DC VCC 0 10.4 0.01 VBB 0 8 2
+.DC VCC {CE_OUT_VMIN} 10.4 0.01 VBB 0 8 2
 .PROBE
 .END
 """
@@ -314,7 +361,7 @@ VCC ncs 0 0
 
 def cc_input_npn():
     return f"""* Common-collector input characteristic (NPN 2N3904)
-* collector at the common (ground) node, emitter supply VEE = -1 ... -4 V
+* collector at the common (ground) node, emitter supply VEE = -1 ... -5 V
 * (VCE = |VEE|).  inner sweep: VBB (referred to ground, so x = VBC)
 * outer sweep: VEE (emitter supply)
 VEE 0 nes 0
@@ -324,7 +371,7 @@ VBB nbs 0 0
 RB nbs b {RB_CC_IN}
 {MODEL_NPN}
 {SAVE}
-.DC VBB -5 3 0.01 VEE 1 4 1
+.DC VBB -6 3 0.01 VEE 1 5 1
 .PROBE
 .END
 """
@@ -335,7 +382,7 @@ def cc_output_npn():
 * collector = common (ground) node, no collector resistor.
 * VBB (+) -> RB -> base, VBB (-) on the collector rail.
 * emitter supply VEE = -VCE feeds the emitter through RE.
-* inner sweep: VEE (0.2 -> -5.2 V, i.e. VCE = -0.2 ... 5.2 V)
+* inner sweep: VEE (VCE = {CC_OUT_VMIN} ... 5.2 V)
 * outer sweep: VBB = -6, 14, 34, 54, 74 V.  With RB = 1 MOhm the base current
 * (VBB + VCE - VBE)/RB is ~0, 14, 34, 54, 74 uA and drifts only a few uA with VCE.
 VEE 0 nes 0
@@ -345,7 +392,7 @@ VBB nbs 0 0
 RB nbs b {RB_CC_OUT}
 {MODEL_NPN}
 {SAVE}
-.DC VEE -0.2 5.2 0.025 VBB -6 74 20
+.DC VEE {CC_OUT_VMIN} 5.2 0.025 VBB -6 74 20
 .PROBE
 .END
 """
@@ -386,8 +433,8 @@ VEE nes 0 0
 def ce_input_pnp():
     expr, n = ce_in_sweep("pnp")
     return f"""* Common-emitter input characteristic (PNP 2N3906)
-* inner sweep: VBB (base supply)   outer sweep: VCE = -0.025, -0.05, -0.1, -0.2 V
-* octave sweep of V_CE, emulated with the index source VK and the behavioural
+* inner sweep: VBB (base supply)   outer sweep: VCE = -0.01, -0.1, -1 V (CE_IN_SWEEP)
+* decade sweep of V_CE, emulated with the index source VK and the behavioural
 * source BVCE exactly as in the NPN netlist.
 VBB 0 nbs 0
 RB nbs b {RB_CE_IN}
@@ -413,7 +460,7 @@ RC ncs c {RC_CE}
 VCC 0 ncs 0
 {MODEL_PNP}
 {SAVE}
-.DC VCC 0 10.4 0.01 VBB 0 8 2
+.DC VCC {CE_OUT_VMIN} 10.4 0.01 VBB 0 8 2
 .PROBE
 .END
 """
@@ -421,8 +468,8 @@ VCC 0 ncs 0
 
 def cc_input_pnp():
     return f"""* Common-collector input characteristic (PNP 2N3906)
-* collector at the common (ground) node, emitter supply VEE = 1 ... 4 V
-* (VCE = VEE).  inner sweep: VBB (referred to ground, swept 5 -> -3 V)
+* collector at the common (ground) node, emitter supply VEE = 1 ... 5 V
+* (VCE = VEE).  inner sweep: VBB (referred to ground, swept 6 -> -3 V)
 * outer sweep: VEE (emitter supply)
 VEE nes 0 0
 RE nes e {RE_CC_IN}
@@ -431,7 +478,7 @@ VBB 0 nbs 0
 RB nbs b {RB_CC_IN}
 {MODEL_PNP}
 {SAVE}
-.DC VBB -5 3 0.01 VEE 1 4 1
+.DC VBB -6 3 0.01 VEE 1 5 1
 .PROBE
 .END
 """
@@ -443,7 +490,8 @@ def cc_output_pnp():
 * VBB (-) -> RB -> base, VBB (+) on the collector rail (base at -VBB).
 * emitter supply VEE = +VCE feeds the emitter through RE.
 * inner sweep: VEE (-0.2 -> 5.2 V = VCE)
-* outer sweep: VBB = -6, 14, 34, 54, 74 V (I_B ~ 0, 14, 34, 54, 74 uA)
+* outer sweep: VBB = -6, 14, 34, 54, 74 V as set on the source, i.e. the base supply is
+* +6, -14, -34, -54, -74 V (I_B ~ 0, 14, 34, 54, 74 uA)
 VEE nes 0 0
 RE nes e {RE_CC_OUT}
 Q1 0 b e Q2N3906
@@ -451,7 +499,7 @@ VBB 0 nbs 0
 RB nbs b {RB_CC_OUT}
 {MODEL_PNP}
 {SAVE}
-.DC VEE -0.2 5.2 0.025 VBB -6 74 20
+.DC VEE {CC_OUT_VMIN} 5.2 0.025 VBB -6 74 20
 .PROBE
 .END
 """
@@ -489,6 +537,11 @@ def extract(key, v):
     ic = np.clip(s * _vec(v, "ic"), 0.0, None)
     ib = np.clip(s * _vec(v, "ib"), 0.0, None)
     ie = np.clip(-s * _vec(v, "ie"), 0.0, None)
+    ib_drive, ie_drive = ib, ie                      # drive currents always stay clipped
+    if SHOW_NEG and "_output_" in key:
+        # --show-negative: keep the reverse (negative) part of the plotted current
+        ic = s * _vec(v, "ic")
+        ie = -s * _vec(v, "ie")
     vb = np.asarray(v.get("v(b)", 0.0), dtype=float)
     vc = np.asarray(v.get("v(c)", 0.0), dtype=float)
     ve = np.asarray(v.get("v(e)", 0.0), dtype=float)
@@ -496,27 +549,27 @@ def extract(key, v):
     if key == "cb_input_npn":
         return _asc(-ve, ie, ie)
     if key == "cb_output_npn":
-        return _asc(vc, ic, ie)
+        return _asc(vc, ic, ie_drive)
     if key == "ce_input_npn":
         return _asc(vb, ib, ib)
     if key == "ce_output_npn":
-        return _asc(vc, ic, ib)
+        return _asc(vc, ic, ib_drive)
     if key == "cc_input_npn":
         return _asc(vb, ib, ib)
     if key == "cc_output_npn":
-        return _asc(vc - ve, ie, ib)
+        return _asc(vc - ve, ie, ib_drive)
     if key == "cb_input_pnp":
         return _asc(ve, ie, ie)
     if key == "cb_output_pnp":
-        return _asc(-vc, ic, ie)
+        return _asc(-vc, ic, ie_drive)
     if key == "ce_input_pnp":
         return _asc(-vb, ib, ib)
     if key == "ce_output_pnp":
-        return _asc(-vc, ic, ib)
+        return _asc(-vc, ic, ib_drive)
     if key == "cc_input_pnp":
         return _asc(-vb, ib, ib)
     if key == "cc_output_pnp":
-        return _asc(ve - vc, ie, ib)
+        return _asc(ve - vc, ie, ib_drive)
     raise KeyError(key)
 
 
@@ -545,6 +598,10 @@ def split_family(key, v, outer, signed=False):
 # Family definitions.  "outer" returns the outer-sweep source voltage from the
 # raw vectors (it identifies the curves); the legend shows that source voltage.
 # --------------------------------------------------------------------------- #
+# Fraction of the largest plotted current that the y axis of an OUTPUT graph extends
+# below zero (the reverse / negative part of the curves: V_CB, V_CE < 0).
+Y_NEG = 0.12
+
 FAMILIES = [
     dict(key="cb_input_npn", build=cb_input_npn,
          outer=lambda v: v["v(ncs)"],
@@ -557,7 +614,8 @@ FAMILIES = [
          param="VEE", trace="IC(Q1)",
          xlabel="Collector-base voltage $V_{CB}$ (V)",
          ylabel="Collector current $I_C$", fname="cb_output_npn", resistor="RC",
-         xlim=(-1, 10.2)),
+         xlim=(-1, 10.2),
+         neg=dict(xlim=(-2, 10.2), y_neg=Y_NEG)),
     dict(key="ce_input_npn", build=ce_input_npn,
          outer=lambda v: v["v(ncs)"],
          param="VCE", trace="IB(Q1)",
@@ -569,19 +627,21 @@ FAMILIES = [
          param="VBB", trace="IC(Q1)",
          xlabel="Collector-emitter voltage $V_{CE}$ (V)",
          ylabel="Collector current $I_C$", fname="ce_output_npn", resistor="RC",
-         xlim=(-0.2, 10.2)),
+         xlim=(-0.2, 10.2),
+         neg=dict(xlim=(-2, 10.2), y_neg=Y_NEG)),
     dict(key="cc_input_npn", build=cc_input_npn,
          outer=lambda v: v["v(nes)"],
          param="VCE", trace="IB(Q1)",
          xlabel="Base-collector voltage $V_{BC}$ (V)",
          ylabel="Base current $I_B$", fname="cc_input_npn", resistor="RB",
-         xlim=(-4, 0.5), ylim=(0.0, 120e-6), trim=True),
+         xlim=(-5, 0.5), ylim=(0.0, 120e-6), trim=True),
     dict(key="cc_output_npn", build=cc_output_npn,
          outer=lambda v: np.asarray(v["v(nbs)"], dtype=float),
          param="VBB", trace="IE(Q1)", signed=True,
          xlabel="Collector-emitter voltage $V_{CE}$ (V)",
          ylabel="Emitter current $I_E$", fname="cc_output_npn", resistor="RE",
-         xlim=(-0.2, 5.2)),
+         xlim=(-0.2, 5.2),
+         neg=dict(xlim=(-1.5, 5.2), y_neg=Y_NEG)),
     dict(key="cb_input_pnp", build=cb_input_pnp,
          outer=lambda v: v["v(ncs)"],
          param="|VCB|", trace="|IE(Q1)|",
@@ -593,7 +653,8 @@ FAMILIES = [
          param="|VEE|", trace="|IC(Q1)|",
          xlabel="Collector-base voltage $|V_{CB}|$ (V)",
          ylabel="Collector current $|I_C|$", fname="cb_output_pnp", resistor="RC",
-         xlim=(-1, 10.2)),
+         xlim=(-1, 10.2),
+         neg=dict(xlim=(-2, 10.2), y_neg=Y_NEG)),
     dict(key="ce_input_pnp", build=ce_input_pnp,
          outer=lambda v: v["v(ncs)"],
          param="|VCE|", trace="|IB(Q1)|",
@@ -605,19 +666,21 @@ FAMILIES = [
          param="|VBB|", trace="|IC(Q1)|",
          xlabel="Collector-emitter voltage $|V_{CE}|$ (V)",
          ylabel="Collector current $|I_C|$", fname="ce_output_pnp", resistor="RC",
-         xlim=(-0.2, 10.2)),
+         xlim=(-0.2, 10.2), ylim=(0.0, 20e-3),
+         neg=dict(xlim=(-2, 10.2), ylim=(-2.4e-3, 20e-3))),
     dict(key="cc_input_pnp", build=cc_input_pnp,
          outer=lambda v: v["v(nes)"],
          param="|VCE|", trace="|IB(Q1)|",
-         xlabel="Base-collector voltage $V_{CB}$ (V)",
+         xlabel="Collector-base voltage $V_{CB}$ (V)",
          ylabel="Base current $|I_B|$", fname="cc_input_pnp", resistor="RB",
-         xlim=(-4, 0.5), ylim=(0.0, 120e-6), trim=True),
+         xlim=(-5, 0.5), ylim=(0.0, 120e-6), trim=True),
     dict(key="cc_output_pnp", build=cc_output_pnp,
-         outer=lambda v: -np.asarray(v["v(nbs)"], dtype=float),    # = +VBB for the pnp
+         outer=lambda v: np.asarray(v["v(nbs)"], dtype=float),     # real base-supply voltage: +6, -14 ... -74 V
          param="VBB", trace="|IE(Q1)|", signed=True,
          xlabel="Collector-emitter voltage $|V_{CE}|$ (V)",
          ylabel="Emitter current $|I_E|$", fname="cc_output_pnp", resistor="RE",
-         xlim=(-0.2, 5.2)),
+         xlim=(-0.2, 5.2),
+         neg=dict(xlim=(-1.5, 5.2), y_neg=Y_NEG)),
 ]
 
 
@@ -650,6 +713,47 @@ def tick_label(value, unit):
     return ("0" if value == 0 else spice_format(value)) + unit
 
 
+_PREFIXES = ((1e-12, "p"), (1e-9, "n"), (1e-6, "\u00b5"), (1e-3, "m"), (1.0, ""), (1e3, "k"))
+
+
+def eng(value, unit, digits=5):
+    """Value with an SI prefix and its unit, e.g. 0.702974 -> "702.97 mV", 58.273e-6 -> "58.273 \u00b5A"."""
+    value = float(value)
+    if abs(value) < 1e-15:
+        return f"0 {unit}"
+    scale, prefix = _PREFIXES[0]
+    for s, p in _PREFIXES:
+        if abs(value) >= s * 0.9995:
+            scale, prefix = s, p
+    return f"{value / scale:.{digits}g} {prefix}{unit}"
+
+
+def soften_grid(ax):
+    """Recolour the grid light grey.  Call right after style_axes, before anything is drawn,
+    so the only full-width lines on the axes are the grid lines."""
+    if not SOFT_GRID:
+        return
+    minor = [t.gridline for t in ax.yaxis.get_minor_ticks()]
+    for gl in ax.get_xgridlines() + ax.get_ygridlines() + minor:
+        gl.set_color(GRID_COLOR)
+        gl.set_linewidth(GRID_LW if gl not in minor else 0.6)
+    x0, x1 = ax.get_xlim()
+    y0, y1 = ax.get_ylim()
+    for ln in ax.lines:                       # grid drawn as plain lines by the theme
+        xs, ys = (np.asarray(a, dtype=float) for a in ln.get_data())
+        if xs.size < 2:
+            continue
+        spans_x = np.ptp(xs) >= 0.9 * abs(x1 - x0) and np.ptp(ys) == 0
+        spans_y = np.ptp(ys) >= 0.9 * abs(y1 - y0) and np.ptp(xs) == 0
+        if spans_x or spans_y:
+            ln.set_color(GRID_COLOR)
+            ln.set_linewidth(GRID_LW)
+    for coll in ax.collections:               # ... or as vlines / hlines
+        if isinstance(coll, LineCollection):
+            coll.set_color(GRID_COLOR)
+            coll.set_linewidth(GRID_LW)
+
+
 def add_family_footer(fig, entries, axis_label, ax):
     """Hollow-marker legend row plus the centred axis label, on two clear rows."""
     x0 = ax.get_position().x0
@@ -667,7 +771,7 @@ def add_family_footer(fig, entries, axis_label, ax):
     fig.text(0.491, y_lab, axis_label, ha="center", va="center", color="black")
 
 
-def add_current_note(ax, text, curves, label_boxes, frame, above=False, extra=()):
+def add_current_note(ax, text, curves, label_boxes, frame, above=False, extra=(), anchor=None):
     """Framed serif note ("Current through RC") placed right next to the family's
     curves, clear of every curve and of the stepped-source value labels.
 
@@ -708,6 +812,8 @@ def add_current_note(ax, text, curves, label_boxes, frame, above=False, extra=()
         # the note sits beside the body of the curves, not down on the flat foot
         j = int(np.argmin(np.abs(ey - 0.55 * ey.max()))) if ex.size else 0
         rx, ry = (ex[j], ey[j]) if ex.size else (frame.w / 2, frame.h / 2)
+        if anchor is not None:                 # caller names the spot to stay close to
+            rx, ry = anchor
         ddx = np.maximum(np.maximum(gx - box_w / 2 - rx, rx - gx - box_w / 2), 0.0)
         ddy = np.maximum(np.maximum(gy - box_h / 2 - ry, ry - gy - box_h / 2), 0.0)
         cost = np.hypot(ddx, ddy)
@@ -765,6 +871,67 @@ def draw_cursor_lines(ax, geoms):
                     [g["points"][0][1], g["points"][1][1]], linestyle="none",
                     marker="o", markersize=CURSOR_DOT_PT, markeredgewidth=0,
                     color=CURSOR_COLOR, zorder=6)
+
+
+def draw_regions(ax, frame, knee, xlim, ylim, point_xs=(), point_ys=()):
+    """Operating regions of an output graph.
+
+    A dashed vertical line at the saturation knee ``knee`` (data x) separates
+    SATURATION (left) from ACTIVE (right); each region has a bracket with its name
+    along the top of the graph.  If the saturation region is too narrow to hold its
+    name, the name is written vertically inside the region (at a height that no
+    cursor line crosses).  CUTOFF is written just above the lowest curve, in the
+    widest gap between the knee and the calculation points.
+
+    Returns the drawn items as data-coordinate polylines [(xs, ys), ...] so that
+    labels, note and read-outs can keep clear of them.
+    """
+    family, fsize = choose_font()
+    prop = FontProperties(family=family)
+    xspan, yspan = xlim[1] - xlim[0], ylim[1] - ylim[0]
+    X = lambda pt: xlim[0] + pt / frame.w * xspan          # page points -> data x
+    Y = lambda pt: ylim[0] + pt / frame.h * yspan          # page points -> data y
+    kx = (knee - xlim[0]) / xspan * frame.w                # knee position in points
+    hy = [(py - ylim[0]) / yspan * frame.h for py in point_ys]
+    polys = []
+    style = dict(color=REGION_COLOR, linewidth=REGION_LW, solid_capstyle="butt", zorder=4)
+
+    ax.plot([knee, knee], [ylim[0], ylim[1]], linestyle=(0, (5, 3)), **style)
+    polys.append(([knee, knee], [ylim[0], ylim[1]]))
+
+    row = frame.h - (1.3 * fsize + 7.0)                    # height of the bracket row
+    gap, tick = 2.5, REGION_TICK_PT
+    for name, a, b in (("Saturation", 2.0, kx - gap), ("Active", kx + gap, frame.w - 2.0)):
+        if b - a > 2.0:
+            ax.plot([X(a), X(b)], [Y(row)] * 2, **style)
+            for e in (a, b):
+                ax.plot([X(e)] * 2, [Y(row - tick), Y(row + tick)], **style)
+            polys.append(([X(a), X(b)], [Y(row)] * 2))
+        tw = text_width(name, fsize, prop)
+        cx = (a + b) / 2
+        if tw + 6.0 <= b - a:
+            ax.text(X(cx), Y(row + 3.0), name, ha="center", va="bottom", fontsize=fsize,
+                    color=REGION_COLOR, zorder=11, path_effects=REGION_HALO)
+            polys.append(([X(cx - tw / 2), X(cx + tw / 2)], [Y(row + 3.0 + 0.6 * fsize)] * 2))
+        else:
+            top = row - tick - 3.0                         # vertical label under the bracket
+            while top - tw > 0.45 * frame.h and any(top - tw - 3.0 <= h <= top + 3.0 for h in hy):
+                top -= 3.0
+            ax.text(X(cx), Y(top), name, rotation=90, ha="center", va="top",
+                    fontsize=fsize, color=REGION_COLOR, zorder=11, path_effects=REGION_HALO)
+            polys.append(([X(cx)] * 2, [Y(top - tw), Y(top)]))
+
+    # CUTOFF: above the lowest curve, in the widest gap free of vertical cursor lines
+    edges = sorted([kx, frame.w] + [(p - xlim[0]) / xspan * frame.w for p in point_xs
+                                    if knee < p < xlim[1]])
+    a, b = max(zip(edges[:-1], edges[1:]), key=lambda s: s[1] - s[0])
+    tw = text_width("Cutoff", fsize, prop)
+    if b - a >= tw + 6.0:
+        cx = (a + b) / 2
+        ax.text(X(cx), Y(CUTOFF_RAISE_PT), "Cutoff", ha="center", va="bottom", fontsize=fsize,
+                color=REGION_COLOR, zorder=11, path_effects=REGION_HALO)
+        polys.append(([X(cx - tw / 2), X(cx + tw / 2)], [Y(CUTOFF_RAISE_PT + 0.6 * fsize)] * 2))
+    return polys
 
 
 def polyline_pt(frame, xs, ys, step=1.5):
@@ -844,11 +1011,12 @@ def add_cursor_readouts(ax, frame, geoms, curve_clouds, line_clouds, avoid_rects
                    and np.isclose(py, qy, rtol=1e-9, atol=1e-15) for qx, qy in seen):
                 continue                      # a point shared by two pairs: one box only
             seen.append((px, py))
-            text = f"({spice_format(px)},{spice_format(py)})"
-            lines = [text]
+            text = f"({eng(px, 'V')}, {eng(py, 'A')})"
+            tag = g.get("tag")                # e.g. "Knee": name written above the reading
+            lines = [tag, text] if tag else [text]
             drive = g["drive"][k]
             if drive is not None and drive_name:
-                lines.append(f"{drive_name}={spice_format(drive)}")
+                lines.append(f"{drive_name} = {eng(drive, 'A')}")
             line_h = 1.45 * fsize
             w = max(text_width(t, fsize, prop) for t in lines) + 1.3 * fsize
             h = (1.75 + 1.45 * (len(lines) - 1)) * fsize
@@ -877,21 +1045,24 @@ def add_cursor_readouts(ax, frame, geoms, curve_clouds, line_clouds, avoid_rects
             blocked.append((cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2))
             ax.add_patch(Rectangle(((cx - w / 2) / frame.w, (cy - h / 2) / frame.h),
                                    w / frame.w, h / frame.h, transform=ax.transAxes,
-                                   facecolor="white", edgecolor=NOTE_EDGE,
+                                   facecolor="white",
+                                   edgecolor=g.get("edge", NOTE_EDGE),
                                    linewidth=1.4, zorder=10, clip_on=False))
             for li, t in enumerate(lines):
                 ty = cy + ((len(lines) - 1) / 2 - li) * line_h
                 ax.text(cx / frame.w, ty / frame.h, t, transform=ax.transAxes,
                         ha="center", va="center_baseline", fontsize=fsize,
-                        color="black", zorder=11)
-            extra = f", {drive_name} = {drive:.6g} A" if len(lines) > 1 else ""
-            print(f"  point {gi * 2 + k + 1}: ({px:.6g} V, {py:.6g} A{extra})  "
-                  f"box {dist[i]:.0f} pt from it")
+                        color=(g.get("edge", "black") if (tag and li == 0) else "black"),
+                        zorder=11)
+            extra = (f", {drive_name} = {drive:.6g} A"
+                     if drive is not None and drive_name else "")
+            print(f"  {tag.lower() if tag else 'point'} {gi * 2 + k + 1}: "
+                  f"({px:.6g} V, {py:.6g} A{extra})  box {dist[i]:.0f} pt from it")
 
 
 def plot_family(curves, param, trace, xlabel, ylabel, outpath, xlim=None, dpi=300,
                 ylim=None, trim=False, note=None, note_above=False, marks=None,
-                drive_name=None):
+                drive_name=None, region_knee=None, knee_y=None, y_neg=None):
     """Draw one characteristic family on a PSpice/Probe-style page.
 
     ``curves`` is [(stepped source value, x, y), ...].  All curves share one
@@ -902,7 +1073,15 @@ def plot_family(curves, param, trace, xlabel, ylabel, outpath, xlim=None, dpi=30
     ``marks`` is a list of point pairs [((x1, y1), (x2, y2)), ...]: the points used
     for the calculation, drawn with drops to the axes, a right triangle and
     coordinate read-outs (see cursor_geometry).  A point given as (x, y, drive)
-    also shows its input current as "<drive_name>=<drive>" in its read-out."""
+    also shows its input current as "<drive_name>=<drive>" in its read-out.
+
+    ``region_knee`` (x of the saturation knee) adds the operating-region markers of an
+    output graph (see draw_regions) and leaves head-room above the curves for them.
+    ``y_neg`` (fraction of the largest current, e.g. 0.12) lets the auto y axis extend
+    below zero by that fraction, so the negative part of an output graph is shown; the
+    curves are cut where they leave the window.
+    ``knee_y`` (output current at the knee, on the plotted curve) additionally marks the
+    knee point itself with a dot and a red-framed "Knee (x,y)" read-out."""
     # the sweeps run slightly beyond the plotted window: keep only what is shown
     if xlim is not None:
         cropped = []
@@ -928,11 +1107,21 @@ def plot_family(curves, param, trace, xlabel, ylabel, outpath, xlim=None, dpi=30
         xlim = (float(xs.min()), float(xs.max()))
     if ylim is None:
         ylo = min(0.0, float(ys.min()))
-        yhi = float(ys.max()) * 1.08
+        if y_neg:
+            ylo = max(ylo, -y_neg * float(ys.max()))   # only a stub of the negative side
+        yhi = float(ys.max()) * (1.22 if region_knee is not None else 1.08)
         step = nice_step(yhi - ylo, 9)
         ylo = np.floor(ylo / step) * step
         yhi = np.ceil(yhi / step) * step
         ylim = (ylo, yhi)
+
+    if ylim[0] < 0:                               # stop curves at the bottom of the window too
+        cropped = []
+        for val, x, y in curves:
+            m = y >= ylim[0]
+            if m.sum() >= 2:
+                cropped.append((val, x[m], y[m]))
+        curves = cropped
 
     ystep = nice_step(ylim[1] - ylim[0], 9)
     yticks = major_ticks(ylim[0], ylim[1], ystep)
@@ -943,6 +1132,8 @@ def plot_family(curves, param, trace, xlabel, ylabel, outpath, xlim=None, dpi=30
 
     fig, ax, frame = new_page(xlim, ylim, ylabels)
     style_axes(ax, xticks, xlabels, yticks, ylabels)
+               #minor_between(yticks, Y_MINOR_SUBDIV))      # dotted PSpice minor grid on y
+    soften_grid(ax)
 
     # same colour + marker everywhere; the first curve on top, markers staggered
     for k in reversed(range(len(curves))):
@@ -954,13 +1145,31 @@ def plot_family(curves, param, trace, xlabel, ylabel, outpath, xlim=None, dpi=30
     geoms = [cursor_geometry(pair, xlim, ylim) for pair in (marks or [])]
     draw_cursor_lines(ax, geoms)
     line_polys = [seg for g in geoms for seg in g["drops"] + g["edges"]]
+    if region_knee is not None:
+        line_polys += draw_regions(
+            ax, frame, region_knee, xlim, ylim,
+            point_xs=[p[0] for g in geoms for p in g["points"]],
+            point_ys=[p[1] for g in geoms for p in g["points"]])
     line_clouds = [polyline_pt(frame, xs, ys) for xs, ys in line_polys]
+
+    # the knee reading: a dot where the knee line meets its curve + a read-out box
+    if region_knee is not None and knee_y is not None:
+        ax.plot([region_knee], [knee_y], linestyle="none", marker="o",
+                markersize=CURSOR_DOT_PT + 1.5, markerfacecolor="white",
+                markeredgecolor=REGION_COLOR, markeredgewidth=1.6, zorder=7)
+        geoms.append(dict(points=((region_knee, knee_y),), drive=(None,),
+                          drops=[], edges=[], tag=f"Knee ({KNEE_FRAC:.0%})", edge=REGION_COLOR))
 
     # source value beside each curve, in a free spot next to the curve's end
     items = [(x, y, (f"{param}=" if k == 0 else "") + f"{val:g}V", "black")
              for k, (val, x, y) in enumerate(curves)]
+    known = {id(t) for t in list(ax.texts) + list(fig.texts)}
     label_boxes = place_sweep_labels(fig, ax, [(x, y) for _, x, y in curves] + line_polys,
                                      items)
+    for t in list(ax.texts) + list(fig.texts):          # white halo: no grid line through a label
+        if id(t) not in known:
+            t.set_path_effects(REGION_HALO)
+            t.set_zorder(12)
     label_rects = []
     for x0, y0, x1, y1 in label_boxes:
         (a, b), (c, d) = (tuple(float(v) for v in frame.to_pt(x0, y0)),
@@ -970,8 +1179,16 @@ def plot_family(curves, param, trace, xlabel, ylabel, outpath, xlim=None, dpi=30
     # "Current through RC" etc. beside the curves
     note_rect = None
     if note:
-        note_rect = add_current_note(ax, note, curves, label_boxes, frame, note_above,
-                                     extra=line_clouds)
+        anchor = None
+        if region_knee is not None:
+            # free band between the top curve and the region brackets, in the middle of
+            # the active region
+            kx = (region_knee - xlim[0]) / (xlim[1] - xlim[0]) * frame.w
+            anchor = (kx + 0.5 * (frame.w - kx),
+                      frame.h - (1.3 * choose_font()[1] + 7.0) - 0.07 * frame.h)
+        note_rect = add_current_note(ax, note, curves, label_boxes, frame,
+                                     note_above or region_knee is not None,
+                                     extra=line_clouds, anchor=anchor)
 
     # coordinate read-outs of the two points
     if geoms:
@@ -1042,11 +1259,12 @@ def measure_polarity(d, pol):
     cb_in, cb_out = d["cb_input_" + pol], d["cb_output_" + pol]
     ce_in, ce_out = d["ce_input_" + pol], d["ce_output_" + pol]
     cc_in, cc_out = d["cc_input_" + pol], d["cc_output_" + pol]
-    # input curves used for R_in, all of them plotted: V_CB = 5 V (CB), the last
-    # curve of the octave sweep, V_CE = 0.2 V (CE) and V_CE = 4 V (CC)
+    # input curves used for R_in, all of them plotted: V_CB = 5 V (CB), the highest
+    # V_CE of the CE sweep, and V_CE = 5 V (CC) - the same V_CE as the CC output points,
+    # so the I_B values read on the input and on the output graph belong together
     cb_in5 = curve_at(cb_in, 5.0)
-    ce_in_r = curve_at(ce_in, 2, tol=0.05)
-    cc_in5 = curve_at(cc_in, 4.0)      # the VCE = 4 V curve
+    ce_in_r = max(ce_in, key=lambda c: c[0])      # highest V_CE of the plotted sweep
+    cc_in5 = curve_at(cc_in, 5.0)                 # the VCE = 5 V curve
     # V_CE = 5 V reference curve (not plotted), only for the turn-on voltage
     ce_in5 = curve_at(d["ce_input_ref_" + pol], 5.0)
 
@@ -1141,23 +1359,32 @@ def measure_polarity(d, pol):
                ie_cc40_5v=ie_a_c, ie_cc60_5v=ie_b_c,
                ie_cc60_4v=ie_mid_cc)
 
-    def knee(curve, ref_x, frac=0.9):
+    def knee(curve, ref_x, frac=KNEE_FRAC):
         """Saturation knee: the lowest x at which the trace has reached frac of its
-        value at ref_x (just inside the active region)."""
+        value at ref_x (just inside the active region).  Returns (x, y) of that
+        sample, so the knee point lies exactly on the plotted curve."""
         x, y = np.asarray(curve[0], float), np.asarray(curve[1], float)
         o = np.argsort(x)
         x, y = x[o], y[o]
         target = frac * np.interp(ref_x, x, y)
-        return float(x[np.where(y >= target)[0][0]])
+        i = int(np.where(y >= target)[0][0])
+        return float(x[i]), float(y[i])
 
+    knee_cb = knee(_xy(cb_), KNEE_REF["cb"])
+    knee_ce = knee(_xy(cb_e), KNEE_REF["ce"])
+    knee_cc = knee(_xy(cb_c), KNEE_REF["cc"])
     regions = dict(
-        sat_cb=knee(_xy(cb_), 0.5),               # V_CB at the CB saturation knee
-        sat_ce=knee(_xy(cb_e), 1.0),              # V_CE at the CE saturation knee
-        sat_cc=knee(_xy(cb_c), 1.0),              # V_CE at the CC saturation knee
+        sat_cb=knee_cb[0],                        # V_CB at the CB saturation knee
+        sat_ce=knee_ce[0],                        # V_CE at the CE saturation knee
+        sat_cc=knee_cc[0],                        # V_CE at the CC saturation knee
+        sat_cb_ic=knee_cb[1],                     # I_C at the CB knee (on the plotted curve)
+        sat_ce_ic=knee_ce[1],                     # I_C at the CE knee
+        sat_cc_ie=knee_cc[1],                     # I_E at the CC knee
         ib_cutoff_ce=y_at_x(5.0, *_xy(ce_out[0])),  # collector leakage, V_BB = 0, V_CE = 5 V
         ie_cutoff_cb=y_at_x(5.0, *_xy(cb_out[0])),  # collector leakage, V_EE = 0, V_CB = 5 V
         vbe_on_ce=x_at_y(10e-6, *_xy(ce_in5)),    # V_BE at I_B = 10 uA
         veb_on_cb=x_at_y(1e-3, *_xy(cb_in5)),     # V_EB at I_E = 1 mA
+        knee_definition=KNEE_TEXT,
     )
     # The two points of every graph that the calculations use (x in V, y in A, in the
     # coordinates of the plot).  "res": R_in (input graphs) / R_out (output graphs);
@@ -1201,12 +1428,22 @@ def main():
     ap.add_argument("--netlists", default=str(HERE.parent / "netlist"))
     ap.add_argument("--out", default=str(HERE))
     ap.add_argument("--no-plots", action="store_true")
+    ap.add_argument("--show-negative", action="store_true",
+                    help="output graphs also show the reverse (negative-current) part; files "
+                         "get a _neg suffix so they do not overwrite the standard graphs")
     ap.add_argument("--no-cursors", action="store_true",
                     help="do not mark the calculation points on the graphs")
+    ap.add_argument("--no-regions", action="store_true",
+                    help="do not mark saturation / active / cutoff on the output graphs")
     ap.add_argument("--gain-points", action=argparse.BooleanOptionalAction, default=True,
                     help="also mark the two points of the alpha / beta / gamma calculation "
                          "on the output graphs (default: on; --no-gain-points to drop them)")
     args = ap.parse_args()
+
+    global SHOW_NEG, CE_OUT_VMIN, CC_OUT_VMIN
+    sfx = ""
+    if args.show_negative:
+        SHOW_NEG, CE_OUT_VMIN, CC_OUT_VMIN, sfx = True, "-2", "-1.5", "_neg"
 
     netdir = Path(args.netlists)
     outdir = Path(args.out)
@@ -1226,7 +1463,7 @@ def main():
                   f"drive: {np.max(dr):.4g}")
         all_data[key] = curves
         # the netlist on file is the complete nested-sweep netlist of the family
-        (netdir / f"{fam['fname']}.cir").write_text(text)
+        (netdir / f"{fam['fname']}{sfx}.cir").write_text(text)
 
     # V_CE = 5 V reference curves of the CE input characteristic
     for pol in ("npn", "pnp"):
@@ -1234,15 +1471,17 @@ def main():
         vectors = simulate_text(text, f"ce_input_ref_{pol}")
         all_data[f"ce_input_ref_{pol}"] = split_family(
             f"ce_input_{pol}", vectors, lambda v: v["v(ncs)"])
-        (netdir / f"ce_input_ref_{pol}.cir").write_text(text)
+        (netdir / f"ce_input_ref_{pol}{sfx}.cir").write_text(text)
 
     # 2. choose the two points of every graph and do the calculations with them
     res = {pol: measure_polarity(all_data, pol) for pol in ("npn", "pnp")}
-    (outdir / "results.json").write_text(json.dumps(res, indent=2))
+    (outdir / f"results{sfx}.json").write_text(json.dumps(res, indent=2))
 
     # 3. plot, with the two calculation points drawn on every graph
     if not args.no_plots:
         for fam in FAMILIES:
+            if args.show_negative and "neg" in fam:
+                fam = {**fam, **fam["neg"]}
             key = fam["key"]
             base, pol = key.rsplit("_", 1)
             curves_lab = [(p, x, y) for p, x, y, _ in all_data[key]]
@@ -1252,10 +1491,20 @@ def main():
                 pairs = [m["res"]]
                 if args.gain_points and "gain" in m:
                     pairs.append(m["gain"])
+            knee = knee_y = None
+            if base.endswith("_output") and not args.no_regions:
+                knee = res[pol]["regions"][f"sat_{base[:2]}"]
+                knee_y = res[pol]["regions"][f"sat_{base[:2]}_{'ie' if base[:2] == 'cc' else 'ic'}"]
+                lo, hi = fam["xlim"]
+                if not lo < knee < hi:
+                    print(f"  warning: saturation knee {knee:g} V outside the plot; no region markers")
+                    knee = None
+                else:
+                    print(f"  saturation knee at {knee:.4g} V")
             print(f"{key}:")
             plot_family(curves_lab, fam["param"], fam["trace"],
                         fam["xlabel"], fam["ylabel"],
-                        outdir / f"{fam['fname']}.png",
+                        outdir / f"{fam['fname']}{sfx}.png",
                         xlim=fam["xlim"], dpi=args.dpi,
                         ylim=fam.get("ylim"), trim=fam.get("trim", False),
                         note=f"Current through {fam['resistor']}",
@@ -1263,8 +1512,10 @@ def main():
                         note_above=base.endswith("_input"),
                         marks=pairs,
                         # input current shown in the read-outs of the output graphs
-                        drive_name=drive_label(base, pol))
-            print(f"    -> {fam['fname']}.png")
+                        drive_name=drive_label(base, pol),
+                        region_knee=knee, knee_y=knee_y,
+                        y_neg=fam.get("y_neg"))
+            print(f"    -> {fam['fname']}{sfx}.png")
 
     for pol in ("npn", "pnp"):
         s, t, e = res[pol]["simulated"], res[pol]["theoretical"], res[pol]["error"]
@@ -1273,6 +1524,7 @@ def main():
         for k in ("alpha", "beta", "gamma", "rin_cb", "rin_ce", "rin_cc",
                   "rout_cb", "rout_ce", "rout_cc"):
             print(f"  {k:10s} {s[k]:10.4g} {t[k]:10.4g} {e[k]:8.2f}")
+    print("\nFor the report - " + KNEE_TEXT + ".")
 
 
 if __name__ == "__main__":
